@@ -210,17 +210,32 @@ async function saveSaleToSupabase(tx: Transaction) {
   if (!supabase) return
   
   try {
+    // Create one entry per item in the sale
+    const entries = tx.items.map((item, index) => {
+      // Generate unique timestamp with microsecond precision for each item
+      const itemDate = new Date(new Date(tx.date).getTime() + index)
+      
+      return {
+        transaction_id: tx.id,
+        date: itemDate.toISOString(),
+        item_id: item.itemId,
+        item_name: item.name,
+        quantity: item.qty,
+        item_price: item.price,
+        item_cost: item.cost,
+        item_subtotal: item.price * item.qty,
+        item_profit: (item.price - item.cost) * item.qty,
+        // Transaction totals (repeated for each item)
+        transaction_subtotal: tx.subtotal,
+        transaction_tax: tx.tax,
+        transaction_total: tx.total,
+        transaction_profit: tx.profit,
+      }
+    })
+    
     const { error } = await supabase
       .from('sales')
-      .insert({
-        transaction_id: tx.id,
-        date: tx.date,
-        items: JSON.stringify(tx.items),
-        subtotal: tx.subtotal,
-        tax: tx.tax,
-        total: tx.total,
-        profit: tx.profit,
-      })
+      .insert(entries)
     
     if (error) {
       console.error('Failed to save sale to Supabase:', error)

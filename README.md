@@ -19,26 +19,28 @@ Setup
 2. Add your Supabase credentials to `.env`:
    - `VITE_SUPABASE_URL`: Your Supabase project URL
    - `VITE_SUPABASE_ANON_KEY`: Your Supabase anonymous key (get from Dashboard > Settings > API)
-3. Create `sales` table in Supabase:
-   - `transaction_id` (text, primary key)
-   - `date` (timestamp)
-   - `items` (jsonb)
-   - `subtotal` (numeric)
-   - `tax` (numeric)
-   - `total` (numeric)
-   - `profit` (numeric)
+3. Create `sales` table in Supabase (see SQL below)
 
 SQL to create the table:
 ```sql
 CREATE TABLE sales (
-  transaction_id TEXT PRIMARY KEY,
-  date TIMESTAMP NOT NULL,
-  items JSONB NOT NULL,
-  subtotal NUMERIC NOT NULL,
-  tax NUMERIC NOT NULL,
-  total NUMERIC NOT NULL,
-  profit NUMERIC NOT NULL
+  date TIMESTAMP PRIMARY KEY,
+  transaction_id TEXT NOT NULL,
+  item_id TEXT NOT NULL,
+  item_name TEXT NOT NULL,
+  quantity NUMERIC NOT NULL,
+  item_price NUMERIC NOT NULL,
+  item_cost NUMERIC NOT NULL,
+  item_subtotal NUMERIC NOT NULL,
+  item_profit NUMERIC NOT NULL,
+  transaction_subtotal NUMERIC NOT NULL,
+  transaction_tax NUMERIC NOT NULL,
+  transaction_total NUMERIC NOT NULL,
+  transaction_profit NUMERIC NOT NULL
 );
+
+-- Create index for efficient transaction lookups
+CREATE INDEX idx_transaction_id ON sales(transaction_id);
 
 -- Enable RLS if needed
 ALTER TABLE sales ENABLE ROW LEVEL SECURITY;
@@ -47,6 +49,8 @@ ALTER TABLE sales ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public inserts" ON sales
   FOR INSERT WITH CHECK (true);
 ```
+
+Note: Each item in a sale creates a separate row with the same `transaction_id`. Unique `date` timestamps are generated per item (millisecond precision).
 
 Notes
 
