@@ -56,6 +56,13 @@ const supabase = SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey
   ? createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey)
   : null
 
+// Log connection status
+if (supabase) {
+  console.log('✓ Supabase connected:', SUPABASE_CONFIG.url)
+} else {
+  console.warn('⚠ Supabase not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env file')
+}
+
 // App State
 let inventory: Item[] = load<Item[]>(STORAGE_KEYS.inventory) ?? seed(seedItems)
 let transactions: Transaction[] = load<Transaction[]>(STORAGE_KEYS.transactions) ?? []
@@ -83,6 +90,7 @@ const receiptTransactionId = qs<HTMLSpanElement>('#receiptTransactionId')
 const receiptDate = qs<HTMLDivElement>('#receiptDate')
 const receiptItems = qs<HTMLDivElement>('#receiptItems')
 const receiptTotals = qs<HTMLDivElement>('#receiptTotals')
+const receiptStatus = qs<HTMLDivElement>('#receiptStatus')
 const closeReceiptBtn = qs<HTMLButtonElement>('#closeReceiptBtn')
 
 // Inventory
@@ -216,9 +224,14 @@ function addToCart(id: string) {
 }
 
 async function saveSaleToSupabase(tx: Transaction) {
-  if (!supabase) return
+  if (!supabase) {
+    console.warn('⚠ Supabase client not initialized. Sale not saved to database.')
+    return false
+  }
   
   try {
+    console.log('💾 Saving sale to Supabase:', tx.id, 'Items:', tx.items.length)
+    
     // Create one entry per item in the sale
     const entries = tx.items.map((item, index) => {
       // Generate unique timestamp with microsecond precision for each item
@@ -242,19 +255,28 @@ async function saveSaleToSupabase(tx: Transaction) {
       }
     })
     
-    const { error } = await supabase
+    console.log('📤 Inserting', entries.length, 'entries:', entries)
+    
+    const { data, error } = await supabase
       .from('sales')
       .insert(entries)
+      .select()
     
     if (error) {
-      console.error('Failed to save sale to Supabase:', error)
+      console.error('❌ Failed to save sale to Supabase:', error)
+      console.error('Error details:', JSON.stringify(error, null, 2))
+      return false
     }
+    
+    console.log('✅ Sale saved successfully to Supabase:', data)
+    return true
   } catch (err) {
-    console.error('Error saving sale to Supabase:', err)
+    console.error('❌ Error saving sale to Supabase:', err)
+    return false
   }
 }
 
-function completeSale() {
+async function completeSale() {
   const entries = Object.entries(cart)
   if (!entries.length) return
   let subtotal = 0
@@ -273,13 +295,16 @@ function completeSale() {
   transactions.unshift(tx)
   cart = {}
   persist()
-  saveSaleToSupabase(tx)
+  
+  // Save to Supabase and get result
+  const saved = await saveSaleToSupabase(tx)
+  
   renderProducts()
   renderCart()
   renderReports()
   renderInventory()
   renderReorder()
-  showReceipt(tx)
+  showReceipt(tx, saved)
 }
 
 // Inventory
@@ -400,7 +425,7 @@ function renderReorder() {
 }
 
 // Receipt
-function showReceipt(tx: Transaction) {
+function showReceipt(tx: Transaction, saved: boolean) {
   receiptTransactionId.textContent = tx.id
   const date = new Date(tx.date)
   receiptDate.textContent = date.toLocaleString()
@@ -429,6 +454,15 @@ function showReceipt(tx: Transaction) {
   totalRow.append(h('span', null, 'Total'), h('span', null, fmt(tx.total)))
   
   receiptTotals.append(subtotalRow, taxRow, totalRow)
+  
+  // Update status message
+  if (saved) {
+    receiptStatus.style.background = '#f0fdf4'
+    receiptStatus.innerHTML = '<div style="font-size: 12px; color: #166534; margin-bottom: 5px;">✅ Items saved to database</div>'
+  } else {
+    receiptStatus.style.background = '#fef3c7'
+    receiptStatus.innerHTML = '<div style="font-size: 12px; color: #92400e; margin-bottom: 5px;">⚠️ Saved locally only. Check Supabase connection.</div>'
+  }
   
   receiptDialog.showModal()
 }
