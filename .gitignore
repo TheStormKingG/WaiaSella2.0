@@ -1,4 +1,6 @@
 build-info.json
 dist/
 node_modules/
+.env
+.env.local
 

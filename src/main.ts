@@ -1,4 +1,6 @@
 import '../styles.css'
+import { createClient } from '@supabase/supabase-js'
+import { SUPABASE_CONFIG } from './config'
 
 // WaiaSella POS - Vite + TypeScript SPA
 
@@ -48,6 +50,11 @@ const seedItems: Item[] = [
   { id: id(), name: 'Green Tea', price: 3.5, cost: 1.0, stock: 30, category: 'Drinks', image: pic(1070) },
   { id: id(), name: 'Apples', price: 0.75, cost: 0.2, stock: 40, category: 'Produce', image: pic(1080) },
 ]
+
+// Initialize Supabase client
+const supabase = SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey
+  ? createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey)
+  : null
 
 // App State
 let inventory: Item[] = load<Item[]>(STORAGE_KEYS.inventory) ?? seed(seedItems)
@@ -199,6 +206,30 @@ function addToCart(id: string) {
   renderCart()
 }
 
+async function saveSaleToSupabase(tx: Transaction) {
+  if (!supabase) return
+  
+  try {
+    const { error } = await supabase
+      .from('sales')
+      .insert({
+        transaction_id: tx.id,
+        date: tx.date,
+        items: JSON.stringify(tx.items),
+        subtotal: tx.subtotal,
+        tax: tx.tax,
+        total: tx.total,
+        profit: tx.profit,
+      })
+    
+    if (error) {
+      console.error('Failed to save sale to Supabase:', error)
+    }
+  } catch (err) {
+    console.error('Error saving sale to Supabase:', err)
+  }
+}
+
 function completeSale() {
   const entries = Object.entries(cart)
   if (!entries.length) return
@@ -218,6 +249,7 @@ function completeSale() {
   transactions.unshift(tx)
   cart = {}
   persist()
+  saveSaleToSupabase(tx)
   renderProducts()
   renderCart()
   renderReports()
