@@ -45,10 +45,15 @@
 
       <!-- Inventory View -->
       <section id="inventoryView" class="view">
-        <div class="search-row">
-          <input id="inventorySearch" class="search" placeholder="Search inventory..." />
+        <div id="inventoryCategories" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 16px; padding: 16px;">
+          <!-- Categories will be rendered here as app buttons -->
         </div>
-        <ul id="inventoryList" class="inventory-list"></ul>
+        <div id="inventoryItemsView" style="display: none;">
+          <div class="search-row">
+            <input id="inventorySearch" class="search" placeholder="Search inventory..." />
+          </div>
+          <ul id="inventoryList" class="inventory-list"></ul>
+        </div>
         <button id="addItemFab" class="fab" title="Add Item" aria-label="Add Item">
           <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
             <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
@@ -164,9 +169,8 @@
         
         <div id="receiptTotals" style="margin-bottom: 20px;"></div>
         
-        <menu class="dialog-actions" style="margin: 0 0 10px 0; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+        <menu class="dialog-actions" style="margin: 0 0 10px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
           <button id="whatsappReceiptBtn" class="btn" style="background: #25D366; color: white;">WhatsApp</button>
-          <button id="emailReceiptBtn" class="btn" style="background: #2563eb; color: white;">Email</button>
           <button id="downloadReceiptBtn" class="btn" style="background: #6b7280; color: white;">Download</button>
         </menu>
         

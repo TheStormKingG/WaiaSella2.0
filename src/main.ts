@@ -11,6 +11,7 @@ const STORAGE_KEYS = {
   inventory: 'ws.inventory',
   transactions: 'ws.transactions',
   soldTally: 'ws.soldTally',
+  transactionCounter: 'ws.transactionCounter',
 } as const
 
 type Item = {
@@ -101,6 +102,8 @@ const toast = qs<HTMLDivElement>('#toast')
 let currentReceipt: Transaction | null = null
 
 // Inventory
+const inventoryCategories = qs<HTMLDivElement>('#inventoryCategories')
+const inventoryItemsView = qs<HTMLDivElement>('#inventoryItemsView')
 const inventoryList = qs<HTMLUListElement>('#inventoryList')
 const inventorySearch = qs<HTMLInputElement>('#inventorySearch')
 const addItemFab = qs<HTMLButtonElement>('#addItemFab')
@@ -108,6 +111,9 @@ const itemDialog = qs<HTMLDialogElement>('#itemDialog')
 const itemForm = qs<HTMLFormElement>('#itemForm')
 const itemDialogTitle = qs<HTMLHeadingElement>('#itemDialogTitle')
 const categoryList = qs<HTMLDataListElement>('#categoryList')
+
+// Inventory state
+let selectedInventoryCategory: string | null = null
 
 // Reports
 const totalSalesEl = qs<HTMLDivElement>('#totalSales')
@@ -123,6 +129,7 @@ const reorderContainer = qs<HTMLDivElement>('#reorderContainer')
 renderCategoryChips()
 renderProducts()
 renderCart()
+showInventoryCategories()
 renderInventory()
 renderReports()
 renderReorder()
@@ -139,7 +146,10 @@ tabs.forEach((t) =>
     headerTitle.textContent = t.textContent?.trim() ?? ''
     if (id === 'reportsView') renderReports()
     if (id === 'reorderView') renderReorder()
-    if (id === 'inventoryView') renderInventory()
+    if (id === 'inventoryView') {
+      showInventoryCategories()
+      renderInventory()
+    }
   })
 )
 
@@ -148,11 +158,14 @@ salesSearch.addEventListener('input', renderProducts)
 completeSaleBtn.addEventListener('click', completeSale)
 closeReceiptBtn.addEventListener('click', () => receiptDialog.close())
 whatsappReceiptBtn.addEventListener('click', shareReceiptWhatsApp)
-emailReceiptBtn.addEventListener('click', shareReceiptEmail)
 downloadReceiptBtn.addEventListener('click', downloadReceiptPDF)
 
 // Inventory interactions
-inventorySearch.addEventListener('input', renderInventory)
+inventorySearch.addEventListener('input', () => {
+  if (inventoryItemsView.style.display !== 'none') {
+    renderInventoryItems()
+  }
+})
 addItemFab.addEventListener('click', () => openItemDialog())
 itemForm.addEventListener('submit', saveItemFromDialog)
 
@@ -301,7 +314,13 @@ async function completeSale() {
   })
   const tax = subtotal * TAX_RATE
   const total = subtotal + tax
-  const tx: Transaction = { id: id(), date: new Date().toISOString(), items, subtotal, tax, total, profit }
+  // Generate sequential transaction ID
+  const txCounter = load<number>(STORAGE_KEYS.transactionCounter) ?? 0
+  const newCounter = txCounter + 1
+  save(STORAGE_KEYS.transactionCounter, newCounter)
+  const txId = `waia${newCounter}`
+  
+  const tx: Transaction = { id: txId, date: new Date().toISOString(), items, subtotal, tax, total, profit }
   transactions.unshift(tx)
   cart = {}
   persist()
@@ -318,10 +337,78 @@ async function completeSale() {
 }
 
 // Inventory
-function renderInventory() {
+function renderInventoryCategories() {
+  const categories = unique(inventory.map(i => i.category))
+  inventoryCategories.innerHTML = ''
+  
+  // Add "Manage Categories" button
+  const manageBtn = h('div', {
+    class: 'category-app-btn',
+    style: 'display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); min-height: 100px;'
+  })
+  manageBtn.innerHTML = `
+    <div style="font-size: 32px; margin-bottom: 8px;">⚙️</div>
+    <div style="font-size: 12px; font-weight: 600; color: white; text-align: center;">Manage Categories</div>
+  `
+  manageBtn.addEventListener('click', () => {
+    // For now, just show all items
+    selectedInventoryCategory = null
+    showInventoryItems()
+  })
+  inventoryCategories.appendChild(manageBtn)
+  
+  // Add category buttons
+  categories.forEach(category => {
+    const categoryItems = inventory.filter(i => i.category === category)
+    const btn = h('div', {
+      class: 'category-app-btn',
+      style: 'display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); min-height: 100px;'
+    })
+    btn.innerHTML = `
+      <div style="font-size: 32px; margin-bottom: 8px;">📦</div>
+      <div style="font-size: 12px; font-weight: 600; color: white; text-align: center;">${category}</div>
+      <div style="font-size: 10px; color: rgba(255,255,255,0.8); margin-top: 4px;">${categoryItems.length} items</div>
+    `
+    btn.addEventListener('click', () => {
+      selectedInventoryCategory = category
+      showInventoryItems()
+    })
+    inventoryCategories.appendChild(btn)
+  })
+}
+
+function showInventoryItems() {
+  inventoryCategories.style.display = 'none'
+  inventoryItemsView.style.display = 'block'
+  renderInventoryItems()
+}
+
+function showInventoryCategories() {
+  selectedInventoryCategory = null
+  inventoryItemsView.style.display = 'none'
+  inventoryCategories.style.display = 'grid'
+}
+
+function renderInventoryItems() {
+  let list = inventory
+  if (selectedInventoryCategory) {
+    list = list.filter(i => i.category === selectedInventoryCategory)
+  }
+  
   const term = inventorySearch.value?.toLowerCase?.() || ''
-  const list = inventory.filter((i) => i.name.toLowerCase().includes(term))
+  list = list.filter((i) => i.name.toLowerCase().includes(term))
+  
   inventoryList.innerHTML = ''
+  
+  // Add back button
+  const backBtn = h('li', {
+    class: 'inventory-item',
+    style: 'background: #e5e7eb; cursor: pointer; margin-bottom: 8px;'
+  })
+  backBtn.innerHTML = '<div style="padding: 12px; text-align: center; font-weight: 600;">← Back to Categories</div>'
+  backBtn.addEventListener('click', showInventoryCategories)
+  inventoryList.appendChild(backBtn)
+  
   list.forEach((item) => {
     const li = h('li', { class: 'inventory-item' })
     li.append(
@@ -336,6 +423,14 @@ function renderInventory() {
     li.addEventListener('click', () => openItemDialog(item))
     inventoryList.appendChild(li)
   })
+}
+
+function renderInventory() {
+  if (selectedInventoryCategory === null && inventoryItemsView.style.display === 'none') {
+    renderInventoryCategories()
+  } else {
+    renderInventoryItems()
+  }
 }
 
 function stockClass(stock: number) {
@@ -373,6 +468,7 @@ function saveItemFromDialog(ev: SubmitEvent) {
   else inventory.unshift(payload)
   persist()
   itemDialog.close()
+  renderInventoryCategories()
   renderInventory()
   renderCategoryChips()
   renderProducts()
@@ -556,32 +652,6 @@ function shareReceiptWhatsApp() {
   setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000)
 }
 
-function shareReceiptEmail() {
-  if (!currentReceipt) return
-  const pdf = generateReceiptPDF(currentReceipt)
-  const pdfBlob = pdf.output('blob')
-  const pdfDataUri = pdf.output('datauristring')
-  
-  const date = new Date(currentReceipt.date)
-  const subject = encodeURIComponent(`Receipt - Transaction #${currentReceipt.id}`)
-  const body = encodeURIComponent(
-    `Receipt Details:\n\n` +
-    `Transaction ID: ${currentReceipt.id}\n` +
-    `Date: ${date.toLocaleString()}\n\n` +
-    `Items:\n${currentReceipt.items.map(i => `${i.qty}x ${i.name} - ${fmt(i.price * i.qty)}`).join('\n')}\n\n` +
-    `Subtotal: ${fmt(currentReceipt.subtotal)}\n` +
-    `VAT (16%): ${fmt(currentReceipt.tax)}\n` +
-    `Total: ${fmt(currentReceipt.total)}\n\n` +
-    `Please find the PDF receipt attached.`
-  )
-  
-  // Create a temporary link with data URI
-  const mailtoLink = `mailto:?subject=${subject}&body=${body}`
-  window.location.href = mailtoLink
-  
-  // Note: PDF attachment via mailto is limited, so we include details in body
-  // For full PDF attachment, user would need to download and attach manually
-}
 
 // Utils
 function fmt(n: number) {
