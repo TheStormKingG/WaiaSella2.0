@@ -379,6 +379,7 @@ function renderInventoryCategories() {
   
   // Add "Manage Categories" button - matching product style
   const firstItem = inventory[0]
+  const totalInventoryValue = inventory.reduce((sum, item) => sum + item.price, 0)
   const manageBtn = h('div', { class: 'product' })
   const manageImg = h('img', { 
     class: 'thumb', 
@@ -390,8 +391,7 @@ function renderInventoryCategories() {
   manageBody.append(
     h('div', { class: 'title' }, 'Manage Categories'),
     h('div', { class: 'muted' }, `${categories.length} categories`),
-    row(h('div', { style: 'font-size: 11px; color: #0ea5e9; font-weight: 700;' }, 'Manage'), 
-        h('div', { class: 'icon-btn', style: 'background: #667eea; font-size: 14px;' }, '⚙'))
+    row(h('div', { class: 'price' }, fmt(totalInventoryValue)), h('div', { style: 'font-size: 9px; color: var(--muted);' }, 'total'))
   )
   manageBtn.append(manageImg, manageBody)
   manageBtn.addEventListener('click', () => {
@@ -405,9 +405,7 @@ function renderInventoryCategories() {
     const categoryItems = inventory.filter(i => i.category === category)
     const firstCategoryItem = categoryItems[0]
     const totalStock = categoryItems.reduce((sum, item) => sum + item.stock, 0)
-    const avgPrice = categoryItems.length > 0 
-      ? categoryItems.reduce((sum, item) => sum + item.price, 0) / categoryItems.length 
-      : 0
+    const totalValue = categoryItems.reduce((sum, item) => sum + item.price, 0)
     
     const card = h('div', { class: 'product' })
     const img = h('img', { 
@@ -419,7 +417,7 @@ function renderInventoryCategories() {
     body.append(
       h('div', { class: 'title' }, category),
       h('div', { class: 'muted' }, `${categoryItems.length} item${categoryItems.length !== 1 ? 's' : ''} • ${totalStock} total`),
-      row(h('div', { class: 'price' }, fmt(avgPrice)), h('div', { style: 'font-size: 9px; color: var(--muted);' }, 'avg'))
+      row(h('div', { class: 'price' }, fmt(totalValue)), h('div', { style: 'font-size: 9px; color: var(--muted);' }, 'total'))
     )
     card.append(img, body)
     card.addEventListener('click', () => {
