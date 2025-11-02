@@ -16,9 +16,9 @@ Run
 Setup
 
 1. Copy `env.example.txt` to `.env`
-2. Add Supabase credentials:
-   - `VITE_SUPABASE_URL`: `https://hutsgbcqxmizbcvqpmfq.supabase.co`
-   - `VITE_SUPABASE_ANON_KEY`: Get from Supabase Dashboard > Settings > API
+2. Add your Supabase credentials to `.env`:
+   - `VITE_SUPABASE_URL`: Your Supabase project URL
+   - `VITE_SUPABASE_ANON_KEY`: Your Supabase anonymous key (get from Dashboard > Settings > API)
 3. Create `sales` table in Supabase:
    - `transaction_id` (text, primary key)
    - `date` (timestamp)
