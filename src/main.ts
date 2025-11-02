@@ -77,6 +77,14 @@ const cartTaxEl = qs<HTMLSpanElement>('#cartTax')
 const cartTotalEl = qs<HTMLSpanElement>('#cartTotal')
 const completeSaleBtn = qs<HTMLButtonElement>('#completeSaleBtn')
 
+// Receipt
+const receiptDialog = qs<HTMLDialogElement>('#receiptDialog')
+const receiptTransactionId = qs<HTMLSpanElement>('#receiptTransactionId')
+const receiptDate = qs<HTMLDivElement>('#receiptDate')
+const receiptItems = qs<HTMLDivElement>('#receiptItems')
+const receiptTotals = qs<HTMLDivElement>('#receiptTotals')
+const closeReceiptBtn = qs<HTMLButtonElement>('#closeReceiptBtn')
+
 // Inventory
 const inventoryList = qs<HTMLUListElement>('#inventoryList')
 const inventorySearch = qs<HTMLInputElement>('#inventorySearch')
@@ -123,6 +131,7 @@ tabs.forEach((t) =>
 // Sales interactions
 salesSearch.addEventListener('input', renderProducts)
 completeSaleBtn.addEventListener('click', completeSale)
+closeReceiptBtn.addEventListener('click', () => receiptDialog.close())
 
 // Inventory interactions
 inventorySearch.addEventListener('input', renderInventory)
@@ -270,6 +279,7 @@ function completeSale() {
   renderReports()
   renderInventory()
   renderReorder()
+  showReceipt(tx)
 }
 
 // Inventory
@@ -387,6 +397,40 @@ function renderReorder() {
     wrapper.appendChild(rowEl)
   })
   reorderContainer.appendChild(wrapper)
+}
+
+// Receipt
+function showReceipt(tx: Transaction) {
+  receiptTransactionId.textContent = tx.id
+  const date = new Date(tx.date)
+  receiptDate.textContent = date.toLocaleString()
+  
+  // Render items
+  receiptItems.innerHTML = ''
+  tx.items.forEach(item => {
+    const row = h('div', { style: 'display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px;' })
+    const left = h('div')
+    left.textContent = `${item.qty}x ${item.name}`
+    const right = h('div', { style: 'font-weight: 600;' })
+    right.textContent = fmt(item.price * item.qty)
+    row.append(left, right)
+    receiptItems.appendChild(row)
+  })
+  
+  // Render totals
+  receiptTotals.innerHTML = ''
+  const subtotalRow = h('div', { style: 'display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px;' })
+  subtotalRow.append(h('span', { style: 'color: #6b7280;' }, 'Subtotal'), h('span', null, fmt(tx.subtotal)))
+  
+  const taxRow = h('div', { style: 'display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px;' })
+  taxRow.append(h('span', { style: 'color: #6b7280;' }, 'VAT (16%)'), h('span', null, fmt(tx.tax)))
+  
+  const totalRow = h('div', { style: 'display: flex; justify-content: space-between; padding-top: 10px; margin-top: 10px; border-top: 2px solid #0f172a; font-size: 16px; font-weight: 700;' })
+  totalRow.append(h('span', null, 'Total'), h('span', null, fmt(tx.total)))
+  
+  receiptTotals.append(subtotalRow, taxRow, totalRow)
+  
+  receiptDialog.showModal()
 }
 
 // Utils

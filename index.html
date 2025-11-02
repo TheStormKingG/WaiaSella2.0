@@ -149,6 +149,31 @@
       <datalist id="categoryList"></datalist>
     </dialog>
 
+    <!-- Receipt Modal -->
+    <dialog id="receiptDialog" class="dialog">
+      <div class="dialog-body">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <h2 style="margin: 0 0 10px 0; font-size: 24px;">✓ Sale Successful</h2>
+          <div style="color: #6b7280; font-size: 14px;">Transaction #<span id="receiptTransactionId"></span></div>
+          <div style="color: #6b7280; font-size: 12px; margin-top: 5px;" id="receiptDate"></div>
+        </div>
+        
+        <div style="border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb; padding: 15px 0; margin: 15px 0;">
+          <div id="receiptItems"></div>
+        </div>
+        
+        <div id="receiptTotals" style="margin-bottom: 20px;"></div>
+        
+        <div style="text-align: center; padding: 15px; background: #f0fdf4; border-radius: 8px; margin-bottom: 20px;">
+          <div style="font-size: 12px; color: #166534; margin-bottom: 5px;">Items saved to database</div>
+        </div>
+        
+        <menu class="dialog-actions" style="margin: 0;">
+          <button id="closeReceiptBtn" class="btn primary" style="width: 100%;">Close</button>
+        </menu>
+      </div>
+    </dialog>
+
     <footer id="buildFooter" style="text-align: center; padding: 16px; color: #6b7280; font-size: 12px; border-top: 1px solid #e5e7eb;">
       <div>WaiaSella POS v<span id="buildVersion">local</span></div>
     </footer>
