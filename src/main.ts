@@ -2,7 +2,7 @@ import '../styles.css'
 
 // WaiaSella POS - Vite + TypeScript SPA
 
-const TAX_RATE = 0.0 // set to 0.07 for 7% tax if desired
+const TAX_RATE = 0.16 // 16% VAT
 const LOW_STOCK_THRESHOLD = 5
 const STORAGE_KEYS = {
   inventory: 'ws.inventory',
@@ -67,6 +67,7 @@ const productGrid = qs<HTMLDivElement>('#productGrid')
 const salesSearch = qs<HTMLInputElement>('#salesSearch')
 const cartItemsEl = qs<HTMLDivElement>('#cartItems')
 const cartTaxEl = qs<HTMLSpanElement>('#cartTax')
+const cartTotalEl = qs<HTMLSpanElement>('#cartTotal')
 const completeSaleBtn = qs<HTMLButtonElement>('#completeSaleBtn')
 
 // Inventory
@@ -174,7 +175,9 @@ function renderCart() {
     cartItemsEl.appendChild(el)
   })
   const tax = subtotal * TAX_RATE
+  const total = subtotal + tax
   cartTaxEl.textContent = fmt(tax)
+  cartTotalEl.textContent = fmt(total)
   completeSaleBtn.disabled = entries.length === 0
 }
 
