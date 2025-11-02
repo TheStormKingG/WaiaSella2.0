@@ -12,6 +12,7 @@ const STORAGE_KEYS = {
   transactions: 'ws.transactions',
   soldTally: 'ws.soldTally',
   transactionCounter: 'ws.transactionCounter',
+  cart: 'ws.cart',
 } as const
 
 type Item = {
@@ -69,7 +70,7 @@ if (supabase) {
 let inventory: Item[] = load<Item[]>(STORAGE_KEYS.inventory) ?? seed(seedItems)
 let transactions: Transaction[] = load<Transaction[]>(STORAGE_KEYS.transactions) ?? []
 let soldTally: Record<string, number> = load<Record<string, number>>(STORAGE_KEYS.soldTally) ?? {}
-let cart: Record<string, number> = {}
+let cart: Record<string, number> = load<Record<string, number>>(STORAGE_KEYS.cart) ?? {}
 let activeCategory = 'All'
 
 // Elements
@@ -268,6 +269,7 @@ function changeQty(id: string, delta: number) {
     const item = inventory.find((i) => i.id === id)!
     cart[id] = Math.min(newQty, item.stock)
   }
+  save(STORAGE_KEYS.cart, cart)
   renderCart()
 }
 
@@ -275,6 +277,7 @@ function addToCart(id: string) {
   const item = inventory.find((i) => i.id === id)
   if (!item || item.stock <= 0) return
   cart[id] = Math.min((cart[id] || 0) + 1, item.stock)
+  save(STORAGE_KEYS.cart, cart)
   renderCart()
 }
 
@@ -355,6 +358,7 @@ async function completeSale() {
   const tx: Transaction = { id: txId, date: new Date().toISOString(), items, subtotal, tax, total, profit }
   transactions.unshift(tx)
   cart = {}
+  save(STORAGE_KEYS.cart, cart)
   persist()
   
   // Save to Supabase and get result
@@ -713,7 +717,12 @@ function shareReceiptWhatsApp() {
 
 // Utils
 function fmt(n: number) {
-  return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(n || 0)
+  // Custom formatter for Guyana Dollars (GY$)
+  const formatted = new Intl.NumberFormat('en-GY', { 
+    minimumFractionDigits: 2, 
+    maximumFractionDigits: 2 
+  }).format(n || 0)
+  return `GY$${formatted}`
 }
 function unique<T>(arr: T[]) { return Array.from(new Set(arr)).filter(Boolean) as T[] }
 function id() { return Math.random().toString(36).slice(2, 10) }
