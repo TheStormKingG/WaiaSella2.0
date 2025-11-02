@@ -125,6 +125,38 @@ const topSellingEl = qs<HTMLUListElement>('#topSelling')
 // Reorder
 const reorderContainer = qs<HTMLDivElement>('#reorderContainer')
 
+// App icon color schemes - matching modern app icon style (defined early to avoid TDZ)
+const categoryColors = [
+  { bg: '#FFFFFF', icon: '#1976D2', shadow: 'rgba(0,0,0,0.1)' },
+  { bg: '#E8F5E9', icon: '#388E3C', shadow: 'rgba(0,0,0,0.08)' },
+  { bg: '#E3F2FD', icon: '#1976D2', shadow: 'rgba(0,0,0,0.08)' },
+  { bg: '#FFF3E0', icon: '#F57C00', shadow: 'rgba(0,0,0,0.08)' },
+  { bg: '#F3E5F5', icon: '#7B1FA2', shadow: 'rgba(0,0,0,0.08)' },
+  { bg: '#E0F2F1', icon: '#00796B', shadow: 'rgba(0,0,0,0.08)' },
+  { bg: '#FCE4EC', icon: '#C2185B', shadow: 'rgba(0,0,0,0.08)' },
+  { bg: '#EDE7F6', icon: '#512DA8', shadow: 'rgba(0,0,0,0.08)' },
+  { bg: '#E1F5FE', icon: '#0288D1', shadow: 'rgba(0,0,0,0.08)' },
+  { bg: '#FFF9C4', icon: '#F9A825', shadow: 'rgba(0,0,0,0.08)' },
+  { bg: '#F1F8E9', icon: '#689F38', shadow: 'rgba(0,0,0,0.08)' },
+  { bg: '#F5F5F5', icon: '#424242', shadow: 'rgba(0,0,0,0.1)' },
+]
+
+function getCategoryColor(index: number) {
+  return categoryColors[index % categoryColors.length]
+}
+
+// Generate a simple icon SVG for the category (letter-based design)
+function getCategoryIcon(category: string, color: string): string {
+  const letter = category.charAt(0).toUpperCase()
+  // Create a simple geometric icon using SVG
+  return `
+    <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="20" fill="${color}" opacity="0.2"/>
+      <text x="24" y="32" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="${color}" text-anchor="middle" dominant-baseline="central">${letter}</text>
+    </svg>
+  `
+}
+
 // Init
 renderCategoryChips()
 renderProducts()
@@ -336,38 +368,6 @@ async function completeSale() {
   showReceipt(tx, saved)
 }
 
-// App icon color schemes - matching modern app icon style
-const categoryColors = [
-  { bg: '#FFFFFF', icon: '#1976D2', shadow: 'rgba(0,0,0,0.1)' },
-  { bg: '#E8F5E9', icon: '#388E3C', shadow: 'rgba(0,0,0,0.08)' },
-  { bg: '#E3F2FD', icon: '#1976D2', shadow: 'rgba(0,0,0,0.08)' },
-  { bg: '#FFF3E0', icon: '#F57C00', shadow: 'rgba(0,0,0,0.08)' },
-  { bg: '#F3E5F5', icon: '#7B1FA2', shadow: 'rgba(0,0,0,0.08)' },
-  { bg: '#E0F2F1', icon: '#00796B', shadow: 'rgba(0,0,0,0.08)' },
-  { bg: '#FCE4EC', icon: '#C2185B', shadow: 'rgba(0,0,0,0.08)' },
-  { bg: '#EDE7F6', icon: '#512DA8', shadow: 'rgba(0,0,0,0.08)' },
-  { bg: '#E1F5FE', icon: '#0288D1', shadow: 'rgba(0,0,0,0.08)' },
-  { bg: '#FFF9C4', icon: '#F9A825', shadow: 'rgba(0,0,0,0.08)' },
-  { bg: '#F1F8E9', icon: '#689F38', shadow: 'rgba(0,0,0,0.08)' },
-  { bg: '#F5F5F5', icon: '#424242', shadow: 'rgba(0,0,0,0.1)' },
-]
-
-function getCategoryColor(index: number) {
-  return categoryColors[index % categoryColors.length]
-}
-
-// Generate a simple icon SVG for the category (letter-based design)
-function getCategoryIcon(category: string, color: string): string {
-  const letter = category.charAt(0).toUpperCase()
-  // Create a simple geometric icon using SVG
-  return `
-    <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="24" cy="24" r="20" fill="${color}" opacity="0.2"/>
-      <text x="24" y="32" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="${color}" text-anchor="middle" dominant-baseline="central">${letter}</text>
-    </svg>
-  `
-}
-
 // Inventory
 function renderInventoryCategories() {
   const categories = unique(inventory.map(i => i.category))
@@ -405,6 +405,7 @@ function renderInventoryCategories() {
   categories.forEach((category, index) => {
     const categoryItems = inventory.filter(i => i.category === category)
     const colors = getCategoryColor(index)
+    const iconSvg = getCategoryIcon(category, colors.icon) // Call function first, store result
     const btn = h('div', {
       class: 'category-app-btn',
       style: `aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; background: ${colors.bg}; border-radius: 20px; cursor: pointer; box-shadow: 0 2px 8px ${colors.shadow}; transition: transform 0.2s ease, box-shadow 0.2s ease; position: relative; overflow: hidden;`
@@ -412,7 +413,7 @@ function renderInventoryCategories() {
     
     btn.innerHTML = `
       <div style="width: 56px; height: 56px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center;">
-        ${getCategoryIcon(category, colors.icon)}
+        ${iconSvg}
       </div>
       <div style="font-size: 11px; font-weight: 600; color: #1f2937; text-align: center; line-height: 1.3;">${category}</div>
       <div style="font-size: 9px; color: #6b7280; margin-top: 4px;">${categoryItems.length} item${categoryItems.length !== 1 ? 's' : ''}</div>
