@@ -1,6 +1,7 @@
 import '../styles.css'
 import { createClient } from '@supabase/supabase-js'
 import { SUPABASE_CONFIG } from './config'
+import jsPDF from 'jspdf'
 
 // WaiaSella POS - Vite + TypeScript SPA
 
@@ -90,8 +91,14 @@ const receiptTransactionId = qs<HTMLSpanElement>('#receiptTransactionId')
 const receiptDate = qs<HTMLDivElement>('#receiptDate')
 const receiptItems = qs<HTMLDivElement>('#receiptItems')
 const receiptTotals = qs<HTMLDivElement>('#receiptTotals')
-const receiptStatus = qs<HTMLDivElement>('#receiptStatus')
 const closeReceiptBtn = qs<HTMLButtonElement>('#closeReceiptBtn')
+const whatsappReceiptBtn = qs<HTMLButtonElement>('#whatsappReceiptBtn')
+const emailReceiptBtn = qs<HTMLButtonElement>('#emailReceiptBtn')
+const downloadReceiptBtn = qs<HTMLButtonElement>('#downloadReceiptBtn')
+const toast = qs<HTMLDivElement>('#toast')
+
+// Store current receipt for sharing
+let currentReceipt: Transaction | null = null
 
 // Inventory
 const inventoryList = qs<HTMLUListElement>('#inventoryList')
@@ -140,6 +147,9 @@ tabs.forEach((t) =>
 salesSearch.addEventListener('input', renderProducts)
 completeSaleBtn.addEventListener('click', completeSale)
 closeReceiptBtn.addEventListener('click', () => receiptDialog.close())
+whatsappReceiptBtn.addEventListener('click', shareReceiptWhatsApp)
+emailReceiptBtn.addEventListener('click', shareReceiptEmail)
+downloadReceiptBtn.addEventListener('click', downloadReceiptPDF)
 
 // Inventory interactions
 inventorySearch.addEventListener('input', renderInventory)
@@ -424,8 +434,21 @@ function renderReorder() {
   reorderContainer.appendChild(wrapper)
 }
 
+// Toast notification
+function showToast(message: string, duration = 1000) {
+  if (toast) {
+    toast.textContent = message
+    toast.style.display = 'block'
+    setTimeout(() => {
+      toast.style.display = 'none'
+    }, duration)
+  }
+}
+
 // Receipt
 function showReceipt(tx: Transaction, saved: boolean) {
+  currentReceipt = tx
+  
   receiptTransactionId.textContent = tx.id
   const date = new Date(tx.date)
   receiptDate.textContent = date.toLocaleString()
@@ -455,16 +478,109 @@ function showReceipt(tx: Transaction, saved: boolean) {
   
   receiptTotals.append(subtotalRow, taxRow, totalRow)
   
-  // Update status message
+  // Show toast notification
   if (saved) {
-    receiptStatus.style.background = '#f0fdf4'
-    receiptStatus.innerHTML = '<div style="font-size: 12px; color: #166534; margin-bottom: 5px;">✅ Items saved to database</div>'
+    showToast('✅ Items saved to database')
   } else {
-    receiptStatus.style.background = '#fef3c7'
-    receiptStatus.innerHTML = '<div style="font-size: 12px; color: #92400e; margin-bottom: 5px;">⚠️ Saved locally only. Check Supabase connection.</div>'
+    showToast('⚠️ Saved locally only. Check Supabase connection.')
   }
   
   receiptDialog.showModal()
+}
+
+// PDF Generation
+function generateReceiptPDF(tx: Transaction): jsPDF {
+  const pdf = new jsPDF()
+  const date = new Date(tx.date)
+  
+  // Header
+  pdf.setFontSize(20)
+  pdf.text('WaiaSella POS', 105, 20, { align: 'center' })
+  
+  pdf.setFontSize(14)
+  pdf.text('Receipt', 105, 30, { align: 'center' })
+  
+  pdf.setFontSize(10)
+  pdf.text(`Transaction #${tx.id}`, 20, 40)
+  pdf.text(date.toLocaleString(), 20, 46)
+  
+  // Items
+  let yPos = 60
+  pdf.setFontSize(12)
+  pdf.text('Items:', 20, yPos)
+  yPos += 8
+  
+  pdf.setFontSize(10)
+  tx.items.forEach(item => {
+    const itemText = `${item.qty}x ${item.name}`
+    const priceText = fmt(item.price * item.qty)
+    pdf.text(itemText, 20, yPos)
+    pdf.text(priceText, 180, yPos, { align: 'right' })
+    yPos += 7
+  })
+  
+  // Totals
+  yPos += 5
+  pdf.setFontSize(10)
+  pdf.text(`Subtotal: ${fmt(tx.subtotal)}`, 180, yPos, { align: 'right' })
+  yPos += 7
+  pdf.text(`VAT (16%): ${fmt(tx.tax)}`, 180, yPos, { align: 'right' })
+  yPos += 10
+  pdf.setFontSize(12)
+  pdf.setFont(undefined, 'bold')
+  pdf.text(`Total: ${fmt(tx.total)}`, 180, yPos, { align: 'right' })
+  
+  return pdf
+}
+
+function downloadReceiptPDF() {
+  if (!currentReceipt) return
+  const pdf = generateReceiptPDF(currentReceipt)
+  const fileName = `receipt-${currentReceipt.id}-${Date.now()}.pdf`
+  pdf.save(fileName)
+}
+
+function shareReceiptWhatsApp() {
+  if (!currentReceipt) return
+  const pdf = generateReceiptPDF(currentReceipt)
+  const pdfBlob = pdf.output('blob')
+  const pdfUrl = URL.createObjectURL(pdfBlob)
+  
+  const date = new Date(currentReceipt.date)
+  const receiptText = `Receipt - Transaction #${currentReceipt.id}\nDate: ${date.toLocaleString()}\nTotal: ${fmt(currentReceipt.total)}`
+  
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(receiptText)}`
+  window.open(whatsappUrl, '_blank')
+  
+  // Clean up
+  setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000)
+}
+
+function shareReceiptEmail() {
+  if (!currentReceipt) return
+  const pdf = generateReceiptPDF(currentReceipt)
+  const pdfBlob = pdf.output('blob')
+  const pdfDataUri = pdf.output('datauristring')
+  
+  const date = new Date(currentReceipt.date)
+  const subject = encodeURIComponent(`Receipt - Transaction #${currentReceipt.id}`)
+  const body = encodeURIComponent(
+    `Receipt Details:\n\n` +
+    `Transaction ID: ${currentReceipt.id}\n` +
+    `Date: ${date.toLocaleString()}\n\n` +
+    `Items:\n${currentReceipt.items.map(i => `${i.qty}x ${i.name} - ${fmt(i.price * i.qty)}`).join('\n')}\n\n` +
+    `Subtotal: ${fmt(currentReceipt.subtotal)}\n` +
+    `VAT (16%): ${fmt(currentReceipt.tax)}\n` +
+    `Total: ${fmt(currentReceipt.total)}\n\n` +
+    `Please find the PDF receipt attached.`
+  )
+  
+  // Create a temporary link with data URI
+  const mailtoLink = `mailto:?subject=${subject}&body=${body}`
+  window.location.href = mailtoLink
+  
+  // Note: PDF attachment via mailto is limited, so we include details in body
+  // For full PDF attachment, user would need to download and attach manually
 }
 
 // Utils
