@@ -15,10 +15,10 @@ Run
 
 Setup
 
-1. Copy `.env.example` to `.env` (optional).
+1. Copy `env.example.txt` to `.env`
 2. Add Supabase credentials:
-   - `VITE_SUPABASE_URL`: Your Supabase project URL
-   - `VITE_SUPABASE_ANON_KEY`: Your Supabase anonymous key
+   - `VITE_SUPABASE_URL`: `https://hutsgbcqxmizbcvqpmfq.supabase.co`
+   - `VITE_SUPABASE_ANON_KEY`: Get from Supabase Dashboard > Settings > API
 3. Create `sales` table in Supabase:
    - `transaction_id` (text, primary key)
    - `date` (timestamp)
@@ -27,6 +27,26 @@ Setup
    - `tax` (numeric)
    - `total` (numeric)
    - `profit` (numeric)
+
+SQL to create the table:
+```sql
+CREATE TABLE sales (
+  transaction_id TEXT PRIMARY KEY,
+  date TIMESTAMP NOT NULL,
+  items JSONB NOT NULL,
+  subtotal NUMERIC NOT NULL,
+  tax NUMERIC NOT NULL,
+  total NUMERIC NOT NULL,
+  profit NUMERIC NOT NULL
+);
+
+-- Enable RLS if needed
+ALTER TABLE sales ENABLE ROW LEVEL SECURITY;
+
+-- Allow public inserts (adjust as needed)
+CREATE POLICY "Allow public inserts" ON sales
+  FOR INSERT WITH CHECK (true);
+```
 
 Notes
 
