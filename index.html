@@ -4,7 +4,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>WaiaSella POS</title>
-    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header class="app-header">
@@ -161,7 +160,6 @@
         })
         .catch(() => {}); // Silently fail if build-info.json doesn't exist
     </script>
-    <script src="app.js"></script>
+    <script type="module" src="/src/main.ts"></script>
   </body>
-</html>
-
+  </html>
