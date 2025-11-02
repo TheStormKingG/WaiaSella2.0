@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WaiaSella POS</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>Sales</h1>
+    </header>
+
+    <main id="app" class="app">
+      <!-- Sales View -->
+      <section id="salesView" class="view active">
+        <div class="sales-layout">
+          <div class="sales-left">
+            <div class="search-row">
+              <input id="salesSearch" class="search" placeholder="Search products..." />
+            </div>
+            <div id="categoryChips" class="chips"></div>
+            <div id="productGrid" class="grid"></div>
+          </div>
+          <aside class="cart" id="cartPanel">
+            <div class="cart-header">Current Cart</div>
+            <div id="cartItems" class="cart-items empty">
+              <div class="empty-state">
+                <div class="empty-title">Your cart is empty.</div>
+              </div>
+            </div>
+            <div class="cart-footer">
+              <div class="row">
+                <span>Tax</span>
+                <span id="cartTax">$0.00</span>
+              </div>
+              <button id="completeSaleBtn" class="btn primary" disabled>Complete Sale</button>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- Inventory View -->
+      <section id="inventoryView" class="view">
+        <div class="search-row">
+          <input id="inventorySearch" class="search" placeholder="Search inventory..." />
+        </div>
+        <ul id="inventoryList" class="inventory-list"></ul>
+        <button id="addItemFab" class="fab" title="Add Item" aria-label="Add Item">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+            <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+          </svg>
+        </button>
+      </section>
+
+      <!-- Reports View -->
+      <section id="reportsView" class="view">
+        <h2 class="section-title">Reports</h2>
+        <div class="cards-2col">
+          <div class="card stat">
+            <div class="stat-label">Total Sales</div>
+            <div id="totalSales" class="stat-value">$0.00</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-label">Total Profit</div>
+            <div id="totalProfit" class="stat-value">$0.00</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-label">Transactions</div>
+            <div id="totalTransactions" class="stat-value">0</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-label">Low Stock Items</div>
+            <div id="lowStockCount" class="stat-value">0</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Top Selling Items</div>
+          <ul id="topSelling" class="top-selling"></ul>
+        </div>
+      </section>
+
+      <!-- Reorder View -->
+      <section id="reorderView" class="view">
+        <h2 class="section-title">Reorder List</h2>
+        <div id="reorderContainer"></div>
+      </section>
+    </main>
+
+    <nav class="tabbar">
+      <button class="tab active" data-target="salesView">
+        <span class="icon">🛒</span>
+        <span>Sales</span>
+      </button>
+      <button class="tab" data-target="inventoryView">
+        <span class="icon">📦</span>
+        <span>Inventory</span>
+      </button>
+      <button class="tab" data-target="reportsView">
+        <span class="icon">📊</span>
+        <span>Reports</span>
+      </button>
+      <button class="tab" data-target="reorderView">
+        <span class="icon">🔁</span>
+        <span>Reorder</span>
+      </button>
+    </nav>
+
+    <!-- Item Modal -->
+    <dialog id="itemDialog" class="dialog">
+      <form method="dialog" id="itemForm" class="dialog-body">
+        <h3 id="itemDialogTitle">Add Item</h3>
+        <div class="form-grid">
+          <label>
+            <span>Name</span>
+            <input name="name" required />
+          </label>
+          <label>
+            <span>Category</span>
+            <input name="category" list="categoryList" required />
+          </label>
+          <label>
+            <span>Price</span>
+            <input name="price" type="number" step="0.01" min="0" required />
+          </label>
+          <label>
+            <span>Cost</span>
+            <input name="cost" type="number" step="0.01" min="0" required />
+          </label>
+          <label>
+            <span>Stock</span>
+            <input name="stock" type="number" step="1" min="0" required />
+          </label>
+          <label>
+            <span>Image URL</span>
+            <input name="image" />
+          </label>
+        </div>
+        <menu class="dialog-actions">
+          <button value="cancel" class="btn">Cancel</button>
+          <button id="saveItemBtn" value="default" class="btn primary">Save</button>
+        </menu>
+        <input type="hidden" name="id" />
+      </form>
+      <datalist id="categoryList"></datalist>
+    </dialog>
+
+    <footer id="buildFooter" style="text-align: center; padding: 16px; color: #6b7280; font-size: 12px; border-top: 1px solid #e5e7eb;">
+      <div>WaiaSella POS v<span id="buildVersion">local</span></div>
+    </footer>
+
+    <script>
+      // Load build info if available
+      fetch('build-info.json')
+        .then(r => r.json())
+        .then(info => {
+          document.getElementById('buildVersion').textContent = info.version;
+          const footer = document.getElementById('buildFooter');
+          footer.title = `Build: ${info.buildDate}\nSHA: ${info.sha}`;
+        })
+        .catch(() => {}); // Silently fail if build-info.json doesn't exist
+    </script>
+    <script src="app.js"></script>
+  </body>
+</html>
+

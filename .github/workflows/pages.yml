@@ -1,0 +1,64 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate build info
+        id: build
+        run: |
+          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "sha_full=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+          echo "message=$(git log -1 --pretty=%B | head -1)" >> $GITHUB_OUTPUT
+          echo "build_date=$(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
+
+      - name: Inject build metadata
+        run: |
+          cat > build-info.json <<EOF
+          {
+            "version": "${{ steps.build.outputs.sha_short }}",
+            "sha": "${{ steps.build.outputs.sha_full }}",
+            "buildDate": "${{ steps.build.outputs.build_date }}",
+            "message": "${{ steps.build.outputs.message }}"
+          }
+          EOF
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Deployment summary
+        run: |
+          echo "## 🚀 Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ✅ Success" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: \`${{ steps.build.outputs.sha_short }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build Date**: ${{ steps.build.outputs.build_date }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Live URL**: ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
+
