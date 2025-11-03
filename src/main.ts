@@ -279,79 +279,22 @@ function vibrate(pattern: number | number[] = 10) {
   }
 }
 
+// Cache for the cash register audio
+let cashRegisterAudio: HTMLAudioElement | null = null
+
 function playCashRegisterSound() {
-  if (!audioContext) {
-    initAudioContext()
-    if (!audioContext) return
+  // Create audio element if it doesn't exist
+  if (!cashRegisterAudio) {
+    cashRegisterAudio = new Audio('/soundfx/videoplayback.m4a')
+    cashRegisterAudio.volume = 0.7
+    cashRegisterAudio.preload = 'auto'
   }
   
-  // Resume audio context if suspended
-  if (audioContext.state === 'suspended') {
-    audioContext.resume()
-  }
-  
-  const now = audioContext.currentTime
-  
-  // First "cha" sound - lower frequency with quick attack
-  const chaOsc1 = audioContext.createOscillator()
-  const chaGain1 = audioContext.createGain()
-  chaOsc1.connect(chaGain1)
-  chaGain1.connect(audioContext.destination)
-  
-  chaOsc1.frequency.setValueAtTime(800, now)
-  chaOsc1.frequency.exponentialRampToValueAtTime(600, now + 0.05)
-  chaOsc1.type = 'square'
-  
-  chaGain1.gain.setValueAtTime(0, now)
-  chaGain1.gain.linearRampToValueAtTime(0.4, now + 0.01)
-  chaGain1.gain.exponentialRampToValueAtTime(0.01, now + 0.05)
-  
-  chaOsc1.start(now)
-  chaOsc1.stop(now + 0.05)
-  
-  // Second "ching" sound - higher frequency bell/chime
-  const chingOsc1 = audioContext.createOscillator()
-  const chingOsc2 = audioContext.createOscillator()
-  const chingGain = audioContext.createGain()
-  
-  chingOsc1.connect(chingGain)
-  chingOsc2.connect(chingGain)
-  chingGain.connect(audioContext.destination)
-  
-  chingOsc1.frequency.setValueAtTime(2000, now + 0.05)
-  chingOsc1.frequency.exponentialRampToValueAtTime(1600, now + 0.25)
-  chingOsc1.type = 'sine'
-  
-  chingOsc2.frequency.setValueAtTime(2400, now + 0.05)
-  chingOsc2.frequency.exponentialRampToValueAtTime(2000, now + 0.25)
-  chingOsc2.type = 'sine'
-  
-  chingGain.gain.setValueAtTime(0, now + 0.05)
-  chingGain.gain.linearRampToValueAtTime(0.5, now + 0.06)
-  chingGain.gain.exponentialRampToValueAtTime(0.01, now + 0.25)
-  
-  chingOsc1.start(now + 0.05)
-  chingOsc1.stop(now + 0.25)
-  
-  chingOsc2.start(now + 0.05)
-  chingOsc2.stop(now + 0.25)
-  
-  // Additional high-frequency "ting" for the final ching
-  const tingOsc = audioContext.createOscillator()
-  const tingGain = audioContext.createGain()
-  
-  tingOsc.connect(tingGain)
-  tingGain.connect(audioContext.destination)
-  
-  tingOsc.frequency.setValueAtTime(3000, now + 0.15)
-  tingOsc.type = 'sine'
-  
-  tingGain.gain.setValueAtTime(0, now + 0.15)
-  tingGain.gain.linearRampToValueAtTime(0.3, now + 0.16)
-  tingGain.gain.exponentialRampToValueAtTime(0.01, now + 0.3)
-  
-  tingOsc.start(now + 0.15)
-  tingOsc.stop(now + 0.3)
+  // Play the sound (reset to start if already playing)
+  cashRegisterAudio.currentTime = 0
+  cashRegisterAudio.play().catch((err) => {
+    console.warn('Could not play cash register sound:', err)
+  })
 }
 
 function showAddToCartAnimation(element: HTMLElement) {
