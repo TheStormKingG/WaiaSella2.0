@@ -230,9 +230,10 @@ function renderProducts() {
     body.append(
       h('div', { class: 'title' }, item.name),
       h('div', { class: 'muted' }, `${item.stock} in stock`),
-      row(h('div', { class: 'price' }, fmt(item.price)), btn('+', 'icon-btn', () => addToCart(item.id)))
+      h('div', { class: 'price' }, fmt(item.price))
     )
     card.append(img, body)
+    card.addEventListener('click', () => addToCart(item.id))
     productGrid.appendChild(card)
   })
 }
