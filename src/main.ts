@@ -217,6 +217,37 @@ function renderCategoryChips() {
   })
 }
 
+function showAddToCartAnimation(element: HTMLElement) {
+  const rect = element.getBoundingClientRect()
+  const animEl = document.createElement('div')
+  animEl.textContent = '+1'
+  animEl.style.cssText = `
+    position: fixed;
+    left: ${rect.left + rect.width / 2}px;
+    top: ${rect.top + rect.height / 2}px;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    font-weight: 700;
+    color: #2563eb;
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 1;
+    transition: all 0.6s ease-out;
+  `
+  document.body.appendChild(animEl)
+  
+  // Trigger animation on next frame
+  requestAnimationFrame(() => {
+    animEl.style.transform = `translate(-50%, -${rect.height / 2 + 40}px)`
+    animEl.style.opacity = '0'
+  })
+  
+  // Remove element after animation
+  setTimeout(() => {
+    document.body.removeChild(animEl)
+  }, 600)
+}
+
 function renderProducts() {
   const term = salesSearch.value.toLowerCase()
   const filtered = inventory.filter(
@@ -233,7 +264,10 @@ function renderProducts() {
       h('div', { class: 'price' }, fmt(item.price))
     )
     card.append(img, body)
-    card.addEventListener('click', () => addToCart(item.id))
+    card.addEventListener('click', () => {
+      showAddToCartAnimation(card)
+      addToCart(item.id)
+    })
     productGrid.appendChild(card)
   })
 }
