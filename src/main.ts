@@ -285,7 +285,7 @@ let cashRegisterAudio: HTMLAudioElement | null = null
 function playCashRegisterSound() {
   // Create audio element if it doesn't exist
   if (!cashRegisterAudio) {
-    cashRegisterAudio = new Audio('/soundfx/videoplayback.m4a')
+    cashRegisterAudio = new Audio('./soundfx/videoplayback.m4a')
     cashRegisterAudio.volume = 0.7
     cashRegisterAudio.preload = 'auto'
   }
