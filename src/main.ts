@@ -217,6 +217,68 @@ function renderCategoryChips() {
   })
 }
 
+// Audio context for generating phone dial tones
+let audioContext: AudioContext | null = null
+
+function initAudioContext() {
+  if (!audioContext && typeof AudioContext !== 'undefined') {
+    audioContext = new AudioContext()
+  } else if (!audioContext && typeof (window as any).webkitAudioContext !== 'undefined') {
+    audioContext = new (window as any).webkitAudioContext()
+  }
+}
+
+function playDialTone() {
+  if (!audioContext) {
+    initAudioContext()
+    if (!audioContext) return
+  }
+  
+  // Resume audio context if suspended (required by some browsers)
+  if (audioContext.state === 'suspended') {
+    audioContext.resume()
+  }
+  
+  // Generate a random DTMF-like tone (using phone dial frequencies)
+  // Randomly select one of the DTMF frequencies for variety
+  const frequencies = [
+    [697, 1209], [697, 1336], [697, 1477], // Row 1
+    [770, 1209], [770, 1336], [770, 1477], // Row 2
+    [852, 1209], [852, 1336], [852, 1477], // Row 3
+    [941, 1209], [941, 1336], [941, 1477], // Row 4
+  ]
+  
+  const selectedFreqs = frequencies[Math.floor(Math.random() * frequencies.length)]
+  const duration = 0.1 // 100ms tone
+  
+  selectedFreqs.forEach((freq) => {
+    const oscillator = audioContext!.createOscillator()
+    const gainNode = audioContext!.createGain()
+    
+    oscillator.connect(gainNode)
+    gainNode.connect(audioContext!.destination)
+    
+    oscillator.frequency.value = freq
+    oscillator.type = 'sine'
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext!.currentTime)
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext!.currentTime + duration)
+    
+    oscillator.start(audioContext!.currentTime)
+    oscillator.stop(audioContext!.currentTime + duration)
+  })
+}
+
+function vibrate(pattern: number | number[] = 10) {
+  if ('vibrate' in navigator) {
+    try {
+      navigator.vibrate(pattern)
+    } catch (e) {
+      // Vibration API not supported or failed
+    }
+  }
+}
+
 function showAddToCartAnimation(element: HTMLElement) {
   const rect = element.getBoundingClientRect()
   const animEl = document.createElement('div')
@@ -265,6 +327,8 @@ function renderProducts() {
     )
     card.append(img, body)
     card.addEventListener('click', () => {
+      playDialTone()
+      vibrate(10)
       showAddToCartAnimation(card)
       addToCart(item.id)
     })
