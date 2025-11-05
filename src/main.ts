@@ -26,7 +26,8 @@ type Item = {
   stock: number
   category: string
   image?: string
-  lowIndicator?: number
+  lowPoint?: number
+  maxStock?: number
 }
 
 type TransactionItem = {
@@ -833,28 +834,35 @@ function renderInventoryItems() {
   list.forEach((item) => {
     const li = h('li', { class: 'inventory-item' })
     
-    // Calculate stock percentage (assuming max stock is around 100)
-    const maxStock = 100
+    // Use historical max or default to 100
+    const maxStock = item.maxStock || 100
     const stockPercentage = Math.min((item.stock / maxStock) * 100, 100)
+    const stockColor = getStockColor(item.stock, item.lowPoint, maxStock)
     
     const stockBarContainer = h('div', { class: 'stock-bar-container' })
     const stockBar = h('div', { 
-      class: 'stock-bar stock-' + stockClass(item.stock, item.lowIndicator).replace('status-', ''),
-      style: `width: ${stockPercentage}%`
+      class: 'stock-bar',
+      style: `width: ${stockPercentage}%; background: ${stockColor};`
     })
     stockBarContainer.appendChild(stockBar)
     
-    // Add low indicator if set
-    if (item.lowIndicator && item.lowIndicator > 0) {
-      const lowPercentage = Math.min((item.lowIndicator / maxStock) * 100, 100)
-      const lowIndicator = h('div', { 
-        class: 'low-indicator',
-        style: `left: ${lowPercentage}%`
-      })
-      stockBarContainer.appendChild(lowIndicator)
-    }
+    // Add low point indicator if set
+    const lowPoint = item.lowPoint ?? (maxStock * 0.25)
+    const lowPercentage = Math.min((lowPoint / maxStock) * 100, 100)
+    const lowIndicator = h('div', { 
+      class: 'low-indicator',
+      style: `left: ${lowPercentage}%`
+    })
+    stockBarContainer.appendChild(lowIndicator)
     
-    const textBox = h('div', { style: 'position: relative; flex: 1;' })
+    // Add max label
+    const maxLabel = h('div', { 
+      class: 'stock-max-label',
+      style: 'position: absolute; bottom: -20px; right: 0; font-size: 10px; color: #9ca3af;'
+    }, `Max: ${maxStock}`)
+    stockBarContainer.appendChild(maxLabel)
+    
+    const textBox = h('div', { style: 'position: relative; flex: 1; padding-bottom: 18px;' })
     textBox.append(
       h('div', { class: 'title' }, item.name), 
       h('div', { class: 'muted' }, fmt(item.price)),
@@ -878,8 +886,29 @@ function renderInventory() {
   }
 }
 
-function stockClass(stock: number, lowIndicator?: number) {
-  const threshold = lowIndicator ?? LOW_STOCK_THRESHOLD
+function getStockColor(stock: number, lowPoint?: number, maxStock?: number): string {
+  const max = maxStock || 100
+  const low = lowPoint ?? (max * 0.25)
+  
+  if (stock <= 0) return '#ef4444' // Red - out of stock
+  if (stock <= low) return '#ef4444' // Red - at or below low point
+  
+  // Calculate position between low point and max
+  const range = max - low
+  const position = stock - low
+  const ratio = Math.min(position / range, 1)
+  
+  if (ratio < 0.5) {
+    // Orange zone: between low point and midpoint
+    return '#f59e0b'
+  } else {
+    // Green zone: above midpoint
+    return '#10b981'
+  }
+}
+
+function stockClass(stock: number, lowPoint?: number) {
+  const threshold = lowPoint ?? LOW_STOCK_THRESHOLD
   if (stock <= 0) return 'status-bad'
   if (stock <= threshold) return 'status-warn'
   return 'status-ok'
@@ -892,7 +921,7 @@ function openItemDialog(item?: Item) {
   ;(itemForm.elements.namedItem('price') as HTMLInputElement).value = item?.price?.toString() ?? ''
   ;(itemForm.elements.namedItem('cost') as HTMLInputElement).value = item?.cost?.toString() ?? ''
   ;(itemForm.elements.namedItem('stock') as HTMLInputElement).value = item?.stock?.toString() ?? ''
-  ;(itemForm.elements.namedItem('lowIndicator') as HTMLInputElement).value = item?.lowIndicator?.toString() ?? ''
+  ;(itemForm.elements.namedItem('lowPoint') as HTMLInputElement).value = item?.lowPoint?.toString() ?? ''
   ;(itemForm.elements.namedItem('image') as HTMLInputElement).value = item?.image || ''
   ;(itemForm.elements.namedItem('id') as HTMLInputElement).value = item?.id || ''
   itemDialog.showModal()
@@ -901,15 +930,19 @@ function openItemDialog(item?: Item) {
 function saveItemFromDialog(ev: SubmitEvent) {
   ev.preventDefault()
   const data = Object.fromEntries(new FormData(itemForm) as any) as Record<string, string>
+  const existingItem = inventory.find((i) => i.id === (data.id || ''))
+  const newStock = Number(data.stock) || 0
+  
   const payload: Item = {
     id: data.id || id(),
     name: data.name.trim(),
     category: data.category.trim() || 'Other',
     price: Number(data.price),
     cost: Number(data.cost) || 0,
-    stock: Number(data.stock) || 0,
+    stock: newStock,
     image: data.image?.trim() || '',
-    lowIndicator: data.lowIndicator ? Number(data.lowIndicator) : undefined,
+    lowPoint: data.lowPoint ? Number(data.lowPoint) : undefined,
+    maxStock: Math.max(newStock, existingItem?.maxStock || 0),
   }
   const idx = inventory.findIndex((i) => i.id === payload.id)
   if (idx >= 0) inventory[idx] = payload
