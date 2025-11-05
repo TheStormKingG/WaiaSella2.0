@@ -261,16 +261,9 @@ tabs.forEach((t) =>
     if (id === 'reportsView') renderReports()
     if (id === 'reorderView') renderReorder()
     if (id === 'inventoryView') {
-      const savedInventoryView = load<string>(STORAGE_KEYS.inventoryView)
-      if (savedInventoryView === 'manage') {
-        showManageCategories()
-      } else if (savedInventoryView === 'items') {
-        const savedCategory = load<string>(STORAGE_KEYS.selectedInventoryCategory)
-        if (savedCategory) {
-          selectedInventoryCategory = savedCategory
-        }
-        showInventoryItems()
-      } else {
+      // Don't reset view - maintain current inventory page
+      const currentInventoryView = load<string>(STORAGE_KEYS.inventoryView)
+      if (!currentInventoryView || currentInventoryView === 'categories') {
         showInventoryCategories()
       }
       renderInventory()
@@ -850,7 +843,7 @@ function renderInventoryItems() {
     
     const stockBarContainer = h('div', { class: 'stock-bar-container' })
     const stockBar = h('div', { 
-      class: 'stock-bar stock-' + stockClass(item.stock).replace('status-', ''),
+      class: 'stock-bar stock-' + stockClass(item.stock, item.lowIndicator).replace('status-', ''),
       style: `width: ${stockPercentage}%`
     })
     stockBarContainer.appendChild(stockBar)
@@ -889,9 +882,10 @@ function renderInventory() {
   }
 }
 
-function stockClass(stock: number) {
+function stockClass(stock: number, lowIndicator?: number) {
+  const threshold = lowIndicator ?? LOW_STOCK_THRESHOLD
   if (stock <= 0) return 'status-bad'
-  if (stock <= 10) return 'status-warn'
+  if (stock <= threshold) return 'status-warn'
   return 'status-ok'
 }
 
