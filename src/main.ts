@@ -257,18 +257,14 @@ addItemFab.addEventListener('click', () => openItemDialog())
 itemForm.addEventListener('submit', saveItemFromDialog)
 cancelItemBtn.addEventListener('click', () => itemDialog.close())
 
-function renderCategoryChips() {
+function renderCategoryFilter() {
   const categories = ['All', ...unique(inventory.map((i) => i.category))]
-  categoryChips.innerHTML = ''
+  categoryFilter.innerHTML = ''
   categories.forEach((c) => {
-    const el = h('button', { class: 'chip' + (c === activeCategory ? ' active' : '') }, c)
-    el.addEventListener('click', () => {
-      activeCategory = c
-      qsa<HTMLButtonElement>('.chip', categoryChips).forEach((x) => x.classList.remove('active'))
-      el.classList.add('active')
-      renderProducts()
-    })
-    categoryChips.appendChild(el)
+    const option = h('option', { value: c })
+    option.textContent = c === 'All' ? 'All Categories' : c
+    if (c === selectedCategory) option.selected = true
+    categoryFilter.appendChild(option)
   })
 }
 
