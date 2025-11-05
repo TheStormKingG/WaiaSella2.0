@@ -15,6 +15,7 @@ const STORAGE_KEYS = {
   cart: 'ws.cart',
   currentView: 'ws.currentView',
   inventoryView: 'ws.inventoryView',
+  selectedInventoryCategory: 'ws.selectedInventoryCategory',
 } as const
 
 type Item = {
@@ -83,7 +84,7 @@ const headerTitle = qs<HTMLHeadingElement>('.app-header h1')
 // Sales
 const categoryFilter = qs<HTMLSelectElement>('#categoryFilter')
 const productGrid = qs<HTMLDivElement>('#productGrid')
-const salesSearch = qs<HTMLInputElement>('#salesSearch')
+const salesSearch = qs<HTMLInputElement>('#salesSearch') // Now in header
 const cartItemsEl = qs<HTMLDivElement>('#cartItems')
 const cartTaxEl = qs<HTMLSpanElement>('#cartTax')
 const cartTotalEl = qs<HTMLSpanElement>('#cartTotal')
@@ -246,8 +247,16 @@ tabs.forEach((t) =>
     headerTitle.textContent = t.textContent?.trim() ?? ''
     save(STORAGE_KEYS.currentView, id)
     
-    // Hide search and back button when switching to non-inventory pages
-    if (id !== 'inventoryView') {
+    // Hide/show search bars and back button based on view
+    if (id === 'salesView') {
+      salesSearch.style.display = 'block'
+      inventorySearch.style.display = 'none'
+      headerBackBtn.style.display = 'none'
+    } else if (id === 'inventoryView') {
+      salesSearch.style.display = 'none'
+      // Search bar visibility controlled by inventory sub-view
+    } else {
+      salesSearch.style.display = 'none'
       inventorySearch.style.display = 'none'
       headerBackBtn.style.display = 'none'
     }
@@ -284,6 +293,10 @@ if (savedView) {
       if (savedInventoryView === 'manage') {
         showManageCategories()
       } else if (savedInventoryView === 'items') {
+        const savedCategory = load<string>(STORAGE_KEYS.selectedInventoryCategory)
+        if (savedCategory) {
+          selectedInventoryCategory = savedCategory
+        }
         showInventoryItems()
       } else {
         showInventoryCategories()
@@ -683,11 +696,14 @@ function showInventoryItems() {
   inventoryItemsView.style.display = 'block'
   manageCategoriesView.style.display = 'none'
   save(STORAGE_KEYS.inventoryView, 'items')
+  save(STORAGE_KEYS.selectedInventoryCategory, selectedInventoryCategory)
   headerBackBtn.style.display = 'block'
   inventorySearch.style.display = 'block'
   headerTitle.textContent = selectedInventoryCategory || 'All Items'
   renderInventoryItems()
-}
+}</invoke>
+<invoke name="grep">
+<parameter name="pattern">Restore last view on load
 
 function showInventoryCategories() {
   selectedInventoryCategory = null
@@ -828,7 +844,8 @@ function renderInventoryItems() {
         box.append(h('div', { class: 'title' }, item.name), h('div', { class: 'muted' }, fmt(item.price)))
         return box
       })(),
-      (() => h('div', { class: 'status-dot ' + stockClass(item.stock) }))()
+      (() => h('div', { class: 'status-dot ' + stockClass(item.stock) }))(),
+      (() => h('div', { class: 'stock-bar stock-' + stockClass(item.stock).replace('status-', '') }))()
     )
     li.addEventListener('click', () => openItemDialog(item))
     inventoryList.appendChild(li)

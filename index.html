@@ -8,6 +8,7 @@
   <body>
     <header class="app-header">
       <h1>Sales</h1>
+      <input id="salesSearch" class="header-search" placeholder="Search products..." style="display: none;" />
       <input id="inventorySearch" class="header-search" placeholder="Search inventory..." style="display: none;" />
       <button id="headerBackBtn" class="header-back-btn" style="display: none;">← Back</button>
     </header>
@@ -16,15 +17,14 @@
       <!-- Sales View -->
       <section id="salesView" class="view active">
         <div class="sales-layout">
-          <div class="sales-left">
-            <div class="search-filter-bar">
-              <input id="salesSearch" class="search" placeholder="Search products..." />
-              <select id="categoryFilter" class="category-dropdown">
-                <option value="All">All Categories</option>
-              </select>
-            </div>
-            <div id="productGrid" class="grid"></div>
+        <div class="sales-left">
+          <div class="search-filter-bar">
+            <select id="categoryFilter" class="category-dropdown">
+              <option value="All">All Categories</option>
+            </select>
           </div>
+          <div id="productGrid" class="grid"></div>
+        </div>
           <aside class="cart collapsed" id="cartPanel">
             <div class="cart-header">
               <span>Cart</span>
