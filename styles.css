@@ -237,6 +237,7 @@ body {
     display: flex;
     flex-direction: column;
     height: calc(100vh - 56px - 60px); /* viewport - header - tabbar */
+    position: relative;
   }
   
   .sales-left {
@@ -259,7 +260,7 @@ body {
     flex-shrink: 0;
   }
   
-  /* Sales screen - 2 rows carousel with horizontal scroll */
+  /* Sales screen - 2 rows carousel with horizontal scroll - constant size */
   #productGrid {
     display: grid;
     grid-auto-flow: column;
@@ -270,10 +271,9 @@ body {
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     scroll-snap-type: x proximity;
-    flex: 1;
-    height: auto;
-    max-height: 100%;
+    height: 300px; /* Fixed height - doesn't change with cart */
     padding-bottom: 8px;
+    margin-bottom: 8px;
   }
   
   #productGrid .product {
@@ -297,18 +297,25 @@ body {
     font-size: 11px;
   }
   
-  /* Cart - fit screen width, positioned at bottom, collapsible */
+  /* Cart - overlays items when expanded, collapsed by default */
   .cart { 
-    position: sticky;
+    position: fixed;
+    left: 0;
+    right: 0;
     bottom: 60px;
     height: auto;
-    max-height: 40vh;
-    flex-shrink: 0;
-    transition: max-height 0.3s ease;
+    max-height: 60vh;
+    transition: max-height 0.3s ease, box-shadow 0.3s ease;
+    z-index: 5;
   }
   
   .cart.collapsed {
     max-height: 56px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04);
+  }
+  
+  .cart:not(.collapsed) {
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.15);
   }
   
   .cart-toggle {
