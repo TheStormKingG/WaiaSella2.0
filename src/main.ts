@@ -227,20 +227,11 @@ function fmtNoCents(n: number): string {
   return `GY$${Math.round(n || 0).toLocaleString()}`
 }
 
-// Init (delayed to allow view restoration to complete first)
-setTimeout(() => {
-  if (!load<string>(STORAGE_KEYS.currentView)) {
-    // Only render initial state if no saved view
-    renderCategoryFilter()
-    renderProducts()
-    renderCart()
-    showInventoryCategories()
-  }
-  renderInventory()
-  renderReports()
-  renderReorder()
-  populateCategoryDatalist()
-}, 0)
+// Init
+renderCategoryFilter()
+renderProducts()
+renderCart()
+populateCategoryDatalist()
 
 // Tab switching
 tabs.forEach((t) =>
@@ -288,36 +279,40 @@ tabs.forEach((t) =>
 )
 
 // Restore last view on load
-const savedView = load<string>(STORAGE_KEYS.currentView) || 'salesView'
-tabs.forEach((x) => x.classList.remove('active'))
-const activeTab = Array.from(tabs).find(t => t.dataset.target === savedView)
-if (activeTab) {
-  activeTab.classList.add('active')
-  views.forEach((v) => v.classList.remove('active'))
-  qs<HTMLElement>('#' + savedView).classList.add('active')
-  headerTitle.textContent = activeTab.textContent?.trim() ?? ''
-  
-  if (savedView === 'inventoryView') {
-    const savedInventoryView = load<string>(STORAGE_KEYS.inventoryView)
-    const savedCategory = load<string>(STORAGE_KEYS.selectedInventoryCategory)
+const savedView = load<string>(STORAGE_KEYS.currentView)
+if (savedView && savedView !== 'salesView') {
+  tabs.forEach((x) => x.classList.remove('active'))
+  const activeTab = Array.from(tabs).find(t => t.dataset.target === savedView)
+  if (activeTab) {
+    activeTab.classList.add('active')
+    views.forEach((v) => v.classList.remove('active'))
+    qs<HTMLElement>('#' + savedView).classList.add('active')
+    headerTitle.textContent = activeTab.textContent?.trim() ?? ''
     
-    if (savedInventoryView === 'manage') {
-      showManageCategories()
-    } else if (savedInventoryView === 'items') {
-      if (savedCategory) {
-        selectedInventoryCategory = savedCategory
+    if (savedView === 'inventoryView') {
+      const savedInventoryView = load<string>(STORAGE_KEYS.inventoryView)
+      const savedCategory = load<string>(STORAGE_KEYS.selectedInventoryCategory)
+      
+      if (savedInventoryView === 'manage') {
+        showManageCategories()
+      } else if (savedInventoryView === 'items') {
+        if (savedCategory) {
+          selectedInventoryCategory = savedCategory
+        }
+        showInventoryItems()
+      } else {
+        showInventoryCategories()
       }
-      showInventoryItems()
-    } else {
-      showInventoryCategories()
+      renderInventory()
+    } else if (savedView === 'reportsView') {
+      renderReports()
+    } else if (savedView === 'reorderView') {
+      renderReorder()
     }
-  } else if (savedView === 'reportsView') {
-    renderReports()
-  } else if (savedView === 'reorderView') {
-    renderReorder()
-  } else if (savedView === 'salesView') {
-    salesSearch.style.display = 'block'
   }
+} else {
+  // Default to sales view
+  salesSearch.style.display = 'block'
 }
 
 // Sales interactions
