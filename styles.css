@@ -212,13 +212,22 @@ body {
   .cart { position: static; height: auto; }
   .fab { bottom: 70px; }
   
-  /* Sales screen - Double width on mobile (fewer columns) */
+  /* Sales screen - 2 rows with horizontal scroll on mobile */
   #productGrid {
-    grid-template-columns: repeat(2, 1fr);
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(2, 1fr);
+    grid-template-columns: none;
     gap: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
   }
   #productGrid .product {
     grid-template-rows: 120px auto;
+    min-width: 160px;
+    scroll-snap-align: start;
   }
   #productGrid .product .body {
     padding: 8px;
