@@ -268,6 +268,10 @@ tabs.forEach((t) =>
       if (savedInventoryView === 'manage') {
         showManageCategories()
       } else if (savedInventoryView === 'items') {
+        const savedCategory = load<string>(STORAGE_KEYS.selectedInventoryCategory)
+        if (savedCategory) {
+          selectedInventoryCategory = savedCategory
+        }
         showInventoryItems()
       } else {
         showInventoryCategories()
@@ -835,6 +839,18 @@ function renderInventoryItems() {
   
   list.forEach((item) => {
     const li = h('li', { class: 'inventory-item' })
+    
+    // Calculate stock percentage (assuming max stock is around 100)
+    const maxStock = 100
+    const stockPercentage = Math.min((item.stock / maxStock) * 100, 100)
+    
+    const stockBarContainer = h('div', { class: 'stock-bar-container' })
+    const stockBar = h('div', { 
+      class: 'stock-bar stock-' + stockClass(item.stock).replace('status-', ''),
+      style: `width: ${stockPercentage}%`
+    })
+    stockBarContainer.appendChild(stockBar)
+    
     li.append(
       h('img', { class: 'avatar', src: item.image || pic(Number(item.id.slice(-3))), alt: item.name }),
       (() => {
@@ -843,7 +859,7 @@ function renderInventoryItems() {
         return box
       })(),
       (() => h('div', { class: 'status-dot ' + stockClass(item.stock) }))(),
-      (() => h('div', { class: 'stock-bar stock-' + stockClass(item.stock).replace('status-', '') }))()
+      stockBarContainer
     )
     li.addEventListener('click', () => openItemDialog(item))
     inventoryList.appendChild(li)
