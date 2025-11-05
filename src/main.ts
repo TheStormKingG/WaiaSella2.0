@@ -88,6 +88,8 @@ const cartTotalEl = qs<HTMLSpanElement>('#cartTotal')
 const completeSaleBtn = qs<HTMLButtonElement>('#completeSaleBtn')
 const cartPanel = qs<HTMLElement>('#cartPanel')
 const cartToggle = qs<HTMLButtonElement>('#cartToggle')
+const cartHeaderCount = qs<HTMLSpanElement>('#cartHeaderCount')
+const cartHeaderTotal = qs<HTMLSpanElement>('#cartHeaderTotal')
 
 // Receipt
 const receiptDialog = qs<HTMLDialogElement>('#receiptDialog')
