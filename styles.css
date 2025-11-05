@@ -263,15 +263,21 @@ body {
     display: flex;
     flex-direction: column;
     flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;
+    padding-top: 116px; /* Space for fixed search bar */
   }
   
-  /* Search and category filter - stack vertically on mobile */
+  /* Search and category filter - fixed below header on mobile */
   .search-filter-bar {
+    position: fixed !important;
+    top: 56px !important;
+    left: 0;
+    right: 0;
     grid-template-columns: 1fr;
     gap: 6px;
-    padding: 8px 0;
+    padding: 8px 12px;
+    z-index: 100;
+    background: var(--bg);
   }
   
   .category-dropdown {
@@ -287,11 +293,13 @@ body {
     gap: 8px;
     overflow-y: auto;
     overflow-x: hidden;
-    padding-bottom: 8px;
+    padding: 0 12px 120px 12px; /* Bottom padding for cart space */
+    height: 100%;
   }
   
   #productGrid .product {
-    grid-template-rows: 140px auto;
+    grid-template-rows: 160px auto;
+    height: auto;
   }
   
   #productGrid .product .body {
