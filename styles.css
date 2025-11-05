@@ -263,7 +263,8 @@ body {
     display: flex;
     flex-direction: column;
     flex: 1;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
   
   /* Search and category filter - stack vertically on mobile */
@@ -278,27 +279,19 @@ body {
     min-width: auto;
   }
   
-  /* Sales screen - 2 rows carousel with horizontal scroll - constant size */
+  /* Sales screen - 2 columns with vertical scroll on mobile */
   #productGrid {
-    display: grid;
-    grid-auto-flow: column;
-    grid-template-rows: repeat(2, 1fr);
-    grid-template-columns: none;
-    gap: 6px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x proximity;
-    height: 300px; /* Fixed height - doesn't change with cart */
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    grid-auto-flow: row !important;
+    gap: 8px;
+    overflow-y: auto;
+    overflow-x: hidden;
     padding-bottom: 8px;
-    margin-bottom: 8px;
   }
   
   #productGrid .product {
-    grid-template-rows: 120px auto;
-    min-width: 160px;
-    scroll-snap-align: start;
-    height: 100%;
+    grid-template-rows: 140px auto;
   }
   
   #productGrid .product .body {
