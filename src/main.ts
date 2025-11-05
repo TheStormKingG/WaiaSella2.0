@@ -114,7 +114,7 @@ const inventorySearch = qs<HTMLInputElement>('#inventorySearch')
 const addItemFab = qs<HTMLButtonElement>('#addItemFab')
 const manageCategoriesView = qs<HTMLDivElement>('#manageCategoriesView')
 const categoryManageList = qs<HTMLUListElement>('#categoryManageList')
-const backFromCategoriesBtn = qs<HTMLButtonElement>('#backFromCategoriesBtn')
+const headerBackBtn = qs<HTMLButtonElement>('#headerBackBtn')
 const itemDialog = qs<HTMLDialogElement>('#itemDialog')
 const itemForm = qs<HTMLFormElement>('#itemForm')
 const itemDialogTitle = qs<HTMLHeadingElement>('#itemDialogTitle')
@@ -273,7 +273,12 @@ inventorySearch.addEventListener('input', () => {
 addItemFab.addEventListener('click', () => openItemDialog())
 itemForm.addEventListener('submit', saveItemFromDialog)
 cancelItemBtn.addEventListener('click', () => itemDialog.close())
-backFromCategoriesBtn.addEventListener('click', showInventoryCategories)
+headerBackBtn.addEventListener('click', () => {
+  const savedInventoryView = load<string>(STORAGE_KEYS.inventoryView)
+  if (savedInventoryView === 'manage' || savedInventoryView === 'items') {
+    showInventoryCategories()
+  }
+})
 
 // Category management
 renameCategoryForm.addEventListener('submit', (e) => {
@@ -631,6 +636,9 @@ function showInventoryItems() {
   inventoryCategories.style.display = 'none'
   inventoryItemsView.style.display = 'block'
   manageCategoriesView.style.display = 'none'
+  save(STORAGE_KEYS.inventoryView, 'items')
+  headerBackBtn.style.display = 'block'
+  headerTitle.textContent = selectedInventoryCategory || 'All Items'
   renderInventoryItems()
 }
 
@@ -639,12 +647,18 @@ function showInventoryCategories() {
   inventoryItemsView.style.display = 'none'
   manageCategoriesView.style.display = 'none'
   inventoryCategories.style.display = 'grid'
+  save(STORAGE_KEYS.inventoryView, 'categories')
+  headerBackBtn.style.display = 'none'
+  headerTitle.textContent = 'Inventory'
 }
 
 function showManageCategories() {
   inventoryCategories.style.display = 'none'
   inventoryItemsView.style.display = 'none'
   manageCategoriesView.style.display = 'block'
+  save(STORAGE_KEYS.inventoryView, 'manage')
+  headerBackBtn.style.display = 'block'
+  headerTitle.textContent = 'Manage Categories'
   renderManageCategories()
 }
 
