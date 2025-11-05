@@ -382,7 +382,7 @@ function showAddToCartAnimation(element: HTMLElement) {
 function renderProducts() {
   const term = salesSearch.value.toLowerCase()
   const filtered = inventory.filter(
-    (i) => (activeCategory === 'All' || i.category === activeCategory) && (i.name.toLowerCase().includes(term) || i.category.toLowerCase().includes(term))
+    (i) => (selectedCategory === 'All' || i.category === selectedCategory) && (i.name.toLowerCase().includes(term) || i.category.toLowerCase().includes(term))
   )
   productGrid.innerHTML = ''
   filtered.forEach((item) => {
