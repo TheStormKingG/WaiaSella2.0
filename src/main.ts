@@ -112,6 +112,7 @@ const itemDialog = qs<HTMLDialogElement>('#itemDialog')
 const itemForm = qs<HTMLFormElement>('#itemForm')
 const itemDialogTitle = qs<HTMLHeadingElement>('#itemDialogTitle')
 const categoryList = qs<HTMLDataListElement>('#categoryList')
+const cancelItemBtn = qs<HTMLButtonElement>('#cancelItemBtn')
 
 // Inventory state
 let selectedInventoryCategory: string | null = null
@@ -158,6 +159,50 @@ function getCategoryIcon(category: string, color: string): string {
   `
 }
 
+// Category-specific image mappings
+function getCategoryImage(category: string): string {
+  const categoryMap: Record<string, string> = {
+    'Drinks': 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop', // Beverages
+    'Personal Care': 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=400&h=300&fit=crop', // Cosmetics
+    'Groceries': 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=300&fit=crop', // Grocery items
+    'Snacks': 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=400&h=300&fit=crop', // Snacks
+    'Produce': 'https://images.unsplash.com/photo-1610348725531-843dff563e2c?w=400&h=300&fit=crop', // Fruits/vegetables
+  }
+  
+  return categoryMap[category] || pic(Number(category.charCodeAt(0) * 100))
+}
+
+// Gear/settings icon for manage categories
+function getSettingsImage(): string {
+  return 'data:image/svg+xml,' + encodeURIComponent(`
+    <svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <rect width="400" height="300" fill="url(#grad)"/>
+      <path d="M200 80 L220 100 L220 200 L200 220 L180 200 L180 100 Z" fill="white" opacity="0.3"/>
+      <circle cx="200" cy="150" r="40" fill="white" opacity="0.9"/>
+      <circle cx="200" cy="150" r="20" fill="url(#grad)"/>
+      <circle cx="180" cy="80" r="8" fill="white"/>
+      <circle cx="220" cy="80" r="8" fill="white"/>
+      <circle cx="240" cy="120" r="8" fill="white"/>
+      <circle cx="240" cy="180" r="8" fill="white"/>
+      <circle cx="220" cy="220" r="8" fill="white"/>
+      <circle cx="180" cy="220" r="8" fill="white"/>
+      <circle cx="160" cy="180" r="8" fill="white"/>
+      <circle cx="160" cy="120" r="8" fill="white"/>
+    </svg>
+  `)
+}
+
+// Format currency without cents
+function fmtNoCents(n: number): string {
+  return `GY$${Math.round(n || 0).toLocaleString()}`
+}
+
 // Init
 renderCategoryChips()
 renderProducts()
@@ -201,6 +246,7 @@ inventorySearch.addEventListener('input', () => {
 })
 addItemFab.addEventListener('click', () => openItemDialog())
 itemForm.addEventListener('submit', saveItemFromDialog)
+cancelItemBtn.addEventListener('click', () => itemDialog.close())
 
 function renderCategoryChips() {
   const categories = ['All', ...unique(inventory.map((i) => i.category))]
@@ -500,20 +546,18 @@ function renderInventoryCategories() {
   inventoryCategories.innerHTML = ''
   
   // Add "Manage Categories" button - matching product style
-  const firstItem = inventory[0]
   const totalInventoryValue = inventory.reduce((sum, item) => sum + item.price, 0)
   const manageBtn = h('div', { class: 'product' })
   const manageImg = h('img', { 
     class: 'thumb', 
     alt: 'Manage Categories', 
-    src: firstItem?.image || pic(2000),
-    style: 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); object-fit: cover;'
+    src: getSettingsImage()
   })
   const manageBody = h('div', { class: 'body' })
   manageBody.append(
-    h('div', { class: 'title' }, 'Manage Categories'),
-    h('div', { class: 'muted' }, `${categories.length} categories`),
-    row(h('div', { class: 'price' }, fmt(totalInventoryValue)), h('div', { style: 'font-size: 9px; color: var(--muted);' }, 'total'))
+    h('div', { class: 'muted', style: 'font-size: 10px; line-height: 1.2;' }, 'Manage Categories'),
+    h('div', { style: 'font-size: 9px; color: #6b7280; margin: 2px 0;' }, `${categories.length} categories`),
+    h('div', { class: 'title', style: 'font-size: 11px; font-weight: 700; color: #0f172a;' }, `Value: ${fmtNoCents(totalInventoryValue)}`)
   )
   manageBtn.append(manageImg, manageBody)
   manageBtn.addEventListener('click', () => {
@@ -525,7 +569,6 @@ function renderInventoryCategories() {
   // Add category buttons - matching product style
   categories.forEach((category) => {
     const categoryItems = inventory.filter(i => i.category === category)
-    const firstCategoryItem = categoryItems[0]
     const totalStock = categoryItems.reduce((sum, item) => sum + item.stock, 0)
     const totalValue = categoryItems.reduce((sum, item) => sum + item.price, 0)
     
@@ -533,13 +576,13 @@ function renderInventoryCategories() {
     const img = h('img', { 
       class: 'thumb', 
       alt: category, 
-      src: firstCategoryItem?.image || pic(Number(category.charCodeAt(0) * 100)) 
+      src: getCategoryImage(category)
     })
     const body = h('div', { class: 'body' })
     body.append(
-      h('div', { class: 'title' }, category),
-      h('div', { class: 'muted' }, `${categoryItems.length} item${categoryItems.length !== 1 ? 's' : ''} • ${totalStock} total`),
-      row(h('div', { class: 'price' }, fmt(totalValue)), h('div', { style: 'font-size: 9px; color: var(--muted);' }, 'total'))
+      h('div', { class: 'muted', style: 'font-size: 10px; line-height: 1.2;' }, category),
+      h('div', { style: 'font-size: 9px; color: #6b7280; margin: 2px 0;' }, `${categoryItems.length} item${categoryItems.length !== 1 ? 's' : ''} • ${totalStock} total`),
+      h('div', { class: 'title', style: 'font-size: 11px; font-weight: 700; color: #0f172a;' }, `Value: ${fmtNoCents(totalValue)}`)
     )
     card.append(img, body)
     card.addEventListener('click', () => {
