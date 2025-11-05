@@ -121,6 +121,18 @@ const itemDialogTitle = qs<HTMLHeadingElement>('#itemDialogTitle')
 const categoryList = qs<HTMLDataListElement>('#categoryList')
 const cancelItemBtn = qs<HTMLButtonElement>('#cancelItemBtn')
 
+// Category modals
+const renameCategoryDialog = qs<HTMLDialogElement>('#renameCategoryDialog')
+const renameCategoryForm = qs<HTMLFormElement>('#renameCategoryForm')
+const renameCategoryInput = qs<HTMLInputElement>('#renameCategoryInput')
+const oldCategoryName = qs<HTMLInputElement>('#oldCategoryName')
+const cancelRenameBtn = qs<HTMLButtonElement>('#cancelRenameBtn')
+const deleteCategoryDialog = qs<HTMLDialogElement>('#deleteCategoryDialog')
+const deleteCategoryMessage = qs<HTMLParagraphElement>('#deleteCategoryMessage')
+const categoryToDelete = qs<HTMLInputElement>('#categoryToDelete')
+const cancelDeleteBtn = qs<HTMLButtonElement>('#cancelDeleteBtn')
+const confirmDeleteBtn = qs<HTMLButtonElement>('#confirmDeleteBtn')
+
 // Inventory state
 let selectedInventoryCategory: string | null = null
 
@@ -262,6 +274,15 @@ addItemFab.addEventListener('click', () => openItemDialog())
 itemForm.addEventListener('submit', saveItemFromDialog)
 cancelItemBtn.addEventListener('click', () => itemDialog.close())
 backFromCategoriesBtn.addEventListener('click', showInventoryCategories)
+
+// Category management
+renameCategoryForm.addEventListener('submit', (e) => {
+  e.preventDefault()
+  renameCategory()
+})
+cancelRenameBtn.addEventListener('click', () => renameCategoryDialog.close())
+confirmDeleteBtn.addEventListener('click', deleteCategory)
+cancelDeleteBtn.addEventListener('click', () => deleteCategoryDialog.close())
 
 function renderCategoryFilter() {
   const categories = ['All', ...unique(inventory.map((i) => i.category))]
@@ -646,29 +667,40 @@ function renderManageCategories() {
     
     const actions = h('div', { class: 'category-actions' })
     
-    const editBtn = h('button', { class: 'btn' })
-    editBtn.textContent = 'Edit'
-    editBtn.addEventListener('click', () => editCategory(category))
+    const renameBtn = h('button', { class: 'btn' })
+    renameBtn.textContent = 'Rename'
+    renameBtn.addEventListener('click', () => openRenameCategoryDialog(category))
     
     const deleteBtn = h('button', { class: 'btn', style: 'background: #ef4444; border-color: #ef4444; color: white;' })
     deleteBtn.textContent = 'Delete'
-    deleteBtn.addEventListener('click', () => deleteCategory(category))
+    deleteBtn.addEventListener('click', () => openDeleteCategoryDialog(category))
     
-    actions.append(editBtn, deleteBtn)
+    actions.append(renameBtn, deleteBtn)
     li.append(info, actions)
     categoryManageList.appendChild(li)
   })
 }
 
-function editCategory(oldName: string) {
-  const newName = prompt(`Edit category name:`, oldName)
-  if (!newName || newName.trim() === '' || newName === oldName) return
+function openRenameCategoryDialog(category: string) {
+  oldCategoryName.value = category
+  renameCategoryInput.value = category
+  renameCategoryDialog.showModal()
+  renameCategoryInput.focus()
+  renameCategoryInput.select()
+}
+
+function renameCategory() {
+  const oldName = oldCategoryName.value
+  const newName = renameCategoryInput.value.trim()
   
-  const trimmedName = newName.trim()
+  if (!newName || newName === oldName) {
+    renameCategoryDialog.close()
+    return
+  }
   
   // Check if new name already exists
   const existingCategories = unique(inventory.map(i => i.category))
-  if (existingCategories.includes(trimmedName)) {
+  if (existingCategories.includes(newName)) {
     alert('A category with this name already exists!')
     return
   }
@@ -676,33 +708,38 @@ function editCategory(oldName: string) {
   // Update all items with this category
   inventory.forEach(item => {
     if (item.category === oldName) {
-      item.category = trimmedName
+      item.category = newName
     }
   })
   
   persist()
+  renameCategoryDialog.close()
   renderManageCategories()
   renderInventoryCategories()
   renderCategoryFilter()
 }
 
-function deleteCategory(category: string) {
+function openDeleteCategoryDialog(category: string) {
   const categoryItems = inventory.filter(i => i.category === category)
   const itemCount = categoryItems.length
   
-  if (itemCount > 0) {
-    const confirm = window.confirm(`This category has ${itemCount} item${itemCount !== 1 ? 's' : ''}. Delete anyway? Items will be moved to "Other".`)
-    if (!confirm) return
-    
-    // Move items to "Other" category
-    inventory.forEach(item => {
-      if (item.category === category) {
-        item.category = 'Other'
-      }
-    })
-  }
+  categoryToDelete.value = category
+  deleteCategoryMessage.textContent = `This category has ${itemCount} item${itemCount !== 1 ? 's' : ''}. Delete anyway?`
+  deleteCategoryDialog.showModal()
+}
+
+function deleteCategory() {
+  const category = categoryToDelete.value
+  
+  // Move items to "Other" category
+  inventory.forEach(item => {
+    if (item.category === category) {
+      item.category = 'Other'
+    }
+  })
   
   persist()
+  deleteCategoryDialog.close()
   renderManageCategories()
   renderInventoryCategories()
   renderCategoryFilter()

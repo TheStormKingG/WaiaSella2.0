@@ -170,6 +170,36 @@
       <datalist id="categoryList"></datalist>
     </dialog>
 
+    <!-- Rename Category Modal -->
+    <dialog id="renameCategoryDialog" class="dialog">
+      <form method="dialog" id="renameCategoryForm" class="dialog-body">
+        <h3>Rename Category</h3>
+        <label style="display: grid; gap: 8px;">
+          <span>Category Name</span>
+          <input id="renameCategoryInput" type="text" required style="height: 42px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border);" />
+        </label>
+        <menu class="dialog-actions">
+          <button type="button" id="cancelRenameBtn" class="btn">Cancel</button>
+          <button type="submit" class="btn primary">Rename</button>
+        </menu>
+        <input type="hidden" id="oldCategoryName" />
+      </form>
+    </dialog>
+
+    <!-- Delete Category Modal -->
+    <dialog id="deleteCategoryDialog" class="dialog">
+      <div class="dialog-body">
+        <h3>Delete Category</h3>
+        <p id="deleteCategoryMessage" style="margin: 16px 0; line-height: 1.6;"></p>
+        <p style="margin: 16px 0; color: var(--muted); font-size: 14px;">Items will be moved to "Other" category.</p>
+        <menu class="dialog-actions">
+          <button type="button" id="cancelDeleteBtn" class="btn">Cancel</button>
+          <button type="button" id="confirmDeleteBtn" class="btn" style="background: #ef4444; border-color: #ef4444; color: white;">Delete</button>
+        </menu>
+        <input type="hidden" id="categoryToDelete" />
+      </div>
+    </dialog>
+
     <!-- Receipt Modal -->
     <dialog id="receiptDialog" class="dialog">
       <div class="dialog-body">
