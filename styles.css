@@ -212,9 +212,9 @@ body {
   .cart { position: static; height: auto; }
   .fab { bottom: 70px; }
   
-  /* Sales screen - Double size on mobile */
+  /* Sales screen - Double width on mobile (fewer columns) */
   #productGrid {
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 6px;
   }
   #productGrid .product {
