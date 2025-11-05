@@ -112,6 +112,9 @@ const inventoryItemsView = qs<HTMLDivElement>('#inventoryItemsView')
 const inventoryList = qs<HTMLUListElement>('#inventoryList')
 const inventorySearch = qs<HTMLInputElement>('#inventorySearch')
 const addItemFab = qs<HTMLButtonElement>('#addItemFab')
+const manageCategoriesView = qs<HTMLDivElement>('#manageCategoriesView')
+const categoryManageList = qs<HTMLUListElement>('#categoryManageList')
+const backFromCategoriesBtn = qs<HTMLButtonElement>('#backFromCategoriesBtn')
 const itemDialog = qs<HTMLDialogElement>('#itemDialog')
 const itemForm = qs<HTMLFormElement>('#itemForm')
 const itemDialogTitle = qs<HTMLHeadingElement>('#itemDialogTitle')
@@ -258,6 +261,7 @@ inventorySearch.addEventListener('input', () => {
 addItemFab.addEventListener('click', () => openItemDialog())
 itemForm.addEventListener('submit', saveItemFromDialog)
 cancelItemBtn.addEventListener('click', () => itemDialog.close())
+backFromCategoriesBtn.addEventListener('click', showInventoryCategories)
 
 function renderCategoryFilter() {
   const categories = ['All', ...unique(inventory.map((i) => i.category))]
@@ -572,10 +576,7 @@ function renderInventoryCategories() {
     h('div', { class: 'muted', style: 'font-size: 9px;' }, `Value: ${fmtNoCents(totalInventoryValue)}`)
   )
   manageBtn.append(manageImg, manageBody)
-  manageBtn.addEventListener('click', () => {
-    selectedInventoryCategory = null
-    showInventoryItems()
-  })
+  manageBtn.addEventListener('click', showManageCategories)
   inventoryCategories.appendChild(manageBtn)
   
   // Add category buttons - matching product style
@@ -608,13 +609,103 @@ function renderInventoryCategories() {
 function showInventoryItems() {
   inventoryCategories.style.display = 'none'
   inventoryItemsView.style.display = 'block'
+  manageCategoriesView.style.display = 'none'
   renderInventoryItems()
 }
 
 function showInventoryCategories() {
   selectedInventoryCategory = null
   inventoryItemsView.style.display = 'none'
+  manageCategoriesView.style.display = 'none'
   inventoryCategories.style.display = 'grid'
+}
+
+function showManageCategories() {
+  inventoryCategories.style.display = 'none'
+  inventoryItemsView.style.display = 'none'
+  manageCategoriesView.style.display = 'block'
+  renderManageCategories()
+}
+
+function renderManageCategories() {
+  const categories = unique(inventory.map(i => i.category))
+  categoryManageList.innerHTML = ''
+  
+  categories.forEach(category => {
+    const categoryItems = inventory.filter(i => i.category === category)
+    const itemCount = categoryItems.length
+    const totalStock = categoryItems.reduce((sum, item) => sum + item.stock, 0)
+    
+    const li = h('li', { class: 'category-manage-item' })
+    
+    const info = h('div', { class: 'category-info' })
+    info.append(
+      h('div', { class: 'category-name' }, category),
+      h('div', { class: 'category-details' }, `${itemCount} items • ${totalStock} in stock`)
+    )
+    
+    const actions = h('div', { class: 'category-actions' })
+    
+    const editBtn = h('button', { class: 'btn' })
+    editBtn.textContent = 'Edit'
+    editBtn.addEventListener('click', () => editCategory(category))
+    
+    const deleteBtn = h('button', { class: 'btn', style: 'background: #ef4444; border-color: #ef4444; color: white;' })
+    deleteBtn.textContent = 'Delete'
+    deleteBtn.addEventListener('click', () => deleteCategory(category))
+    
+    actions.append(editBtn, deleteBtn)
+    li.append(info, actions)
+    categoryManageList.appendChild(li)
+  })
+}
+
+function editCategory(oldName: string) {
+  const newName = prompt(`Edit category name:`, oldName)
+  if (!newName || newName.trim() === '' || newName === oldName) return
+  
+  const trimmedName = newName.trim()
+  
+  // Check if new name already exists
+  const existingCategories = unique(inventory.map(i => i.category))
+  if (existingCategories.includes(trimmedName)) {
+    alert('A category with this name already exists!')
+    return
+  }
+  
+  // Update all items with this category
+  inventory.forEach(item => {
+    if (item.category === oldName) {
+      item.category = trimmedName
+    }
+  })
+  
+  persist()
+  renderManageCategories()
+  renderInventoryCategories()
+  renderCategoryFilter()
+}
+
+function deleteCategory(category: string) {
+  const categoryItems = inventory.filter(i => i.category === category)
+  const itemCount = categoryItems.length
+  
+  if (itemCount > 0) {
+    const confirm = window.confirm(`This category has ${itemCount} item${itemCount !== 1 ? 's' : ''}. Delete anyway? Items will be moved to "Other".`)
+    if (!confirm) return
+    
+    // Move items to "Other" category
+    inventory.forEach(item => {
+      if (item.category === category) {
+        item.category = 'Other'
+      }
+    })
+  }
+  
+  persist()
+  renderManageCategories()
+  renderInventoryCategories()
+  renderCategoryFilter()
 }
 
 function renderInventoryItems() {
