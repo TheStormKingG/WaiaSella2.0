@@ -909,21 +909,19 @@ function getStockColor(stock: number, lowPoint?: number, maxStock?: number): str
   const max = maxStock || 100
   const low = lowPoint ?? (max * 0.25)
   
-  if (stock <= 0) return '#ef4444' // Red - out of stock
-  if (stock <= low) return '#ef4444' // Red - at or below low point
+  // Red zone: at or below low point (including 0)
+  if (stock <= low) return '#ef4444'
   
   // Calculate position between low point and max
   const range = max - low
   const position = stock - low
-  const ratio = Math.min(position / range, 1)
+  const ratio = position / range
   
-  if (ratio < 0.5) {
-    // Orange zone: between low point and midpoint
-    return '#f59e0b'
-  } else {
-    // Green zone: above midpoint
-    return '#10b981'
-  }
+  // Orange zone: between low point and halfway to max
+  if (ratio < 0.5) return '#f59e0b'
+  
+  // Green zone: above halfway point
+  return '#10b981'
 }
 
 function stockClass(stock: number, lowPoint?: number) {
