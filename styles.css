@@ -275,13 +275,24 @@ body {
 .stock-bar-container { 
   position: absolute;
   left: 50%;
-  right: -12px;
+  right: 0;
   top: 50%;
   transform: translateY(-50%);
   height: 18px;
   background: #e5e7eb;
   border-radius: 9px;
-  overflow: hidden;
+  overflow: visible;
+}
+.low-indicator {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid #ef4444;
+  z-index: 1;
 }
 .stock-bar { 
   height: 100%; 

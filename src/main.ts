@@ -852,6 +852,16 @@ function renderInventoryItems() {
     })
     stockBarContainer.appendChild(stockBar)
     
+    // Add low indicator if set
+    if (item.lowIndicator && item.lowIndicator > 0) {
+      const lowPercentage = Math.min((item.lowIndicator / maxStock) * 100, 100)
+      const lowIndicator = h('div', { 
+        class: 'low-indicator',
+        style: `left: ${lowPercentage}%`
+      })
+      stockBarContainer.appendChild(lowIndicator)
+    }
+    
     const textBox = h('div', { style: 'position: relative; flex: 1;' })
     textBox.append(
       h('div', { class: 'title' }, item.name), 
@@ -889,6 +899,7 @@ function openItemDialog(item?: Item) {
   ;(itemForm.elements.namedItem('price') as HTMLInputElement).value = item?.price?.toString() ?? ''
   ;(itemForm.elements.namedItem('cost') as HTMLInputElement).value = item?.cost?.toString() ?? ''
   ;(itemForm.elements.namedItem('stock') as HTMLInputElement).value = item?.stock?.toString() ?? ''
+  ;(itemForm.elements.namedItem('lowIndicator') as HTMLInputElement).value = item?.lowIndicator?.toString() ?? ''
   ;(itemForm.elements.namedItem('image') as HTMLInputElement).value = item?.image || ''
   ;(itemForm.elements.namedItem('id') as HTMLInputElement).value = item?.id || ''
   itemDialog.showModal()
@@ -905,6 +916,7 @@ function saveItemFromDialog(ev: SubmitEvent) {
     cost: Number(data.cost) || 0,
     stock: Number(data.stock) || 0,
     image: data.image?.trim() || '',
+    lowIndicator: data.lowIndicator ? Number(data.lowIndicator) : undefined,
   }
   const idx = inventory.findIndex((i) => i.id === payload.id)
   if (idx >= 0) inventory[idx] = payload
