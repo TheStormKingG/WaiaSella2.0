@@ -261,11 +261,7 @@ tabs.forEach((t) =>
     if (id === 'reportsView') renderReports()
     if (id === 'reorderView') renderReorder()
     if (id === 'inventoryView') {
-      // Don't reset view - maintain current inventory page
-      const currentInventoryView = load<string>(STORAGE_KEYS.inventoryView)
-      if (!currentInventoryView || currentInventoryView === 'categories') {
-        showInventoryCategories()
-      }
+      showInventoryCategories()
       renderInventory()
     }
   })
