@@ -429,6 +429,11 @@ function renderCart() {
   cartTaxEl.textContent = fmt(tax)
   cartTotalEl.textContent = fmt(total)
   completeSaleBtn.disabled = entries.length === 0
+  
+  // Update cart header summary (mobile)
+  const totalItems = entries.reduce((sum, [, qty]) => sum + qty, 0)
+  cartHeaderCount.textContent = `${totalItems} item${totalItems !== 1 ? 's' : ''}`
+  cartHeaderTotal.textContent = fmtNoCents(total)
 }
 
 function changeQty(id: string, delta: number) {
