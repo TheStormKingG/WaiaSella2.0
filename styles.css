@@ -297,24 +297,25 @@ body {
     font-size: 11px;
   }
   
-  /* Cart - overlays items when expanded, collapsed by default */
+  /* Cart - fixed at bottom above nav, expands upward to full screen */
   .cart { 
     position: fixed;
     left: 0;
     right: 0;
     bottom: 60px;
+    top: auto;
     height: auto;
-    max-height: 60vh;
-    transition: max-height 0.3s ease, box-shadow 0.3s ease;
+    transition: top 0.3s ease, box-shadow 0.3s ease;
     z-index: 5;
   }
   
   .cart.collapsed {
-    max-height: 56px;
+    top: calc(100vh - 56px - 60px); /* Show only header bar */
     box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04);
   }
   
   .cart:not(.collapsed) {
+    top: 56px; /* Expand to fill from header to nav menu */
     box-shadow: 0 -4px 16px rgba(0,0,0,0.15);
   }
   
