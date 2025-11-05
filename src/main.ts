@@ -13,6 +13,8 @@ const STORAGE_KEYS = {
   soldTally: 'ws.soldTally',
   transactionCounter: 'ws.transactionCounter',
   cart: 'ws.cart',
+  currentView: 'ws.currentView',
+  inventoryView: 'ws.inventoryView',
 } as const
 
 type Item = {
@@ -241,14 +243,50 @@ tabs.forEach((t) =>
     views.forEach((v) => v.classList.remove('active'))
     qs<HTMLElement>('#' + id).classList.add('active')
     headerTitle.textContent = t.textContent?.trim() ?? ''
+    save(STORAGE_KEYS.currentView, id)
     if (id === 'reportsView') renderReports()
     if (id === 'reorderView') renderReorder()
     if (id === 'inventoryView') {
-      showInventoryCategories()
+      const savedInventoryView = load<string>(STORAGE_KEYS.inventoryView)
+      if (savedInventoryView === 'manage') {
+        showManageCategories()
+      } else if (savedInventoryView === 'items') {
+        showInventoryItems()
+      } else {
+        showInventoryCategories()
+      }
       renderInventory()
     }
   })
 )
+
+// Restore last view on load
+const savedView = load<string>(STORAGE_KEYS.currentView)
+if (savedView) {
+  tabs.forEach((x) => x.classList.remove('active'))
+  const activeTab = Array.from(tabs).find(t => t.dataset.target === savedView)
+  if (activeTab) {
+    activeTab.classList.add('active')
+    views.forEach((v) => v.classList.remove('active'))
+    qs<HTMLElement>('#' + savedView).classList.add('active')
+    headerTitle.textContent = activeTab.textContent?.trim() ?? ''
+    
+    if (savedView === 'inventoryView') {
+      const savedInventoryView = load<string>(STORAGE_KEYS.inventoryView)
+      if (savedInventoryView === 'manage') {
+        showManageCategories()
+      } else if (savedInventoryView === 'items') {
+        showInventoryItems()
+      } else {
+        showInventoryCategories()
+      }
+    } else if (savedView === 'reportsView') {
+      renderReports()
+    } else if (savedView === 'reorderView') {
+      renderReorder()
+    }
+  }
+}
 
 // Sales interactions
 salesSearch.addEventListener('input', renderProducts)
