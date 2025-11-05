@@ -285,14 +285,15 @@ body {
 }
 .low-indicator {
   position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  top: 100%;
+  transform: translateX(-50%);
   width: 0;
   height: 0;
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-top: 8px solid #ef4444;
+  border-bottom: 8px solid #ef4444;
   z-index: 1;
+  margin-top: -1px;
 }
 .stock-bar { 
   height: 100%; 
