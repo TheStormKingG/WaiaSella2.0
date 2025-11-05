@@ -136,8 +136,12 @@
         <!-- Image Preview Section -->
         <div style="text-align: center; margin-bottom: 16px;">
           <img id="itemImagePreview" src="" alt="Item preview" style="width: 160px; height: 160px; object-fit: cover; border-radius: 12px; background: #f3f5f7; display: block; margin: 0 auto 12px;" />
-          <input type="file" id="itemImageFile" accept="image/*" capture="environment" style="display: none;" />
-          <button type="button" id="editImageBtn" class="btn" style="width: 100%;">📷 Upload/Capture Image</button>
+          <input type="file" id="itemImageUpload" accept="image/*" style="display: none;" />
+          <input type="file" id="itemImageCapture" accept="image/*" capture="environment" style="display: none;" />
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <button type="button" id="uploadImageBtn" class="btn">📁 Upload</button>
+            <button type="button" id="captureImageBtn" class="btn">📷 Camera</button>
+          </div>
         </div>
         
         <div class="form-grid">

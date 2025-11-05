@@ -127,8 +127,10 @@ const itemDialogTitle = qs<HTMLHeadingElement>('#itemDialogTitle')
 const categoryList = qs<HTMLDataListElement>('#categoryList')
 const cancelItemBtn = qs<HTMLButtonElement>('#cancelItemBtn')
 const itemImagePreview = qs<HTMLImageElement>('#itemImagePreview')
-const itemImageFile = qs<HTMLInputElement>('#itemImageFile')
-const editImageBtn = qs<HTMLButtonElement>('#editImageBtn')
+const itemImageUpload = qs<HTMLInputElement>('#itemImageUpload')
+const itemImageCapture = qs<HTMLInputElement>('#itemImageCapture')
+const uploadImageBtn = qs<HTMLButtonElement>('#uploadImageBtn')
+const captureImageBtn = qs<HTMLButtonElement>('#captureImageBtn')
 const itemImageData = qs<HTMLInputElement>('#itemImageData')
 
 // Category modals
@@ -342,8 +344,7 @@ headerBackBtn.addEventListener('click', () => {
 })
 
 // Image upload/capture
-editImageBtn.addEventListener('click', () => itemImageFile.click())
-itemImageFile.addEventListener('change', (e) => {
+function handleImageSelect(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (!file) return
   
@@ -354,7 +355,12 @@ itemImageFile.addEventListener('change', (e) => {
     itemImageData.value = dataUrl
   }
   reader.readAsDataURL(file)
-})
+}
+
+uploadImageBtn.addEventListener('click', () => itemImageUpload.click())
+captureImageBtn.addEventListener('click', () => itemImageCapture.click())
+itemImageUpload.addEventListener('change', handleImageSelect)
+itemImageCapture.addEventListener('change', handleImageSelect)
 
 // Category management
 renameCategoryForm.addEventListener('submit', (e) => {
