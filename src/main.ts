@@ -79,7 +79,7 @@ const views = qsa<HTMLElement>('.view')
 const headerTitle = qs<HTMLHeadingElement>('.app-header h1')
 
 // Sales
-const categoryChips = qs<HTMLDivElement>('#categoryChips')
+const categoryFilter = qs<HTMLSelectElement>('#categoryFilter')
 const productGrid = qs<HTMLDivElement>('#productGrid')
 const salesSearch = qs<HTMLInputElement>('#salesSearch')
 const cartItemsEl = qs<HTMLDivElement>('#cartItems')
@@ -206,7 +206,7 @@ function fmtNoCents(n: number): string {
 }
 
 // Init
-renderCategoryChips()
+renderCategoryFilter()
 renderProducts()
 renderCart()
 showInventoryCategories()
@@ -235,6 +235,10 @@ tabs.forEach((t) =>
 
 // Sales interactions
 salesSearch.addEventListener('input', renderProducts)
+categoryFilter.addEventListener('change', () => {
+  selectedCategory = categoryFilter.value
+  renderProducts()
+})
 completeSaleBtn.addEventListener('click', completeSale)
 cartToggle.addEventListener('click', () => {
   cartPanel.classList.toggle('collapsed')
@@ -691,7 +695,7 @@ function saveItemFromDialog(ev: SubmitEvent) {
   itemDialog.close()
   renderInventoryCategories()
   renderInventory()
-  renderCategoryChips()
+  renderCategoryFilter()
   renderProducts()
 }
 

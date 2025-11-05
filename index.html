@@ -15,10 +15,12 @@
       <section id="salesView" class="view active">
         <div class="sales-layout">
           <div class="sales-left">
-            <div class="search-row">
+            <div class="search-filter-bar">
               <input id="salesSearch" class="search" placeholder="Search products..." />
+              <select id="categoryFilter" class="category-dropdown">
+                <option value="All">All Categories</option>
+              </select>
             </div>
-            <div id="categoryChips" class="chips"></div>
             <div id="productGrid" class="grid"></div>
           </div>
           <aside class="cart collapsed" id="cartPanel">
