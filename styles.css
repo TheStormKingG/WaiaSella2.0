@@ -350,9 +350,51 @@ body {
 }
 
 /* Dialog */
-.dialog { border: none; border-radius: 12px; padding: 0; }
+.dialog { border: none; border-radius: 12px; padding: 0; overflow: hidden; }
 .dialog::backdrop { background: rgba(0,0,0,.3); }
-.dialog-body { padding: 16px; min-width: 320px; }
+.dialog-body { min-width: 320px; max-width: 500px; }
+.item-image-section {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 1;
+  background: #f3f5f7;
+  overflow: hidden;
+}
+.item-image-section img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.image-overlay-buttons {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+}
+.image-btn {
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: white;
+  padding: 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  transition: background 0.2s ease;
+}
+.image-btn:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+.image-btn svg {
+  width: 24px;
+  height: 24px;
+}
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .form-grid label { display: grid; gap: 6px; font-size: 12px; }
 .form-grid input { height: 36px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--border); }
@@ -386,6 +428,15 @@ body {
 
 #inventoryCategories .product .muted {
   font-size: 11px;
+}
+
+@media (min-width: 981px) {
+  .camera-btn {
+    display: none !important;
+  }
+  .image-overlay-buttons {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 980px) {
