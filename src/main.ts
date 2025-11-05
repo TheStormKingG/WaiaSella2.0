@@ -26,6 +26,7 @@ type Item = {
   stock: number
   category: string
   image?: string
+  lowIndicator?: number
 }
 
 type TransactionItem = {
@@ -226,15 +227,20 @@ function fmtNoCents(n: number): string {
   return `GY$${Math.round(n || 0).toLocaleString()}`
 }
 
-// Init
-renderCategoryFilter()
-renderProducts()
-renderCart()
-showInventoryCategories()
-renderInventory()
-renderReports()
-renderReorder()
-populateCategoryDatalist()
+// Init (delayed to allow view restoration to complete first)
+setTimeout(() => {
+  if (!load<string>(STORAGE_KEYS.currentView)) {
+    // Only render initial state if no saved view
+    renderCategoryFilter()
+    renderProducts()
+    renderCart()
+    showInventoryCategories()
+  }
+  renderInventory()
+  renderReports()
+  renderReorder()
+  populateCategoryDatalist()
+}, 0)
 
 // Tab switching
 tabs.forEach((t) =>
