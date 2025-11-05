@@ -30,6 +30,21 @@ body {
   z-index: 10;
 }
 .app-header h1 { margin: 0; font-size: 22px; }
+.header-search {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--ink);
+  font-size: 14px;
+  flex: 1;
+  max-width: 400px;
+  margin: 0 16px;
+}
+.header-search::placeholder { 
+  color: #9ca3af; 
+}
 .header-back-btn {
   background: white;
   border: 1px solid var(--border);
@@ -40,6 +55,7 @@ body {
   color: var(--ink);
   font-weight: 500;
   transition: background 0.2s ease;
+  flex-shrink: 0;
 }
 .header-back-btn:hover {
   background: #f9fafb;

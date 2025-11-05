@@ -8,6 +8,7 @@
   <body>
     <header class="app-header">
       <h1>Sales</h1>
+      <input id="inventorySearch" class="header-search" placeholder="Search inventory..." style="display: none;" />
       <button id="headerBackBtn" class="header-back-btn" style="display: none;">← Back</button>
     </header>
 
@@ -59,10 +60,7 @@
           <!-- Categories will be rendered here as app buttons -->
         </div>
         <div id="inventoryItemsView" style="display: none;">
-          <div class="search-row">
-            <input id="inventorySearch" class="search" placeholder="Search inventory..." />
-          </div>
-          <ul id="inventoryList" class="inventory-list"></ul>
+          <ul id="inventoryList" class="inventory-list" style="padding: 8px 12px;"></ul>
         </div>
         <div id="manageCategoriesView" style="display: none;">
           <div style="padding: 8px 12px;">

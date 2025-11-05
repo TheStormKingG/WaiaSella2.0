@@ -114,6 +114,7 @@ const inventoryItemsView = qs<HTMLDivElement>('#inventoryItemsView')
 const inventoryList = qs<HTMLUListElement>('#inventoryList')
 const inventorySearch = qs<HTMLInputElement>('#inventorySearch')
 const addItemFab = qs<HTMLButtonElement>('#addItemFab')
+const headerSearch = inventorySearch // Using the same element now in header
 const manageCategoriesView = qs<HTMLDivElement>('#manageCategoriesView')
 const categoryManageList = qs<HTMLUListElement>('#categoryManageList')
 const headerBackBtn = qs<HTMLButtonElement>('#headerBackBtn')
@@ -676,6 +677,7 @@ function showInventoryItems() {
   manageCategoriesView.style.display = 'none'
   save(STORAGE_KEYS.inventoryView, 'items')
   headerBackBtn.style.display = 'block'
+  inventorySearch.style.display = 'block'
   headerTitle.textContent = selectedInventoryCategory || 'All Items'
   renderInventoryItems()
 }
@@ -687,6 +689,7 @@ function showInventoryCategories() {
   inventoryCategories.style.display = 'grid'
   save(STORAGE_KEYS.inventoryView, 'categories')
   headerBackBtn.style.display = 'none'
+  inventorySearch.style.display = 'none'
   headerTitle.textContent = 'Inventory'
 }
 
@@ -696,6 +699,7 @@ function showManageCategories() {
   manageCategoriesView.style.display = 'block'
   save(STORAGE_KEYS.inventoryView, 'manage')
   headerBackBtn.style.display = 'block'
+  inventorySearch.style.display = 'none'
   headerTitle.textContent = 'Manage Categories'
   renderManageCategories()
 }
@@ -807,15 +811,6 @@ function renderInventoryItems() {
   list = list.filter((i) => i.name.toLowerCase().includes(term))
   
   inventoryList.innerHTML = ''
-  
-  // Add back button
-  const backBtn = h('li', {
-    class: 'inventory-item',
-    style: 'background: #e5e7eb; cursor: pointer; margin-bottom: 8px;'
-  })
-  backBtn.innerHTML = '<div style="padding: 12px; text-align: center; font-weight: 600;">← Back to Categories</div>'
-  backBtn.addEventListener('click', showInventoryCategories)
-  inventoryList.appendChild(backBtn)
   
   list.forEach((item) => {
     const li = h('li', { class: 'inventory-item' })
