@@ -234,6 +234,9 @@ tabs.forEach((t) =>
 // Sales interactions
 salesSearch.addEventListener('input', renderProducts)
 completeSaleBtn.addEventListener('click', completeSale)
+cartToggle.addEventListener('click', () => {
+  cartPanel.classList.toggle('collapsed')
+})
 closeReceiptBtn.addEventListener('click', () => receiptDialog.close())
 whatsappReceiptBtn.addEventListener('click', shareReceiptWhatsApp)
 downloadReceiptBtn.addEventListener('click', downloadReceiptPDF)
