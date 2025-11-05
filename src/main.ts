@@ -245,6 +245,13 @@ tabs.forEach((t) =>
     qs<HTMLElement>('#' + id).classList.add('active')
     headerTitle.textContent = t.textContent?.trim() ?? ''
     save(STORAGE_KEYS.currentView, id)
+    
+    // Hide search and back button when switching to non-inventory pages
+    if (id !== 'inventoryView') {
+      inventorySearch.style.display = 'none'
+      headerBackBtn.style.display = 'none'
+    }
+    
     if (id === 'reportsView') renderReports()
     if (id === 'reorderView') renderReorder()
     if (id === 'inventoryView') {
