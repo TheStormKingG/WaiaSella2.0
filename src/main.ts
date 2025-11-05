@@ -282,34 +282,35 @@ tabs.forEach((t) =>
 )
 
 // Restore last view on load
-const savedView = load<string>(STORAGE_KEYS.currentView)
-if (savedView) {
-  tabs.forEach((x) => x.classList.remove('active'))
-  const activeTab = Array.from(tabs).find(t => t.dataset.target === savedView)
-  if (activeTab) {
-    activeTab.classList.add('active')
-    views.forEach((v) => v.classList.remove('active'))
-    qs<HTMLElement>('#' + savedView).classList.add('active')
-    headerTitle.textContent = activeTab.textContent?.trim() ?? ''
+const savedView = load<string>(STORAGE_KEYS.currentView) || 'salesView'
+tabs.forEach((x) => x.classList.remove('active'))
+const activeTab = Array.from(tabs).find(t => t.dataset.target === savedView)
+if (activeTab) {
+  activeTab.classList.add('active')
+  views.forEach((v) => v.classList.remove('active'))
+  qs<HTMLElement>('#' + savedView).classList.add('active')
+  headerTitle.textContent = activeTab.textContent?.trim() ?? ''
+  
+  if (savedView === 'inventoryView') {
+    const savedInventoryView = load<string>(STORAGE_KEYS.inventoryView)
+    const savedCategory = load<string>(STORAGE_KEYS.selectedInventoryCategory)
     
-    if (savedView === 'inventoryView') {
-      const savedInventoryView = load<string>(STORAGE_KEYS.inventoryView)
-      if (savedInventoryView === 'manage') {
-        showManageCategories()
-      } else if (savedInventoryView === 'items') {
-        const savedCategory = load<string>(STORAGE_KEYS.selectedInventoryCategory)
-        if (savedCategory) {
-          selectedInventoryCategory = savedCategory
-        }
-        showInventoryItems()
-      } else {
-        showInventoryCategories()
+    if (savedInventoryView === 'manage') {
+      showManageCategories()
+    } else if (savedInventoryView === 'items') {
+      if (savedCategory) {
+        selectedInventoryCategory = savedCategory
       }
-    } else if (savedView === 'reportsView') {
-      renderReports()
-    } else if (savedView === 'reorderView') {
-      renderReorder()
+      showInventoryItems()
+    } else {
+      showInventoryCategories()
     }
+  } else if (savedView === 'reportsView') {
+    renderReports()
+  } else if (savedView === 'reorderView') {
+    renderReorder()
+  } else if (savedView === 'salesView') {
+    salesSearch.style.display = 'block'
   }
 }
 
@@ -851,15 +852,16 @@ function renderInventoryItems() {
     })
     stockBarContainer.appendChild(stockBar)
     
+    const textBox = h('div', { style: 'position: relative; flex: 1;' })
+    textBox.append(
+      h('div', { class: 'title' }, item.name), 
+      h('div', { class: 'muted' }, fmt(item.price)),
+      stockBarContainer
+    )
+    
     li.append(
       h('img', { class: 'avatar', src: item.image || pic(Number(item.id.slice(-3))), alt: item.name }),
-      (() => {
-        const box = h('div')
-        box.append(h('div', { class: 'title' }, item.name), h('div', { class: 'muted' }, fmt(item.price)))
-        return box
-      })(),
-      (() => h('div', { class: 'status-dot ' + stockClass(item.stock) }))(),
-      stockBarContainer
+      textBox
     )
     li.addEventListener('click', () => openItemDialog(item))
     inventoryList.appendChild(li)
