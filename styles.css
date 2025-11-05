@@ -183,34 +183,66 @@ body {
   gap: 8px;
 }
 
+/* Inventory Categories - Double size on both desktop and mobile */
+#inventoryCategories {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+#inventoryCategories .product {
+  grid-template-rows: 140px auto;
+}
+
+#inventoryCategories .product .body {
+  padding: 12px;
+  gap: 8px;
+}
+
+#inventoryCategories .product .title {
+  font-size: 14px;
+}
+
+#inventoryCategories .product .muted {
+  font-size: 11px;
+}
+
 @media (max-width: 980px) {
   .sales-layout { grid-template-columns: 1fr; }
   .cart { position: static; height: auto; }
   .fab { bottom: 70px; }
+  
+  /* Sales screen - Double size on mobile */
   #productGrid {
     grid-template-columns: repeat(5, 1fr);
     gap: 6px;
   }
-  .product {
-    grid-template-rows: 60px auto;
+  #productGrid .product {
+    grid-template-rows: 120px auto;
   }
-  .product .body {
-    padding: 4px;
-    gap: 2px;
+  #productGrid .product .body {
+    padding: 8px;
+    gap: 4px;
   }
-  .product .title {
-    font-size: 9px;
+  #productGrid .product .title {
+    font-size: 12px;
   }
-  .product .price {
-    font-size: 10px;
+  #productGrid .product .price {
+    font-size: 13px;
   }
-  .product .muted {
-    font-size: 8px;
+  #productGrid .product .muted {
+    font-size: 11px;
   }
+  
   .icon-btn {
     width: 20px;
     height: 20px;
     font-size: 12px;
+  }
+  
+  /* Inventory Categories - Keep double size on mobile too */
+  #inventoryCategories {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   }
 }
 
