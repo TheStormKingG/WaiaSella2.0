@@ -366,6 +366,57 @@ body {
   object-fit: cover;
   display: block;
 }
+.item-image-section.processing img {
+  filter: saturate(0.9) brightness(0.8);
+}
+.item-image-section.processing::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(1.5px);
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+.item-image-section.processing::after {
+  content: attr(data-processing);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 0.2px;
+  text-align: center;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.55);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.25);
+}
+
+@keyframes nb-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.btn.loading {
+  position: relative;
+  pointer-events: none;
+}
+.btn.loading::after {
+  content: '';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-top-color: white;
+  animation: nb-spin 0.8s linear infinite;
+}
 .image-overlay-buttons {
   position: absolute;
   bottom: 0;

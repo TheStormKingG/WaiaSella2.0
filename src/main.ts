@@ -1,6 +1,7 @@
 import '../styles.css'
 import { createClient } from '@supabase/supabase-js'
 import { SUPABASE_CONFIG } from './config'
+import { enhanceProductImage } from './nanoBanana'
 import jsPDF from 'jspdf'
 
 // WaiaSella POS - Vite + TypeScript SPA
@@ -132,6 +133,9 @@ const itemImageCapture = qs<HTMLInputElement>('#itemImageCapture')
 const uploadImageBtn = qs<HTMLButtonElement>('#uploadImageBtn')
 const captureImageBtn = qs<HTMLButtonElement>('#captureImageBtn')
 const itemImageData = qs<HTMLInputElement>('#itemImageData')
+const saveItemBtn = qs<HTMLButtonElement>('#saveItemBtn')
+const itemImageSection = itemImagePreview.closest('.item-image-section') as HTMLDivElement | null
+const saveItemBtnDefaultText = saveItemBtn?.textContent ?? 'Save'
 
 // Category modals
 const renameCategoryDialog = qs<HTMLDialogElement>('#renameCategoryDialog')
@@ -353,6 +357,7 @@ function handleImageSelect(e: Event) {
     const dataUrl = event.target?.result as string
     itemImagePreview.src = dataUrl
     itemImageData.value = dataUrl
+    itemImagePreview.dataset.source = 'user'
   }
   reader.readAsDataURL(file)
 }
@@ -361,6 +366,22 @@ uploadImageBtn.addEventListener('click', () => itemImageUpload.click())
 captureImageBtn.addEventListener('click', () => itemImageCapture.click())
 itemImageUpload.addEventListener('change', handleImageSelect)
 itemImageCapture.addEventListener('change', handleImageSelect)
+
+function setItemDialogProcessingState(isProcessing: boolean) {
+  if (saveItemBtn) {
+    saveItemBtn.disabled = isProcessing
+    saveItemBtn.textContent = isProcessing ? 'Enhancing…' : saveItemBtnDefaultText
+    saveItemBtn.classList.toggle('loading', isProcessing)
+  }
+  if (itemImageSection) {
+    itemImageSection.classList.toggle('processing', isProcessing)
+    if (isProcessing) {
+      itemImageSection.setAttribute('data-processing', 'Enhancing…')
+    } else {
+      itemImageSection.removeAttribute('data-processing')
+    }
+  }
+}
 
 // Category management
 renameCategoryForm.addEventListener('submit', (e) => {
@@ -951,24 +972,54 @@ function openItemDialog(item?: Item) {
   const imageUrl = item?.image || pic(1000)
   itemImagePreview.src = imageUrl
   itemImageData.value = item?.image || ''
+  itemImagePreview.dataset.source = item?.image ? 'existing' : 'placeholder'
+  setItemDialogProcessingState(false)
   
   itemDialog.showModal()
 }
 
-function saveItemFromDialog(ev: SubmitEvent) {
+async function saveItemFromDialog(ev: SubmitEvent) {
   ev.preventDefault()
   const data = Object.fromEntries(new FormData(itemForm) as any) as Record<string, string>
   const existingItem = inventory.find((i) => i.id === (data.id || ''))
   const newStock = Number(data.stock) || 0
-  
+  const trimmedName = (data.name || '').trim()
+  const providedCategory = (data.category || '').trim()
+  const finalCategory = providedCategory || 'Other'
+  const rawImage = (data.image || '').trim()
+
+  let finalImage = rawImage || existingItem?.image || ''
+  let enhancedByNanoBanana = false
+
+  if (rawImage.startsWith('data:')) {
+    setItemDialogProcessingState(true)
+    try {
+      const enhanced = await enhanceProductImage({
+        imageDataUrl: rawImage,
+        itemName: trimmedName,
+        category: finalCategory,
+      })
+      if (enhanced) {
+        finalImage = enhanced
+        itemImagePreview.src = enhanced
+        itemImagePreview.dataset.source = 'enhanced'
+        enhancedByNanoBanana = true
+      }
+    } finally {
+      setItemDialogProcessingState(false)
+    }
+  }
+
+  itemImageData.value = finalImage
+
   const payload: Item = {
     id: data.id || id(),
-    name: data.name.trim(),
-    category: data.category.trim() || 'Other',
+    name: trimmedName,
+    category: finalCategory,
     price: Number(data.price),
     cost: Number(data.cost) || 0,
     stock: newStock,
-    image: data.image?.trim() || '',
+    image: finalImage,
     lowPoint: data.lowPoint ? Number(data.lowPoint) : undefined,
     maxStock: Math.max(newStock, existingItem?.maxStock || 0),
   }
@@ -981,6 +1032,10 @@ function saveItemFromDialog(ev: SubmitEvent) {
   renderInventory()
   renderCategoryFilter()
   renderProducts()
+
+  if (enhancedByNanoBanana) {
+    showToast('✨ Enhanced product photo ready', 1800)
+  }
 }
 
 function populateCategoryDatalist() {

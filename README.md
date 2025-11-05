@@ -6,6 +6,7 @@ Overview
 - Implements Sales + Cart, Inventory, Reports, and Reorder views.
 - Data persists to `localStorage` (inventory + transactions locally).
 - Sales automatically saved to Supabase `sales` table when configured.
+- Optional Nano Banana integration enhances uploaded inventory images for clean, high-res product photos.
 
 Run
 
@@ -51,6 +52,15 @@ CREATE POLICY "Allow public inserts" ON sales
 ```
 
 Note: Each item in a sale creates a separate row with the same `transaction_id`. Unique `date` timestamps are generated per item (millisecond precision).
+
+Nano Banana Image Enhancement (Optional)
+--------------------------------------
+
+- Add Nano Banana credentials to `.env` to auto-clean product photos when adding or updating inventory items:
+  - `VITE_NANO_BANANA_API_KEY`
+  - (Optional) `VITE_NANO_BANANA_API_URL`
+  - (Optional) `VITE_NANO_BANANA_MODEL_ID`
+- When configured, uploaded or captured images are sent to Nano Banana, and the enhanced photo is saved back to the item automatically.
 
 Notes
 
