@@ -39,7 +39,12 @@ body {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 8px;
-  margin: 10px 0;
+  margin: 0;
+  padding: 10px 0;
+  position: sticky;
+  top: 56px;
+  z-index: 20;
+  background: var(--bg);
 }
 
 .search {
@@ -261,16 +266,11 @@ body {
     overflow: hidden;
   }
   
-  /* Search and category filter - sticky at top */
+  /* Search and category filter - stack vertically on mobile */
   .search-filter-bar {
-    position: sticky;
-    top: 56px;
-    z-index: 10;
-    background: var(--bg);
-    padding: 8px 0;
-    flex-shrink: 0;
     grid-template-columns: 1fr;
     gap: 6px;
+    padding: 8px 0;
   }
   
   .category-dropdown {
