@@ -701,9 +701,7 @@ function showInventoryItems() {
   inventorySearch.style.display = 'block'
   headerTitle.textContent = selectedInventoryCategory || 'All Items'
   renderInventoryItems()
-}</invoke>
-<invoke name="grep">
-<parameter name="pattern">Restore last view on load
+}
 
 function showInventoryCategories() {
   selectedInventoryCategory = null
