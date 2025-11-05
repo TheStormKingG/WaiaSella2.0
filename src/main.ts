@@ -1,6 +1,7 @@
 import '../styles.css'
 import { createClient } from '@supabase/supabase-js'
-import { SUPABASE_CONFIG } from './config'
+import { SUPABASE_CONFIG, NANO_BANANA_CONFIG } from './config'
+import { enhanceProductImage, isNanoBananaConfigured, NanoBananaError } from './nanoBanana'
 import jsPDF from 'jspdf'
 
 // WaiaSella POS - Vite + TypeScript SPA
@@ -71,6 +72,12 @@ if (supabase) {
   console.warn('⚠ Supabase not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env file')
 }
 
+if (isNanoBananaConfigured()) {
+  console.log(`✨ Nano Banana enabled (model: ${NANO_BANANA_CONFIG.model})`)
+} else {
+  console.warn('⚠ Nano Banana disabled. Set VITE_NANO_BANANA_API_URL and VITE_NANO_BANANA_API_KEY to enable image cleanup.')
+}
+
 // App State
 let inventory: Item[] = load<Item[]>(STORAGE_KEYS.inventory) ?? seed(seedItems)
 let transactions: Transaction[] = load<Transaction[]>(STORAGE_KEYS.transactions) ?? []
@@ -126,7 +133,9 @@ const itemForm = qs<HTMLFormElement>('#itemForm')
 const itemDialogTitle = qs<HTMLHeadingElement>('#itemDialogTitle')
 const categoryList = qs<HTMLDataListElement>('#categoryList')
 const cancelItemBtn = qs<HTMLButtonElement>('#cancelItemBtn')
+const saveItemBtn = qs<HTMLButtonElement>('#saveItemBtn')
 const itemImagePreview = qs<HTMLImageElement>('#itemImagePreview')
+const itemImageSection = itemImagePreview?.closest('.item-image-section') as HTMLDivElement | null
 const itemImageUpload = qs<HTMLInputElement>('#itemImageUpload')
 const itemImageCapture = qs<HTMLInputElement>('#itemImageCapture')
 const uploadImageBtn = qs<HTMLButtonElement>('#uploadImageBtn')
@@ -955,12 +964,44 @@ function openItemDialog(item?: Item) {
   itemDialog.showModal()
 }
 
-function saveItemFromDialog(ev: SubmitEvent) {
+async function saveItemFromDialog(ev: SubmitEvent) {
   ev.preventDefault()
-  const data = Object.fromEntries(new FormData(itemForm) as any) as Record<string, string>
+
+  const formEntries = Object.fromEntries(new FormData(itemForm).entries()) as Record<string, FormDataEntryValue>
+  const data: Record<string, string> = {}
+  for (const [key, value] of Object.entries(formEntries)) {
+    data[key] = typeof value === 'string' ? value : String(value)
+  }
+
   const existingItem = inventory.find((i) => i.id === (data.id || ''))
   const newStock = Number(data.stock) || 0
-  
+
+  let finalImage = data.image?.trim() || ''
+
+  if (shouldEnhanceWithNanoBanana(finalImage, existingItem)) {
+    try {
+      setSaveButtonLoading(true, 'Enhancing...')
+      setImageEnhancementState('loading')
+      finalImage = await enhanceProductImage({
+        image: finalImage,
+        itemName: data.name ?? '',
+        category: data.category ?? '',
+      })
+      itemImagePreview.src = finalImage
+      itemImageData.value = finalImage
+      showToast('✨ Product photo enhanced')
+    } catch (err) {
+      handleNanoBananaFailure(err)
+      finalImage = data.image?.trim() || itemImagePreview.src
+      showToast('⚠️ Enhancement failed. Using original photo.')
+    } finally {
+      setSaveButtonLoading(false)
+      setImageEnhancementState('idle')
+    }
+  } else {
+    finalImage = finalImage || itemImagePreview.src
+  }
+
   const payload: Item = {
     id: data.id || id(),
     name: data.name.trim(),
@@ -968,7 +1009,7 @@ function saveItemFromDialog(ev: SubmitEvent) {
     price: Number(data.price),
     cost: Number(data.cost) || 0,
     stock: newStock,
-    image: data.image?.trim() || '',
+    image: finalImage,
     lowPoint: data.lowPoint ? Number(data.lowPoint) : undefined,
     maxStock: Math.max(newStock, existingItem?.maxStock || 0),
   }
@@ -988,6 +1029,60 @@ function populateCategoryDatalist() {
   unique(inventory.map((i) => i.category)).forEach((c) => {
     categoryList.appendChild(h('option', { value: c }))
   })
+}
+
+function shouldEnhanceWithNanoBanana(image: string, existingItem?: Item): boolean {
+  if (!isNanoBananaConfigured()) return false
+  if (!image) return false
+  if (!existingItem) return true
+  const previousImage = existingItem.image?.trim() || ''
+  return previousImage !== image.trim()
+}
+
+function setSaveButtonLoading(loading: boolean, label?: string) {
+  if (!saveItemBtn) return
+
+  if (loading) {
+    if (!saveItemBtn.dataset.originalText) {
+      saveItemBtn.dataset.originalText = saveItemBtn.textContent ?? 'Save'
+    }
+    saveItemBtn.disabled = true
+    saveItemBtn.classList.add('loading')
+    if (label) {
+      saveItemBtn.textContent = label
+    }
+  } else {
+    saveItemBtn.disabled = false
+    const original = saveItemBtn.dataset.originalText
+    saveItemBtn.textContent = original || 'Save'
+    delete saveItemBtn.dataset.originalText
+    saveItemBtn.classList.remove('loading')
+  }
+}
+
+function setImageEnhancementState(state: 'idle' | 'loading') {
+  if (!itemImagePreview) return
+  if (state === 'loading') {
+    itemImagePreview.classList.add('enhancing')
+    itemImagePreview.setAttribute('aria-busy', 'true')
+    itemImageSection?.classList.add('enhancing')
+  } else {
+    itemImagePreview.classList.remove('enhancing')
+    itemImagePreview.removeAttribute('aria-busy')
+    itemImageSection?.classList.remove('enhancing')
+  }
+}
+
+function handleNanoBananaFailure(err: unknown) {
+  if (err instanceof NanoBananaError) {
+    console.error('Nano Banana enhancement failed:', err.message, err.cause ?? err)
+    return
+  }
+  if (err instanceof DOMException && err.name === 'AbortError') {
+    console.error('Nano Banana enhancement timed out')
+    return
+  }
+  console.error('Nano Banana enhancement failed:', err)
 }
 
 // Reports

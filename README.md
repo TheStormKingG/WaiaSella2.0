@@ -20,6 +20,10 @@ Setup
    - `VITE_SUPABASE_URL`: Your Supabase project URL
    - `VITE_SUPABASE_ANON_KEY`: Your Supabase anonymous key (get from Dashboard > Settings > API)
 3. Create `sales` table in Supabase (see SQL below)
+4. (Optional) Enable Nano Banana product image enhancement by setting the following in `.env`:
+   - `VITE_NANO_BANANA_API_URL`
+   - `VITE_NANO_BANANA_API_KEY`
+   - `VITE_NANO_BANANA_MODEL`
 
 SQL to create the table:
 ```sql
@@ -59,6 +63,7 @@ Notes
 - Seed inventory is written on first load. To reset, clear browser localStorage for this folder/app.
 - Images use `picsum.photos` placeholders; replace with your own URLs via Inventory > edit item.
 - App works without Supabase (fallback to localStorage only).
+- When Nano Banana is configured, new product images captured/uploaded during item creation are automatically enhanced and upscaled before being saved.
 
 Deployment (GitHub Pages)
 

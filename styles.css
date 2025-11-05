@@ -226,6 +226,10 @@ body {
 .btn { height: 40px; padding: 0 14px; border-radius: 8px; border: 1px solid var(--border); background: white; cursor: pointer; }
 .btn.primary { background: var(--primary); border-color: var(--primary); color: white; }
 .btn.primary:disabled { background: #94a3b8; border-color: #94a3b8; cursor: not-allowed; }
+.btn.loading {
+  pointer-events: none;
+  opacity: 0.9;
+}
 
 .tabbar {
   position: fixed; left: 0; right: 0; bottom: 0; height: 60px; background: white; border-top: 1px solid var(--border);
@@ -365,6 +369,41 @@ body {
   height: 100%;
   object-fit: cover;
   display: block;
+}
+.item-image-section img.enhancing {
+  filter: saturate(0.75) brightness(0.95);
+  transform: scale(1.01);
+  transition: filter 0.3s ease, transform 0.3s ease;
+}
+.item-image-section.enhancing::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(1px);
+  z-index: 1;
+}
+.item-image-section.enhancing::after {
+  content: 'Enhancing with Nano Banana...';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.85);
+  z-index: 2;
+  animation: nano-banana-pulse 1.4s ease-in-out infinite;
+  text-align: center;
+  white-space: nowrap;
+}
+
+@keyframes nano-banana-pulse {
+  0%, 100% { opacity: 0.9; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.03); }
 }
 .image-overlay-buttons {
   position: absolute;
