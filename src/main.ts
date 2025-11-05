@@ -555,9 +555,9 @@ function renderInventoryCategories() {
   })
   const manageBody = h('div', { class: 'body' })
   manageBody.append(
-    h('div', { class: 'muted', style: 'font-size: 10px; line-height: 1.2;' }, 'Manage Categories'),
+    h('div', { class: 'title', style: 'font-weight: 700; color: #2563eb;' }, 'Manage Categories'),
     h('div', { style: 'font-size: 9px; color: #6b7280; margin: 2px 0;' }, `${categories.length} categories`),
-    h('div', { class: 'title', style: 'font-size: 11px; font-weight: 700; color: #0f172a;' }, `Value: ${fmtNoCents(totalInventoryValue)}`)
+    h('div', { class: 'muted', style: 'font-size: 9px;' }, `Value: ${fmtNoCents(totalInventoryValue)}`)
   )
   manageBtn.append(manageImg, manageBody)
   manageBtn.addEventListener('click', () => {
@@ -580,9 +580,9 @@ function renderInventoryCategories() {
     })
     const body = h('div', { class: 'body' })
     body.append(
-      h('div', { class: 'muted', style: 'font-size: 10px; line-height: 1.2;' }, category),
+      h('div', { class: 'title', style: 'font-weight: 700; color: #2563eb;' }, category),
       h('div', { style: 'font-size: 9px; color: #6b7280; margin: 2px 0;' }, `${categoryItems.length} item${categoryItems.length !== 1 ? 's' : ''} • ${totalStock} total`),
-      h('div', { class: 'title', style: 'font-size: 11px; font-weight: 700; color: #0f172a;' }, `Value: ${fmtNoCents(totalValue)}`)
+      h('div', { class: 'muted', style: 'font-size: 9px;' }, `Value: ${fmtNoCents(totalValue)}`)
     )
     card.append(img, body)
     card.addEventListener('click', () => {
