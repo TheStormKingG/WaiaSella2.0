@@ -71,7 +71,7 @@ let inventory: Item[] = load<Item[]>(STORAGE_KEYS.inventory) ?? seed(seedItems)
 let transactions: Transaction[] = load<Transaction[]>(STORAGE_KEYS.transactions) ?? []
 let soldTally: Record<string, number> = load<Record<string, number>>(STORAGE_KEYS.soldTally) ?? {}
 let cart: Record<string, number> = load<Record<string, number>>(STORAGE_KEYS.cart) ?? {}
-let activeCategory = 'All'
+let selectedCategory = 'All'
 
 // Elements
 const tabs = qsa<HTMLButtonElement>('.tab')
