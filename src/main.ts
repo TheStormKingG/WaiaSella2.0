@@ -280,7 +280,7 @@ tabs.forEach((t) =>
 
 // Restore last view on load
 const savedView = load<string>(STORAGE_KEYS.currentView)
-if (savedView && savedView !== 'salesView') {
+if (savedView) {
   tabs.forEach((x) => x.classList.remove('active'))
   const activeTab = Array.from(tabs).find(t => t.dataset.target === savedView)
   if (activeTab) {
@@ -289,7 +289,9 @@ if (savedView && savedView !== 'salesView') {
     qs<HTMLElement>('#' + savedView).classList.add('active')
     headerTitle.textContent = activeTab.textContent?.trim() ?? ''
     
-    if (savedView === 'inventoryView') {
+    if (savedView === 'salesView') {
+      salesSearch.style.display = 'block'
+    } else if (savedView === 'inventoryView') {
       const savedInventoryView = load<string>(STORAGE_KEYS.inventoryView)
       const savedCategory = load<string>(STORAGE_KEYS.selectedInventoryCategory)
       
