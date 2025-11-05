@@ -132,6 +132,14 @@
     <dialog id="itemDialog" class="dialog">
       <form method="dialog" id="itemForm" class="dialog-body">
         <h3 id="itemDialogTitle">Add Item</h3>
+        
+        <!-- Image Preview Section -->
+        <div style="text-align: center; margin-bottom: 16px;">
+          <img id="itemImagePreview" src="" alt="Item preview" style="width: 160px; height: 160px; object-fit: cover; border-radius: 12px; background: #f3f5f7; display: block; margin: 0 auto 12px;" />
+          <input type="file" id="itemImageFile" accept="image/*,capture=camera" style="display: none;" />
+          <button type="button" id="editImageBtn" class="btn" style="width: 100%;">📷 Upload/Capture Image</button>
+        </div>
+        
         <div class="form-grid">
           <label>
             <span>Name</span>
@@ -157,16 +165,13 @@
             <span>Low Point</span>
             <input name="lowPoint" type="number" step="1" min="0" placeholder="e.g. 10" />
           </label>
-          <label style="grid-column: 1 / -1;">
-            <span>Image URL</span>
-            <input name="image" />
-          </label>
         </div>
         <menu class="dialog-actions">
           <button type="button" id="cancelItemBtn" class="btn">Cancel</button>
           <button id="saveItemBtn" value="default" class="btn primary">Save</button>
         </menu>
         <input type="hidden" name="id" />
+        <input type="hidden" name="image" id="itemImageData" />
       </form>
       <datalist id="categoryList"></datalist>
     </dialog>

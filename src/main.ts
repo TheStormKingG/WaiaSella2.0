@@ -126,6 +126,10 @@ const itemForm = qs<HTMLFormElement>('#itemForm')
 const itemDialogTitle = qs<HTMLHeadingElement>('#itemDialogTitle')
 const categoryList = qs<HTMLDataListElement>('#categoryList')
 const cancelItemBtn = qs<HTMLButtonElement>('#cancelItemBtn')
+const itemImagePreview = qs<HTMLImageElement>('#itemImagePreview')
+const itemImageFile = qs<HTMLInputElement>('#itemImageFile')
+const editImageBtn = qs<HTMLButtonElement>('#editImageBtn')
+const itemImageData = qs<HTMLInputElement>('#itemImageData')
 
 // Category modals
 const renameCategoryDialog = qs<HTMLDialogElement>('#renameCategoryDialog')
@@ -335,6 +339,21 @@ headerBackBtn.addEventListener('click', () => {
   if (savedInventoryView === 'manage' || savedInventoryView === 'items') {
     showInventoryCategories()
   }
+})
+
+// Image upload/capture
+editImageBtn.addEventListener('click', () => itemImageFile.click())
+itemImageFile.addEventListener('change', (e) => {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  
+  const reader = new FileReader()
+  reader.onload = (event) => {
+    const dataUrl = event.target?.result as string
+    itemImagePreview.src = dataUrl
+    itemImageData.value = dataUrl
+  }
+  reader.readAsDataURL(file)
 })
 
 // Category management
@@ -922,8 +941,13 @@ function openItemDialog(item?: Item) {
   ;(itemForm.elements.namedItem('cost') as HTMLInputElement).value = item?.cost?.toString() ?? ''
   ;(itemForm.elements.namedItem('stock') as HTMLInputElement).value = item?.stock?.toString() ?? ''
   ;(itemForm.elements.namedItem('lowPoint') as HTMLInputElement).value = item?.lowPoint?.toString() ?? ''
-  ;(itemForm.elements.namedItem('image') as HTMLInputElement).value = item?.image || ''
   ;(itemForm.elements.namedItem('id') as HTMLInputElement).value = item?.id || ''
+  
+  // Set image preview
+  const imageUrl = item?.image || pic(1000)
+  itemImagePreview.src = imageUrl
+  itemImageData.value = item?.image || ''
+  
   itemDialog.showModal()
 }
 
