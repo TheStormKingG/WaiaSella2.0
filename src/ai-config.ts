@@ -10,9 +10,9 @@ export interface AIConfig {
 
 // Configure your AI service here
 export const AI_CONFIG: AIConfig = {
-  service: (import.meta.env.VITE_AI_SERVICE || 'gemini') as any,
+  service: (import.meta.env.VITE_AI_SERVICE || 'stability') as any,
   apiKey: import.meta.env.VITE_AI_API_KEY || '', // API key from environment variable
-  model: import.meta.env.VITE_AI_MODEL || 'gemini-2.0-flash-exp'
+  model: import.meta.env.VITE_AI_MODEL || 'stable-diffusion-xl-1024-v1-0'
 }
 
 // Product image generation prompt template
@@ -61,72 +61,20 @@ export interface ImageGenerationResult {
   error?: string
 }
 
-// Google Gemini API call (Nano Banana - Gemini 2.5 Flash Image)
+// Google Imagen API call (Note: Gemini 2.0 Flash is for text, not images - use Imagen instead)
 async function generateWithGemini(prompt: string): Promise<ImageGenerationResult> {
-  if (!AI_CONFIG.apiKey) {
-    return { 
-      success: false, 
-      error: 'Gemini API key not configured. Get one from https://aistudio.google.com/apikey' 
-    }
+  return {
+    success: false,
+    error: 'Gemini 2.0 Flash is a text model, not for image generation. Please use Stability AI, Replicate, or DALL-E instead. To use Google\'s image generation, you need Imagen API (different service).'
   }
-
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${AI_CONFIG.model}:generateContent?key=${AI_CONFIG.apiKey}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: prompt
-            }]
-          }],
-          generationConfig: {
-            temperature: 1,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 8192,
-            responseMimeType: "image/jpeg"
-          }
-        }),
-      }
-    )
-
-    if (!response.ok) {
-      const error = await response.json()
-      return { 
-        success: false, 
-        error: error.error?.message || `Gemini API error: ${response.status}` 
-      }
-    }
-
-    const result = await response.json()
-    
-    // Gemini returns base64-encoded image in the response
-    if (result.candidates && result.candidates[0]?.content?.parts?.[0]?.inlineData) {
-      const imageData = result.candidates[0].content.parts[0].inlineData
-      const mimeType = imageData.mimeType || 'image/jpeg'
-      const base64Data = imageData.data
-      
-      return { 
-        success: true, 
-        imageData: `data:${mimeType};base64,${base64Data}` 
-      }
-    }
-    
-    return { 
-      success: false, 
-      error: 'No image data in Gemini response' 
-    }
-  } catch (error) {
-    return { 
-      success: false, 
-      error: `Gemini error: ${error instanceof Error ? error.message : 'Unknown error'}` 
-    }
-  }
+  
+  // Note: For Google's Imagen image generation API, you would need:
+  // - Different endpoint: vertex AI or Imagen API
+  // - Different authentication (service account)
+  // - Different pricing model
+  // 
+  // Imagen is not available through the simple Google AI Studio API key.
+  // Use Stability AI, Replicate, or DALL-E for easy image generation instead.
 }
 
 // Stability AI API call
