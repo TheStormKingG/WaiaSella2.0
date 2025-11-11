@@ -2,7 +2,7 @@
 // Configure your preferred AI service here
 
 export interface AIConfig {
-  service: 'stability' | 'replicate' | 'dalle' | 'custom'
+  service: 'gemini' | 'stability' | 'replicate' | 'dalle' | 'custom'
   apiKey: string
   endpoint?: string
   model?: string
@@ -10,9 +10,9 @@ export interface AIConfig {
 
 // Configure your AI service here
 export const AI_CONFIG: AIConfig = {
-  service: 'stability', // Change this to your preferred service
-  apiKey: '', // Add your API key here (or use environment variable)
-  model: 'stable-diffusion-xl-1024-v1-0' // Default model
+  service: 'gemini', // Recommended: Google Gemini 2.5 Flash Image (aka "Nano Banana")
+  apiKey: '', // Add your API key here from Google AI Studio (or use environment variable)
+  model: 'gemini-2.0-flash-exp' // Gemini 2.5 Flash Image model
 }
 
 // Product image generation prompt template
@@ -59,6 +59,74 @@ export interface ImageGenerationResult {
   imageUrl?: string
   imageData?: string // Base64 data URL
   error?: string
+}
+
+// Google Gemini API call (Nano Banana - Gemini 2.5 Flash Image)
+async function generateWithGemini(prompt: string): Promise<ImageGenerationResult> {
+  if (!AI_CONFIG.apiKey) {
+    return { 
+      success: false, 
+      error: 'Gemini API key not configured. Get one from https://aistudio.google.com/apikey' 
+    }
+  }
+
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${AI_CONFIG.model}:generateContent?key=${AI_CONFIG.apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: prompt
+            }]
+          }],
+          generationConfig: {
+            temperature: 1,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 8192,
+            responseMimeType: "image/jpeg"
+          }
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      const error = await response.json()
+      return { 
+        success: false, 
+        error: error.error?.message || `Gemini API error: ${response.status}` 
+      }
+    }
+
+    const result = await response.json()
+    
+    // Gemini returns base64-encoded image in the response
+    if (result.candidates && result.candidates[0]?.content?.parts?.[0]?.inlineData) {
+      const imageData = result.candidates[0].content.parts[0].inlineData
+      const mimeType = imageData.mimeType || 'image/jpeg'
+      const base64Data = imageData.data
+      
+      return { 
+        success: true, 
+        imageData: `data:${mimeType};base64,${base64Data}` 
+      }
+    }
+    
+    return { 
+      success: false, 
+      error: 'No image data in Gemini response' 
+    }
+  } catch (error) {
+    return { 
+      success: false, 
+      error: `Gemini error: ${error instanceof Error ? error.message : 'Unknown error'}` 
+    }
+  }
 }
 
 // Stability AI API call
@@ -233,9 +301,12 @@ export async function generateProductImage(
   const enhancedPrompt = await enhancePromptWithSearch(itemName, category)
   
   console.log('🎨 Generating product image with prompt:', enhancedPrompt)
+  console.log('🍌 Using service:', AI_CONFIG.service)
   
   // Call appropriate AI service
   switch (AI_CONFIG.service) {
+    case 'gemini':
+      return await generateWithGemini(enhancedPrompt)
     case 'stability':
       return await generateWithStability(enhancedPrompt)
     case 'replicate':

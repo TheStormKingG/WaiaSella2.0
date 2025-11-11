@@ -8,9 +8,17 @@ WaiaSella POS now supports AI-generated product images! When adding or editing i
 
 - **Smart Prompt Building**: Uses item name, category, and optional user image reference
 - **Category-Aware**: Adds contextual enhancements based on product category
-- **Multiple AI Services**: Supports Stability AI, Replicate, DALL-E, and custom endpoints
+- **Multiple AI Services**: Supports Google Gemini ("Nano Banana"), Stability AI, Replicate, DALL-E, and custom endpoints
 - **Graceful Fallbacks**: If generation fails, you can continue with your current image
 - **Loading States**: Visual feedback during generation process
+
+## Recommended: Google Gemini 2.5 Flash Image 🍌
+
+**"Nano Banana"** (Gemini 2.5 Flash Image) is the recommended service because it's:
+- ⚡ **Fast**: ~2-5 seconds generation time
+- 💰 **Affordable**: Much cheaper than competitors
+- 🎨 **High Quality**: Excellent product photography results
+- 🔓 **Easy Setup**: Free API key from Google AI Studio
 
 ## Setup Instructions
 
@@ -20,15 +28,27 @@ Edit `src/ai-config.ts` and configure your preferred service:
 
 ```typescript
 export const AI_CONFIG: AIConfig = {
-  service: 'stability', // Options: 'stability', 'replicate', 'dalle', or 'custom'
+  service: 'gemini', // Recommended! Options: 'gemini', 'stability', 'replicate', 'dalle', or 'custom'
   apiKey: 'YOUR_API_KEY_HERE',
-  model: 'stable-diffusion-xl-1024-v1-0'
+  model: 'gemini-2.0-flash-exp' // Gemini 2.5 Flash Image
 }
 ```
 
 ### 2. Get an API Key
 
-#### Stability AI (Recommended)
+#### Google Gemini (Recommended - "Nano Banana")
+1. Visit https://aistudio.google.com/apikey
+2. Sign in with your Google account
+3. Click "Create API key"
+4. Copy the key and add to `ai-config.ts`
+
+**Pricing**: 
+- Free tier: Generous quota for testing
+- Paid: Very affordable pricing (typically $0.001-0.002 per image)
+
+**Model**: `gemini-2.0-flash-exp` (Gemini 2.5 Flash Image)
+
+#### Stability AI
 1. Visit https://platform.stability.ai/
 2. Create an account
 3. Generate an API key from your dashboard
@@ -58,17 +78,17 @@ For better security, use environment variables instead of hardcoding API keys:
 
 Create a `.env.local` file:
 ```env
-VITE_AI_SERVICE=stability
-VITE_AI_API_KEY=your_api_key_here
-VITE_AI_MODEL=stable-diffusion-xl-1024-v1-0
+VITE_AI_SERVICE=gemini
+VITE_AI_API_KEY=your_gemini_api_key_here
+VITE_AI_MODEL=gemini-2.0-flash-exp
 ```
 
 Then update `src/ai-config.ts`:
 ```typescript
 export const AI_CONFIG: AIConfig = {
-  service: (import.meta.env.VITE_AI_SERVICE || 'stability') as any,
+  service: (import.meta.env.VITE_AI_SERVICE || 'gemini') as any,
   apiKey: import.meta.env.VITE_AI_API_KEY || '',
-  model: import.meta.env.VITE_AI_MODEL || 'stable-diffusion-xl-1024-v1-0'
+  model: import.meta.env.VITE_AI_MODEL || 'gemini-2.0-flash-exp'
 }
 ```
 
@@ -137,6 +157,7 @@ const contextEnhancements: Record<string, string> = {
 
 ### Generation Taking Too Long
 - Different services have different response times
+- **Gemini ("Nano Banana")**: ~2-5 seconds ⚡ (Fastest!)
 - Stability AI: ~3-10 seconds
 - Replicate: ~5-20 seconds (varies by model)
 - DALL-E: ~10-30 seconds
@@ -188,11 +209,27 @@ For issues or questions:
 3. Test with a simple item first (e.g., "Red Apple" in "Produce")
 4. Review the API provider's documentation for specific service issues
 
-## What Service Did You Mean?
+## Why "Nano Banana"? 🍌
 
-You mentioned "nano banana generates" - this might refer to:
-- **Banana.dev**: An AI model hosting platform (similar to Replicate)
-- A specific custom service
+"Nano Banana" is the informal/nickname for **Google's Gemini 2.5 Flash Image model**. The community gave it this fun name, and it's become quite popular!
 
-If you meant Banana.dev or another service, please let me know and I'll add specific integration instructions!
+### Accessing Gemini Image Generation
+
+You can access it through:
+1. **Google AI Studio** (easiest - get free API key)
+2. **Vertex AI** (enterprise Google Cloud integration)
+3. **OpenAI-compatible endpoints** (via third-party wrappers)
+
+This implementation uses the official Google Gemini API for the best performance and reliability.
+
+## Service Comparison
+
+| Service | Speed | Cost | Quality | Setup |
+|---------|-------|------|---------|-------|
+| **Gemini 2.5 Flash** 🍌 | ⚡⚡⚡ Very Fast | 💰 Very Cheap | ⭐⭐⭐⭐ Excellent | ✅ Easy |
+| Stability AI | ⚡⚡ Fast | 💰💰 Moderate | ⭐⭐⭐⭐⭐ Top | ✅ Easy |
+| Replicate | ⚡ Variable | 💰💰 Moderate | ⭐⭐⭐⭐ Good | ✅ Easy |
+| DALL-E 3 | ⚡ Slower | 💰💰💰 Expensive | ⭐⭐⭐⭐⭐ Top | ✅ Easy |
+
+**Recommendation**: Start with Gemini ("Nano Banana") for the best balance of speed, cost, and quality!
 
