@@ -2,6 +2,7 @@ import '../styles.css'
 import { createClient } from '@supabase/supabase-js'
 import { SUPABASE_CONFIG } from './config'
 import jsPDF from 'jspdf'
+import { generateProductImage, convertUrlToDataUrl } from './ai-config'
 
 // WaiaSella POS - Vite + TypeScript SPA
 
@@ -132,6 +133,9 @@ const itemImageCapture = qs<HTMLInputElement>('#itemImageCapture')
 const uploadImageBtn = qs<HTMLButtonElement>('#uploadImageBtn')
 const captureImageBtn = qs<HTMLButtonElement>('#captureImageBtn')
 const itemImageData = qs<HTMLInputElement>('#itemImageData')
+const generateAiImage = qs<HTMLInputElement>('#generateAiImage')
+const aiGenerationOverlay = qs<HTMLDivElement>('#aiGenerationOverlay')
+const aiGenerationStatus = qs<HTMLDivElement>('#aiGenerationStatus')
 
 // Category modals
 const renameCategoryDialog = qs<HTMLDialogElement>('#renameCategoryDialog')
@@ -955,11 +959,72 @@ function openItemDialog(item?: Item) {
   itemDialog.showModal()
 }
 
-function saveItemFromDialog(ev: SubmitEvent) {
+async function saveItemFromDialog(ev: SubmitEvent) {
   ev.preventDefault()
   const data = Object.fromEntries(new FormData(itemForm) as any) as Record<string, string>
   const existingItem = inventory.find((i) => i.id === (data.id || ''))
   const newStock = Number(data.stock) || 0
+  
+  // Check if AI generation is requested
+  if (generateAiImage.checked) {
+    try {
+      // Show loading overlay
+      aiGenerationOverlay.style.display = 'flex'
+      aiGenerationStatus.textContent = 'Building enhanced prompt...'
+      
+      // Generate AI image
+      const itemName = data.name.trim()
+      const category = data.category.trim() || 'Other'
+      
+      aiGenerationStatus.textContent = 'Generating product image with AI...'
+      const result = await generateProductImage(itemName, category, data.image)
+      
+      if (result.success) {
+        aiGenerationStatus.textContent = 'Image generated successfully! ✓'
+        
+        // Use the generated image
+        let imageData = result.imageData
+        if (!imageData && result.imageUrl) {
+          aiGenerationStatus.textContent = 'Converting image...'
+          imageData = await convertUrlToDataUrl(result.imageUrl)
+        }
+        
+        if (imageData) {
+          itemImagePreview.src = imageData
+          itemImageData.value = imageData
+          data.image = imageData
+        }
+        
+        // Brief pause to show success message
+        await new Promise(resolve => setTimeout(resolve, 800))
+      } else {
+        // Show error but continue with save
+        aiGenerationStatus.textContent = `Error: ${result.error || 'Generation failed'}`
+        await new Promise(resolve => setTimeout(resolve, 2000))
+        console.error('AI generation error:', result.error)
+        
+        // Ask user if they want to continue without AI image
+        if (!confirm(`AI image generation failed: ${result.error}\n\nContinue saving item with current image?`)) {
+          aiGenerationOverlay.style.display = 'none'
+          return
+        }
+      }
+    } catch (error) {
+      console.error('AI generation error:', error)
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error'
+      aiGenerationStatus.textContent = `Error: ${errorMsg}`
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      if (!confirm(`AI image generation failed: ${errorMsg}\n\nContinue saving item with current image?`)) {
+        aiGenerationOverlay.style.display = 'none'
+        return
+      }
+    } finally {
+      // Hide loading overlay
+      aiGenerationOverlay.style.display = 'none'
+      generateAiImage.checked = false // Reset checkbox for next time
+    }
+  }
   
   const payload: Item = {
     id: data.id || id(),
