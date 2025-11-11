@@ -10,9 +10,9 @@ export interface AIConfig {
 
 // Configure your AI service here
 export const AI_CONFIG: AIConfig = {
-  service: 'gemini', // Recommended: Google Gemini 2.5 Flash Image (aka "Nano Banana")
-  apiKey: '', // Add your API key here from Google AI Studio (or use environment variable)
-  model: 'gemini-2.0-flash-exp' // Gemini 2.5 Flash Image model
+  service: (import.meta.env.VITE_AI_SERVICE || 'gemini') as any,
+  apiKey: import.meta.env.VITE_AI_API_KEY || '', // API key from environment variable
+  model: import.meta.env.VITE_AI_MODEL || 'gemini-2.0-flash-exp'
 }
 
 // Product image generation prompt template
