@@ -22,41 +22,51 @@ export function buildProductImagePrompt(
   userImageContext?: string,
   extractedName?: string
 ): string {
-  // If we extracted a name from the image, combine it with user input for better results
-  const productName = extractedName 
-    ? `${itemName} (${extractedName})` 
-    : itemName
+  // Use the extracted name if available (more specific than user input)
+  const productName = extractedName || itemName
   
+  // Build a detailed prompt that emphasizes accurate labeling
   return `Professional product photography of ${productName}, ${category} category, 
+IMPORTANT: product must show clear, readable, accurate brand label and product name "${productName}" on packaging, 
 studio lighting, white background, high quality, detailed, commercial product shot, 
-e-commerce ready, 4k resolution, centered composition${userImageContext ? `, ${userImageContext}` : ''}`
+e-commerce ready, crisp focus on label text, centered composition, 
+product label clearly visible and legible, 4k resolution${userImageContext ? `, reference: ${userImageContext}` : ''}`
 }
 
 // Enhanced prompt with search context
 export async function enhancePromptWithSearch(
   itemName: string,
-  category: string
+  category: string,
+  extractedName?: string
 ): Promise<string> {
   // You can integrate Google Custom Search API or similar here
-  // For now, we'll add context-aware enhancements
+  // For now, we'll add context-aware enhancements with emphasis on labeling
   
   const contextEnhancements: Record<string, string> = {
-    'Drinks': 'beverage, refreshing, clear glass bottle or can',
-    'Food': 'appetizing, fresh ingredients, culinary presentation',
-    'Electronics': 'modern, sleek design, technology',
-    'Clothing': 'fashion, textile detail, wearable',
-    'Books': 'book cover, readable title, publishing',
-    'Toys': 'colorful, playful, child-friendly',
-    'Tools': 'industrial, practical, metal finish',
-    'Beauty': 'cosmetic, elegant packaging, skincare',
-    'Sports': 'athletic, performance, sports equipment',
-    'Home': 'household item, domestic use, practical design'
+    'Drinks': 'beverage bottle or can with brand label clearly visible, refreshing product shot',
+    'Food': 'packaged food product with brand name and product label visible, appetizing presentation',
+    'Electronics': 'electronic device with brand logo visible, modern product photography',
+    'Clothing': 'clothing item with visible brand tag or label, fashion photography',
+    'Books': 'book with title and author clearly readable on cover',
+    'Toys': 'toy with brand name and product packaging visible',
+    'Tools': 'tool with brand marking visible, industrial product shot',
+    'Beauty': 'beauty product with label and brand name clearly visible, cosmetic packaging',
+    'Sports': 'sports equipment with brand logo visible, athletic gear photography',
+    'Home': 'household item with brand label visible, product packaging',
+    'Personal Care': 'personal care product with clear brand label, packaging visible',
+    'Groceries': 'grocery product with packaging label clearly readable',
+    'Snacks': 'snack package with brand name prominently displayed',
+    'Produce': 'fresh produce with any visible branding or label'
   }
   
-  const categoryContext = contextEnhancements[category] || 'product'
-  const basePrompt = buildProductImagePrompt(itemName, category)
+  const categoryContext = contextEnhancements[category] || 'product with visible brand label'
+  const productName = extractedName || itemName
   
-  return `${basePrompt}, ${categoryContext}`
+  // Emphasize accurate labeling in the prompt
+  return `Professional product photography of ${productName}, ${categoryContext}, 
+ensure product label shows "${productName}" text clearly and accurately, 
+studio lighting, white background, high quality, product label in sharp focus, 
+commercial e-commerce product shot, 4k resolution, centered composition`
 }
 
 // API call interfaces for different services
@@ -384,13 +394,15 @@ export async function generateProductImage(
   userImageReference?: string,
   extractedName?: string
 ): Promise<ImageGenerationResult> {
-  // Build enhanced prompt with extracted name if available
-  let enhancedPrompt = await enhancePromptWithSearch(itemName, category)
+  // Prefer extracted name (more accurate) over user input
+  const accurateProductName = extractedName || itemName
   
-  // If we extracted a product name from the uploaded image, enhance the prompt
+  // Build enhanced prompt with emphasis on accurate labeling
+  const enhancedPrompt = await enhancePromptWithSearch(accurateProductName, category, extractedName)
+  
   if (extractedName) {
-    enhancedPrompt = buildProductImagePrompt(itemName, category, userImageReference, extractedName)
-    console.log('🔍 Using extracted name from image:', extractedName)
+    console.log('🔍 Extracted product name from uploaded image:', extractedName)
+    console.log('🏷️  Generating professional version WITH accurate product label')
   }
   
   console.log('🎨 Generating product image with prompt:', enhancedPrompt)
