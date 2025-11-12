@@ -19,9 +19,15 @@ export const AI_CONFIG: AIConfig = {
 export function buildProductImagePrompt(
   itemName: string,
   category: string,
-  userImageContext?: string
+  userImageContext?: string,
+  extractedName?: string
 ): string {
-  return `Professional product photography of ${itemName}, ${category} category, 
+  // If we extracted a name from the image, combine it with user input for better results
+  const productName = extractedName 
+    ? `${itemName} (${extractedName})` 
+    : itemName
+  
+  return `Professional product photography of ${productName}, ${category} category, 
 studio lighting, white background, high quality, detailed, commercial product shot, 
 e-commerce ready, 4k resolution, centered composition${userImageContext ? `, ${userImageContext}` : ''}`
 }
@@ -334,14 +340,58 @@ async function generateWithDalle(prompt: string): Promise<ImageGenerationResult>
   }
 }
 
+// Analyze uploaded image to extract product name/label using OCR
+export async function analyzeImageForProductName(imageDataUrl: string): Promise<string | null> {
+  try {
+    console.log('🔍 Analyzing uploaded image for product labels...')
+    
+    // Use Hugging Face's free image-to-text model (BLIP)
+    const response = await fetch(
+      'https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-large',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          inputs: imageDataUrl.split(',')[1] // Send base64 without prefix
+        })
+      }
+    )
+    
+    if (response.ok) {
+      const result = await response.json()
+      if (result && result[0]?.generated_text) {
+        const caption = result[0].generated_text
+        console.log('📝 Extracted from image:', caption)
+        return caption
+      }
+    }
+    
+    // Fallback: Try OCR with a simple approach
+    // This will be handled by Tesseract.js in the main.ts file
+    return null
+  } catch (error) {
+    console.error('Error analyzing image:', error)
+    return null
+  }
+}
+
 // Main function to generate product image
 export async function generateProductImage(
   itemName: string,
   category: string,
-  userImageReference?: string
+  userImageReference?: string,
+  extractedName?: string
 ): Promise<ImageGenerationResult> {
-  // Build enhanced prompt
-  const enhancedPrompt = await enhancePromptWithSearch(itemName, category)
+  // Build enhanced prompt with extracted name if available
+  let enhancedPrompt = await enhancePromptWithSearch(itemName, category)
+  
+  // If we extracted a product name from the uploaded image, enhance the prompt
+  if (extractedName) {
+    enhancedPrompt = buildProductImagePrompt(itemName, category, userImageReference, extractedName)
+    console.log('🔍 Using extracted name from image:', extractedName)
+  }
   
   console.log('🎨 Generating product image with prompt:', enhancedPrompt)
   console.log('🍌 Using service:', AI_CONFIG.service)

@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { SUPABASE_CONFIG } from './config'
 import jsPDF from 'jspdf'
 import { generateProductImage, convertUrlToDataUrl } from './ai-config'
+import { analyzeProductImage, suggestProductName, combineProductNames } from './image-analysis'
 
 // WaiaSella POS - Vite + TypeScript SPA
 
@@ -151,6 +152,9 @@ const confirmDeleteBtn = qs<HTMLButtonElement>('#confirmDeleteBtn')
 
 // Inventory state
 let selectedInventoryCategory: string | null = null
+
+// Store extracted product name from image analysis
+let extractedProductName: string | null = null
 
 // Reports
 const totalSalesEl = qs<HTMLDivElement>('#totalSales')
@@ -348,15 +352,50 @@ headerBackBtn.addEventListener('click', () => {
 })
 
 // Image upload/capture
-function handleImageSelect(e: Event) {
+async function handleImageSelect(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (!file) return
   
   const reader = new FileReader()
-  reader.onload = (event) => {
+  reader.onload = async (event) => {
     const dataUrl = event.target?.result as string
     itemImagePreview.src = dataUrl
     itemImageData.value = dataUrl
+    
+    // Analyze the image to extract product name/label
+    console.log('🔍 Analyzing uploaded image...')
+    aiGenerationStatus.textContent = 'Analyzing uploaded image...'
+    
+    try {
+      extractedProductName = await analyzeProductImage(dataUrl)
+      
+      if (extractedProductName) {
+        console.log('✅ Extracted product name:', extractedProductName)
+        
+        // Get the name input field
+        const nameInput = itemForm.querySelector<HTMLInputElement>('input[name="name"]')
+        
+        if (nameInput) {
+          const currentName = nameInput.value.trim()
+          
+          // If name field is empty or has generic text, auto-fill with extracted name
+          if (!currentName || currentName.toLowerCase() === 'new item' || currentName.toLowerCase() === 'item') {
+            nameInput.value = extractedProductName
+            console.log('📝 Auto-filled name field with:', extractedProductName)
+          } else {
+            // Show a subtle notification that we detected a name
+            console.log(`💡 Detected "${extractedProductName}" in image (keeping user's "${currentName}")`)
+            // Could show a toast notification here
+          }
+        }
+      } else {
+        console.log('ℹ️ No text/labels detected in image')
+        extractedProductName = null
+      }
+    } catch (error) {
+      console.error('Error analyzing image:', error)
+      extractedProductName = null
+    }
   }
   reader.readAsDataURL(file)
 }
@@ -956,6 +995,9 @@ function openItemDialog(item?: Item) {
   itemImagePreview.src = imageUrl
   itemImageData.value = item?.image || ''
   
+  // Reset extracted product name when opening dialog
+  extractedProductName = null
+  
   itemDialog.showModal()
 }
 
@@ -976,8 +1018,15 @@ async function saveItemFromDialog(ev: SubmitEvent) {
       const itemName = data.name.trim()
       const category = data.category.trim() || 'Other'
       
+      // Combine user-entered name with extracted name for better AI results
+      const combinedName = extractedProductName 
+        ? combineProductNames(itemName, extractedProductName)
+        : itemName
+      
       aiGenerationStatus.textContent = 'Generating product image with AI...'
-      const result = await generateProductImage(itemName, category, data.image)
+      console.log('🎯 Using combined name for AI:', combinedName)
+      
+      const result = await generateProductImage(combinedName, category, data.image, extractedProductName || undefined)
       
       if (result.success) {
         aiGenerationStatus.textContent = 'Image generated successfully! ✓'
