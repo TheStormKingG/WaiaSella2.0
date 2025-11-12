@@ -129,6 +129,7 @@ const itemForm = qs<HTMLFormElement>('#itemForm')
 const itemDialogTitle = qs<HTMLHeadingElement>('#itemDialogTitle')
 const categoryList = qs<HTMLDataListElement>('#categoryList')
 const cancelItemBtn = qs<HTMLButtonElement>('#cancelItemBtn')
+const deleteItemBtn = qs<HTMLButtonElement>('#deleteItemBtn')
 const itemImagePreview = qs<HTMLImageElement>('#itemImagePreview')
 const itemImageUpload = qs<HTMLInputElement>('#itemImageUpload')
 const itemImageCapture = qs<HTMLInputElement>('#itemImageCapture')
@@ -347,6 +348,29 @@ inventorySearch.addEventListener('input', () => {
 addItemFab.addEventListener('click', () => openItemDialog())
 itemForm.addEventListener('submit', saveItemFromDialog)
 cancelItemBtn.addEventListener('click', () => itemDialog.close())
+deleteItemBtn.addEventListener('click', () => {
+  const itemId = (itemForm.elements.namedItem('id') as HTMLInputElement).value
+  if (!itemId) return
+  
+  const item = inventory.find(i => i.id === itemId)
+  if (!item) return
+  
+  if (confirm(`Delete "${item.name}"?\n\nThis action cannot be undone.`)) {
+    // Remove item from inventory
+    inventory = inventory.filter(i => i.id !== itemId)
+    persist()
+    itemDialog.close()
+    
+    // Refresh views
+    renderInventoryCategories()
+    renderInventory()
+    renderCategoryFilter()
+    renderProducts()
+    renderReports()
+    
+    console.log(`🗑️  Deleted item: ${item.name}`)
+  }
+})
 headerBackBtn.addEventListener('click', () => {
   const savedInventoryView = load<string>(STORAGE_KEYS.inventoryView)
   if (savedInventoryView === 'manage' || savedInventoryView === 'items') {
@@ -1009,6 +1033,13 @@ function openItemDialog(item?: Item) {
   const imageUrl = item?.image || pic(1000)
   itemImagePreview.src = imageUrl
   itemImageData.value = item?.image || ''
+  
+  // Show delete button only when editing existing item
+  if (item) {
+    deleteItemBtn.style.display = 'block'
+  } else {
+    deleteItemBtn.style.display = 'none'
+  }
   
   // Reset extracted product information when opening dialog
   extractedProductName = null

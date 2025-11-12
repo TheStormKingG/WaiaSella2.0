@@ -430,9 +430,19 @@ export async function generateProductImage(
   
   console.log('🖼️  Using detailed prompt with complete label information')
   console.log('🍌 Using service:', AI_CONFIG.service)
+  console.log('   Available services: pollinations, huggingface, stability, replicate, dalle')
+  
+  // Validate service is set
+  if (!AI_CONFIG.service) {
+    console.error('❌ No AI service configured! Defaulting to pollinations...')
+    return await generateWithPollinations(enhancedPrompt)
+  }
   
   // Call appropriate AI service
-  switch (AI_CONFIG.service) {
+  const service = AI_CONFIG.service.toLowerCase().trim()
+  console.log('   Using service (normalized):', service)
+  
+  switch (service) {
     case 'pollinations':
       return await generateWithPollinations(enhancedPrompt)
     case 'huggingface':
@@ -451,7 +461,8 @@ export async function generateProductImage(
       // Implement custom API call here
       return { success: false, error: 'Custom service not implemented' }
     default:
-      return { success: false, error: 'Unknown AI service configured' }
+      console.error(`❌ Unknown service: "${service}". Falling back to pollinations...`)
+      return await generateWithPollinations(enhancedPrompt)
   }
 }
 
