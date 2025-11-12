@@ -2,7 +2,7 @@
 // Configure your preferred AI service here
 
 export interface AIConfig {
-  service: 'gemini' | 'stability' | 'replicate' | 'dalle' | 'custom'
+  service: 'pollinations' | 'huggingface' | 'stability' | 'replicate' | 'dalle' | 'custom'
   apiKey: string
   endpoint?: string
   model?: string
@@ -10,9 +10,9 @@ export interface AIConfig {
 
 // Configure your AI service here
 export const AI_CONFIG: AIConfig = {
-  service: (import.meta.env.VITE_AI_SERVICE || 'stability') as any,
-  apiKey: import.meta.env.VITE_AI_API_KEY || '', // API key from environment variable
-  model: import.meta.env.VITE_AI_MODEL || 'stable-diffusion-xl-1024-v1-0'
+  service: (import.meta.env.VITE_AI_SERVICE || 'pollinations') as any,
+  apiKey: import.meta.env.VITE_AI_API_KEY || 'none', // No API key needed for free services!
+  model: import.meta.env.VITE_AI_MODEL || 'flux'
 }
 
 // Product image generation prompt template
@@ -61,20 +61,115 @@ export interface ImageGenerationResult {
   error?: string
 }
 
-// Google Imagen API call (Note: Gemini 2.0 Flash is for text, not images - use Imagen instead)
-async function generateWithGemini(prompt: string): Promise<ImageGenerationResult> {
-  return {
-    success: false,
-    error: 'Gemini 2.0 Flash is a text model, not for image generation. Please use Stability AI, Replicate, or DALL-E instead. To use Google\'s image generation, you need Imagen API (different service).'
+// Pollinations.ai - Completely FREE, no API key needed!
+async function generateWithPollinations(prompt: string): Promise<ImageGenerationResult> {
+  try {
+    // Pollinations uses a simple URL-based API - completely free!
+    const encodedPrompt = encodeURIComponent(prompt)
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&enhance=true`
+    
+    console.log('🌸 Generating with Pollinations.ai (FREE):', prompt)
+    
+    // Fetch the image
+    const response = await fetch(imageUrl)
+    if (!response.ok) {
+      return { 
+        success: false, 
+        error: `Pollinations API error: ${response.status}` 
+      }
+    }
+    
+    // Convert to base64
+    const blob = await response.blob()
+    return new Promise((resolve) => {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        resolve({
+          success: true,
+          imageData: reader.result as string
+        })
+      }
+      reader.onerror = () => {
+        resolve({
+          success: false,
+          error: 'Failed to convert image to base64'
+        })
+      }
+      reader.readAsDataURL(blob)
+    })
+  } catch (error) {
+    return { 
+      success: false, 
+      error: `Pollinations error: ${error instanceof Error ? error.message : 'Unknown error'}` 
+    }
   }
+}
+
+// Hugging Face Inference API - FREE tier available!
+async function generateWithHuggingFace(prompt: string): Promise<ImageGenerationResult> {
+  const apiKey = AI_CONFIG.apiKey
   
-  // Note: For Google's Imagen image generation API, you would need:
-  // - Different endpoint: vertex AI or Imagen API
-  // - Different authentication (service account)
-  // - Different pricing model
-  // 
-  // Imagen is not available through the simple Google AI Studio API key.
-  // Use Stability AI, Replicate, or DALL-E for easy image generation instead.
+  // Hugging Face has a free tier - just need to sign up for a token
+  if (!apiKey || apiKey === 'none') {
+    return { 
+      success: false, 
+      error: 'Hugging Face requires a free API token. Get one at https://huggingface.co/settings/tokens' 
+    }
+  }
+
+  try {
+    // Using Stable Diffusion XL on Hugging Face (free!)
+    const model = AI_CONFIG.model || 'stabilityai/stable-diffusion-xl-base-1.0'
+    const response = await fetch(
+      `https://api-inference.huggingface.co/models/${model}`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          inputs: prompt,
+          parameters: {
+            negative_prompt: 'blurry, low quality, distorted, amateur, cluttered background',
+            num_inference_steps: 30,
+            guidance_scale: 7.5
+          }
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      const error = await response.text()
+      return { 
+        success: false, 
+        error: `Hugging Face error: ${error}` 
+      }
+    }
+
+    const blob = await response.blob()
+    return new Promise((resolve) => {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        resolve({
+          success: true,
+          imageData: reader.result as string
+        })
+      }
+      reader.onerror = () => {
+        resolve({
+          success: false,
+          error: 'Failed to convert image'
+        })
+      }
+      reader.readAsDataURL(blob)
+    })
+  } catch (error) {
+    return { 
+      success: false, 
+      error: `Hugging Face error: ${error instanceof Error ? error.message : 'Unknown error'}` 
+    }
+  }
 }
 
 // Stability AI API call
@@ -253,8 +348,10 @@ export async function generateProductImage(
   
   // Call appropriate AI service
   switch (AI_CONFIG.service) {
-    case 'gemini':
-      return await generateWithGemini(enhancedPrompt)
+    case 'pollinations':
+      return await generateWithPollinations(enhancedPrompt)
+    case 'huggingface':
+      return await generateWithHuggingFace(enhancedPrompt)
     case 'stability':
       return await generateWithStability(enhancedPrompt)
     case 'replicate':
