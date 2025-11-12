@@ -6,7 +6,7 @@
 
 **Cause:** Heavy OCR processing (Tesseract.js loads ~3MB language data + intensive processing)
 
-**Solution:** Automatic device detection with lightweight processing mode for mobile devices
+**Solution:** Aggressive memory cleanup before and after EACH step - OCR runs on ALL devices!
 
 ---
 
@@ -37,21 +37,21 @@ The system automatically detects your device and chooses the appropriate process
 
 ## 📊 **Two Processing Modes**
 
-### **🔋 Lightweight Mode (Mobile)**
+### **🔋 Mobile Mode (Full Features + Memory Management)**
 
-**When:** Mobile devices or <4GB RAM
+**When:** Mobile devices
 
 **What it does:**
+- ✅ Full OCR text extraction (with cleanup!)
 - ✅ AI image understanding (BLIP model)
-- ✅ Basic product identification
-- ✅ Fast and memory-efficient
-- ❌ Skips OCR (no text extraction)
-- ❌ Skips web search
-- ❌ No verification step
+- ✅ Web search verification
+- ✅ Brand detection
+- ✅ Complete 5-step process
+- ✅ **Memory cleanup after each step**
 
-**Memory Usage:** ~50MB
+**Memory Usage:** ~125MB peak, cleans to ~65MB
 
-**Speed:** 2-5 seconds
+**Speed:** 15-45 seconds (depends on device)
 
 **Example:**
 ```
