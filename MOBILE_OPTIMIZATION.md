@@ -162,9 +162,10 @@ else {
 | Aspect | Mobile (Lightweight) | Desktop (Full) |
 |--------|---------------------|----------------|
 | **OCR** | ❌ Skipped | ✅ Tesseract.js |
-| **Memory** | ~50MB | ~200MB |
-| **Speed** | 2-5 seconds | 10-30 seconds |
-| **Accuracy** | ~70% | ~95% |
+| **Peak Memory** | ~125MB | ~200MB |
+| **After Cleanup** | ~65MB | ~80MB |
+| **Speed** | 15-45 seconds | 10-30 seconds |
+| **Accuracy** | ~95% | ~95% |
 | **Verification** | ❌ No | ✅ Yes |
 | **Works on Low RAM** | ✅ Yes | ❌ May crash |
 
