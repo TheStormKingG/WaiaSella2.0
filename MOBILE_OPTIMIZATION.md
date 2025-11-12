@@ -159,15 +159,19 @@ else {
 
 ## ⚡ **Performance Comparison**
 
-| Aspect | Mobile (Lightweight) | Desktop (Full) |
-|--------|---------------------|----------------|
-| **OCR** | ❌ Skipped | ✅ Tesseract.js |
+| Aspect | Mobile (With Cleanup) | Desktop (With Cleanup) |
+|--------|----------------------|------------------------|
+| **OCR** | ✅ Tesseract.js | ✅ Tesseract.js |
+| **AI Understanding** | ✅ Yes | ✅ Yes |
+| **Web Search** | ✅ Yes | ✅ Yes |
+| **Brand Detection** | ✅ 50+ patterns | ✅ 50+ patterns |
+| **Verification** | ✅ Yes | ✅ Yes |
+| **Memory Cleanup** | ✅ Aggressive (after each step) | ✅ Standard |
 | **Peak Memory** | ~125MB | ~200MB |
 | **After Cleanup** | ~65MB | ~80MB |
 | **Speed** | 15-45 seconds | 10-30 seconds |
 | **Accuracy** | ~95% | ~95% |
-| **Verification** | ❌ No | ✅ Yes |
-| **Works on Low RAM** | ✅ Yes | ❌ May crash |
+| **Works on Low RAM** | ✅ Yes | ✅ Yes |
 
 ---
 
