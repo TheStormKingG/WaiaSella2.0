@@ -5,6 +5,7 @@ import jsPDF from 'jspdf'
 import { generateProductImage, convertUrlToDataUrl } from './ai-config'
 import { analyzeProductImage, suggestProductName, combineProductNames, parseLabelInformation, type LabelInformation } from './image-analysis'
 import { identifyProductComprehensively, type ProductIdentification } from './product-identifier'
+import { shouldUseLightweightProcessing, extractProductNameLightweight } from './mobile-optimizer'
 
 // WaiaSella POS - Vite + TypeScript SPA
 
@@ -389,46 +390,69 @@ async function handleImageSelect(e: Event) {
     itemImagePreview.src = dataUrl
     itemImageData.value = dataUrl
     
-    // NEW: Comprehensive product identification with OCR → Search → Verification
+    // Intelligent product identification (optimized for mobile)
     console.log('\n')
-    console.log('🎯 Starting Intelligent Product Identification System...')
-    aiGenerationStatus.textContent = 'Analyzing product with AI...'
     
     try {
-      // Use the new logical identification system
-      productIdentification = await identifyProductComprehensively(dataUrl)
+      // Check if we should use lightweight processing
+      const useLightweight = shouldUseLightweightProcessing()
       
-      if (productIdentification) {
-        extractedProductName = productIdentification.fullName
+      if (useLightweight) {
+        // Mobile/Low-memory: Use lightweight AI-only approach
+        console.log('📱 Mobile Mode: Using lightweight AI identification...')
+        aiGenerationStatus.textContent = 'Analyzing with AI (lightweight)...'
         
-        console.log('\n✨ IDENTIFICATION SUCCESS!')
-        console.log(`   Brand: ${productIdentification.brandName}`)
-        console.log(`   Product: ${productIdentification.productName}`)
-        console.log(`   Full Name: ${productIdentification.fullName}`)
-        console.log(`   Confidence: ${Math.round(productIdentification.confidence * 100)}%`)
-        console.log(`   Verified: ${productIdentification.verifiedBySearch ? 'YES ✓' : 'NO'}`)
-        console.log(`   All Label Text: [${productIdentification.allTextFromLabel.join(', ')}]`)
-        console.log('\n')
+        extractedProductName = await extractProductNameLightweight(dataUrl)
         
-        // Get the name input field
-        const nameInput = itemForm.querySelector<HTMLInputElement>('input[name="name"]')
-        
-        if (nameInput) {
-          const currentName = nameInput.value.trim()
+        if (extractedProductName) {
+          console.log('✅ Product identified:', extractedProductName)
           
-          // If name field is empty or has generic text, auto-fill with identified name
-          if (!currentName || currentName.toLowerCase() === 'new item' || currentName.toLowerCase() === 'item') {
-            nameInput.value = productIdentification.fullName
-            console.log(`📝 Auto-filled with verified name: "${productIdentification.fullName}"`)
-          } else {
-            console.log(`💡 Identified "${productIdentification.fullName}" (keeping user's "${currentName}")`)
+          // Auto-fill name field
+          const nameInput = itemForm.querySelector<HTMLInputElement>('input[name="name"]')
+          if (nameInput) {
+            const currentName = nameInput.value.trim()
+            if (!currentName || currentName.toLowerCase() === 'new item' || currentName.toLowerCase() === 'item') {
+              nameInput.value = extractedProductName
+              console.log(`📝 Auto-filled with: "${extractedProductName}"`)
+            }
           }
         }
       } else {
+        // Desktop: Use full OCR → Search → Verification system
+        console.log('🎯 Desktop Mode: Starting comprehensive identification...')
+        aiGenerationStatus.textContent = 'Analyzing product with AI...'
+        
+        productIdentification = await identifyProductComprehensively(dataUrl)
+        
+        if (productIdentification) {
+          extractedProductName = productIdentification.fullName
+          
+          console.log('\n✨ IDENTIFICATION SUCCESS!')
+          console.log(`   Brand: ${productIdentification.brandName}`)
+          console.log(`   Product: ${productIdentification.productName}`)
+          console.log(`   Full Name: ${productIdentification.fullName}`)
+          console.log(`   Confidence: ${Math.round(productIdentification.confidence * 100)}%`)
+          console.log(`   Verified: ${productIdentification.verifiedBySearch ? 'YES ✓' : 'NO'}`)
+          console.log(`   All Label Text: [${productIdentification.allTextFromLabel.join(', ')}]`)
+          console.log('\n')
+          
+          // Auto-fill name field
+          const nameInput = itemForm.querySelector<HTMLInputElement>('input[name="name"]')
+          if (nameInput) {
+            const currentName = nameInput.value.trim()
+            if (!currentName || currentName.toLowerCase() === 'new item' || currentName.toLowerCase() === 'item') {
+              nameInput.value = productIdentification.fullName
+              console.log(`📝 Auto-filled with verified name: "${productIdentification.fullName}"`)
+            } else {
+              console.log(`💡 Identified "${productIdentification.fullName}" (keeping user's "${currentName}")`)
+            }
+          }
+        }
+      }
+      
+      if (!extractedProductName && !productIdentification) {
         console.log('\n⚠️  Could not identify product from image')
-        console.log('   Falling back to manual entry\n')
-        extractedProductName = null
-        productIdentification = null
+        console.log('   You can enter the name manually\n')
       }
     } catch (error) {
       console.error('❌ Product identification error:', error)
