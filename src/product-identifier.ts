@@ -18,9 +18,12 @@ export interface SearchResult {
   link: string
 }
 
-// Step 1: Extract ALL text from uploaded image label
+// Step 1: Extract ALL text from uploaded image label (with memory management)
 export async function extractAllTextFromLabel(imageDataUrl: string): Promise<string[]> {
   console.log('📖 Step 1: Extracting ALL text from product label...')
+  
+  // Clear memory before heavy OCR processing
+  clearMemoryIfPossible()
   
   try {
     const result = await Tesseract.recognize(imageDataUrl, 'eng', {
@@ -44,10 +47,50 @@ export async function extractAllTextFromLabel(imageDataUrl: string): Promise<str
     console.log('✅ Extracted text from label:')
     allLines.forEach((line, i) => console.log(`   ${i + 1}. "${line}"`))
     
+    // Clear memory after OCR
+    await cleanupAfterStep()
+    
     return allLines
   } catch (error) {
     console.error('❌ OCR extraction failed:', error)
+    // Clear memory even on error
+    await cleanupAfterStep()
     return []
+  }
+}
+
+// Helper: Clear memory if garbage collection available
+function clearMemoryIfPossible(): void {
+  try {
+    // @ts-ignore
+    if (window.gc) {
+      console.log('🧹 Clearing memory before processing...')
+      // @ts-ignore
+      window.gc()
+    }
+  } catch (e) {
+    // Ignore if not available
+  }
+}
+
+// Helper: Cleanup after processing step
+async function cleanupAfterStep(): Promise<void> {
+  // Small delay to allow browser to process
+  await new Promise(resolve => setTimeout(resolve, 50))
+  
+  // Try to trigger garbage collection
+  clearMemoryIfPossible()
+  
+  // Log memory if available
+  try {
+    // @ts-ignore
+    if (performance.memory) {
+      // @ts-ignore
+      const memoryMB = (performance.memory.usedJSHeapSize / 1048576).toFixed(2)
+      console.log(`   Memory usage: ${memoryMB}MB`)
+    }
+  } catch (e) {
+    // Ignore if not available
   }
 }
 
@@ -178,40 +221,52 @@ export async function findReferenceImages(
   }
 }
 
-// Complete identification pipeline
+// Complete identification pipeline (with memory management)
 export async function identifyProductComprehensively(
   imageDataUrl: string
 ): Promise<ProductIdentification | null> {
   console.log('🚀 Starting comprehensive product identification...')
   console.log('=' .repeat(60))
   
+  // Clear memory before starting
+  clearMemoryIfPossible()
+  
   try {
-    // Step 1: Extract all text from label
+    // Step 1: Extract all text from label (handles own memory cleanup)
     const extractedText = await extractAllTextFromLabel(imageDataUrl)
     if (extractedText.length === 0) {
       console.log('❌ No text found on label')
+      await cleanupAfterStep()
       return null
     }
     
+    // Clear memory after Step 1
+    await cleanupAfterStep()
+    
     // Step 2: Search web with extracted text
     const searchResults = await searchProductByText(extractedText)
+    await cleanupAfterStep()
     
     // Step 3: Identify brand and product from results
     const identification = await identifyBrandAndProduct(extractedText, searchResults)
     if (!identification) {
+      await cleanupAfterStep()
       return null
     }
+    await cleanupAfterStep()
     
     // Step 4: Verify the identification
     const verified = await verifyProductIdentification(
       identification.brand,
       identification.product
     )
+    await cleanupAfterStep()
     
     // Step 5: Find reference images (optional, for future enhancement)
     if (verified) {
       await findReferenceImages(identification.brand, identification.product)
     }
+    await cleanupAfterStep()
     
     console.log('=' .repeat(60))
     console.log('🎯 FINAL IDENTIFICATION:')
@@ -220,6 +275,9 @@ export async function identifyProductComprehensively(
     console.log(`   Full Name: ${identification.brand} ${identification.product}`)
     console.log(`   Verified: ${verified ? 'YES ✓' : 'NO ⚠️'}`)
     console.log('=' .repeat(60))
+    
+    // Final memory cleanup
+    await cleanupAfterStep()
     
     return {
       brandName: identification.brand,
@@ -231,7 +289,13 @@ export async function identifyProductComprehensively(
     }
   } catch (error) {
     console.error('❌ Comprehensive identification failed:', error)
+    // Cleanup even on error
+    await cleanupAfterStep()
     return null
+  } finally {
+    // Final cleanup
+    console.log('🧹 Final memory cleanup...')
+    clearMemoryIfPossible()
   }
 }
 

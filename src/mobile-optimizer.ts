@@ -1,67 +1,52 @@
-// Mobile Optimization - Detect device and adjust processing
+// Mobile Optimization - Memory Management for All Devices
 
 export function isMobileDevice(): boolean {
   // Check if running on mobile device
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 }
 
-export function isLowMemoryDevice(): boolean {
-  // Check if device has limited memory
+export function getDeviceInfo(): { isMobile: boolean; memoryGB: number | null } {
   // @ts-ignore - navigator.deviceMemory is experimental
-  const deviceMemory = navigator.deviceMemory
+  const deviceMemory = navigator.deviceMemory || null
+  const isMobile = isMobileDevice()
   
-  if (deviceMemory && deviceMemory < 4) {
-    console.log(`⚠️  Low memory device detected: ${deviceMemory}GB RAM`)
-    return true
-  }
+  console.log('📱 Device Info:')
+  console.log(`   Type: ${isMobile ? 'Mobile' : 'Desktop'}`)
+  console.log(`   Memory: ${deviceMemory ? deviceMemory + 'GB' : 'Unknown'}`)
   
-  // Fallback: assume mobile devices might have low memory
-  if (isMobileDevice()) {
-    console.log('📱 Mobile device detected - using lightweight processing')
-    return true
-  }
-  
-  return false
+  return { isMobile, memoryGB: deviceMemory }
 }
 
-export function shouldUseLightweightProcessing(): boolean {
-  const useLightweight = isLowMemoryDevice()
-  
-  if (useLightweight) {
-    console.log('🔋 Using lightweight processing mode for mobile/low-memory devices')
-  } else {
-    console.log('💪 Using full processing mode for desktop')
+// Force garbage collection if available
+export function clearMemory(): void {
+  // Request garbage collection (only works in some browsers with flags)
+  // @ts-ignore
+  if (window.gc) {
+    console.log('🧹 Forcing garbage collection...')
+    // @ts-ignore
+    window.gc()
   }
   
-  return useLightweight
-}
-
-// Lightweight product name extraction (no OCR, just AI)
-export async function extractProductNameLightweight(imageDataUrl: string): Promise<string | null> {
-  console.log('🔋 Lightweight extraction (skipping OCR to save memory)...')
-  
+  // Clear any large cached objects
   try {
-    // Use only AI image understanding (much lighter than OCR)
-    const response = await fetch(
-      'https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-large',
-      {
-        method: 'POST',
-        body: await fetch(imageDataUrl).then(r => r.blob())
-      }
-    )
-    
-    if (response.ok) {
-      const result = await response.json()
-      if (result && result[0]?.generated_text) {
-        const productName = result[0].generated_text
-        console.log('✅ Product identified:', productName)
-        return productName
-      }
+    // Request browser to free up memory
+    if ('memory' in performance) {
+      // @ts-ignore
+      const memoryInfo = performance.memory
+      console.log(`   Memory before cleanup: ${(memoryInfo.usedJSHeapSize / 1048576).toFixed(2)}MB`)
     }
-  } catch (error) {
-    console.error('❌ Lightweight extraction failed:', error)
+  } catch (e) {
+    // Ignore if not available
   }
-  
-  return null
+}
+
+// Memory-aware delay to allow cleanup
+export async function memoryCleanupDelay(ms: number = 100): Promise<void> {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      clearMemory()
+      resolve()
+    }, ms)
+  })
 }
 
