@@ -15,22 +15,37 @@ export const AI_CONFIG: AIConfig = {
   model: import.meta.env.VITE_AI_MODEL || 'flux'
 }
 
-// Product image generation prompt template
+// Product image generation prompt template (enhanced with detailed label info)
 export function buildProductImagePrompt(
   itemName: string,
   category: string,
   userImageContext?: string,
-  extractedName?: string
+  extractedName?: string,
+  brandName?: string,
+  allLabelText?: string[]
 ): string {
   // Use the extracted name if available (more specific than user input)
   const productName = extractedName || itemName
   
+  // Build label context from all extracted text
+  let labelContext = ''
+  if (brandName || allLabelText?.length) {
+    const labelElements: string[] = []
+    if (brandName) labelElements.push(`brand: "${brandName}"`)
+    if (allLabelText && allLabelText.length > 0) {
+      const labelText = allLabelText.slice(0, 3).join(', ') // Top 3 text elements
+      labelElements.push(`label text: "${labelText}"`)
+    }
+    labelContext = `, ${labelElements.join(', ')}`
+  }
+  
   // Build a detailed prompt that emphasizes accurate labeling
   return `Professional product photography of ${productName}, ${category} category, 
-IMPORTANT: product must show clear, readable, accurate brand label and product name "${productName}" on packaging, 
+CRITICAL: product packaging must display accurate brand label with "${brandName || productName}" prominently visible,
+product label must show clear, readable text matching the actual product${labelContext},
 studio lighting, white background, high quality, detailed, commercial product shot, 
 e-commerce ready, crisp focus on label text, centered composition, 
-product label clearly visible and legible, 4k resolution${userImageContext ? `, reference: ${userImageContext}` : ''}`
+brand name and product information clearly visible and legible on packaging, 4k resolution${userImageContext ? `, visual reference: ${userImageContext}` : ''}`
 }
 
 // Enhanced prompt with search context
@@ -387,12 +402,14 @@ export async function analyzeImageForProductName(imageDataUrl: string): Promise<
   }
 }
 
-// Main function to generate product image
+// Main function to generate product image (enhanced with detailed label info)
 export async function generateProductImage(
   itemName: string,
   category: string,
   userImageReference?: string,
-  extractedName?: string
+  extractedName?: string,
+  brandName?: string,
+  allLabelText?: string[]
 ): Promise<ImageGenerationResult> {
   // Prefer extracted name (more accurate) over user input
   const accurateProductName = extractedName || itemName
@@ -402,10 +419,16 @@ export async function generateProductImage(
   
   if (extractedName) {
     console.log('🔍 Extracted product name from uploaded image:', extractedName)
-    console.log('🏷️  Generating professional version WITH accurate product label')
+    if (brandName) {
+      console.log('🏷️  Brand identified:', brandName)
+    }
+    if (allLabelText && allLabelText.length > 0) {
+      console.log('📝 All label text found:', allLabelText.join(', '))
+    }
+    console.log('🎨 Generating professional version WITH accurate branded label')
   }
   
-  console.log('🎨 Generating product image with prompt:', enhancedPrompt)
+  console.log('🖼️  Using detailed prompt with complete label information')
   console.log('🍌 Using service:', AI_CONFIG.service)
   
   // Call appropriate AI service

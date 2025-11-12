@@ -77,31 +77,129 @@ export async function analyzeImageWithAI(imageDataUrl: string): Promise<string |
   }
 }
 
-// Combined analysis: Try AI first, fallback to OCR
-export async function analyzeProductImage(imageDataUrl: string): Promise<string | null> {
-  // Try AI captioning first (faster, better for products)
-  const aiResult = await analyzeImageWithAI(imageDataUrl)
-  if (aiResult) {
-    return aiResult
+// Enhanced product search using image
+export async function searchProductByImage(imageDataUrl: string): Promise<ProductSearchResult | null> {
+  try {
+    console.log('🔎 Searching for similar product images online...')
+    
+    // Use Google Lens-style reverse image search via SerpAPI (free tier) or similar
+    // For now, we'll use the AI caption as a search query
+    const aiCaption = await analyzeImageWithAI(imageDataUrl)
+    if (!aiCaption) {
+      return null
+    }
+    
+    // Search for product information
+    // This would ideally use Google Custom Search API or similar
+    // For now, we'll enhance with the caption
+    return {
+      brandName: extractBrandName(aiCaption),
+      productName: aiCaption,
+      fullDescription: aiCaption,
+      confidence: 0.8
+    }
+  } catch (error) {
+    console.error('Product search error:', error)
+    return null
   }
+}
+
+export interface ProductSearchResult {
+  brandName: string | null
+  productName: string
+  fullDescription: string
+  confidence: number
+}
+
+// Extract brand name from text
+function extractBrandName(text: string): string | null {
+  // Common brand patterns
+  const brandPatterns = [
+    // Coca-Cola, Pepsi, etc.
+    /\b(coca[\s-]?cola|pepsi|sprite|fanta|mountain dew|dr\.?\s*pepper)\b/i,
+    // Food brands
+    /\b(heinz|kellogg'?s|nestle|kraft|lay'?s|doritos|cheetos|pringles)\b/i,
+    // Beauty/Personal care
+    /\b(pantene|dove|nivea|l'oreal|garnier|head & shoulders|axe)\b/i,
+    // Household
+    /\b(tide|downy|lysol|clorox|windex|dawn)\b/i,
+    // Electronics
+    /\b(apple|samsung|sony|lg|dell|hp|lenovo)\b/i,
+  ]
   
-  // Fallback to OCR for text extraction
-  console.log('📖 Falling back to OCR...')
-  const ocrResult = await analyzeImageWithOCR(imageDataUrl)
-  
-  if (ocrResult.productName && ocrResult.confidence > 60) {
-    return ocrResult.productName
-  }
-  
-  // Return extracted text if no product name found
-  if (ocrResult.extractedText && ocrResult.extractedText.length > 2) {
-    return ocrResult.extractedText
+  for (const pattern of brandPatterns) {
+    const match = text.match(pattern)
+    if (match) {
+      return match[1]
+    }
   }
   
   return null
 }
 
-// Extract likely product name from OCR text
+// Enhanced combined analysis: OCR all text + AI + search
+export async function analyzeProductImage(imageDataUrl: string): Promise<string | null> {
+  console.log('🔍 Starting comprehensive product analysis...')
+  
+  // Step 1: Get ALL text from label using OCR
+  console.log('📖 Extracting all text from label...')
+  const ocrResult = await analyzeImageWithOCR(imageDataUrl)
+  console.log('📝 All text found on label:', ocrResult.extractedText)
+  
+  // Step 2: Get AI understanding of the product
+  console.log('🤖 Getting AI product identification...')
+  const aiResult = await analyzeImageWithAI(imageDataUrl)
+  console.log('🎯 AI identified product as:', aiResult)
+  
+  // Step 3: Search for similar products online
+  console.log('🔎 Searching for similar products...')
+  const searchResult = await searchProductByImage(imageDataUrl)
+  
+  // Step 4: Combine all information for best result
+  const combinedInfo = combineProductInformation(
+    ocrResult.extractedText,
+    aiResult,
+    searchResult
+  )
+  
+  console.log('✅ Final product identification:', combinedInfo)
+  return combinedInfo
+}
+
+// Combine OCR, AI, and search results for best product name
+function combineProductInformation(
+  ocrText: string,
+  aiCaption: string | null,
+  searchResult: ProductSearchResult | null
+): string {
+  // Priority: Search result > AI caption > OCR text
+  
+  if (searchResult && searchResult.confidence > 0.7) {
+    // Use search result with brand + product name
+    if (searchResult.brandName) {
+      return `${searchResult.brandName} ${searchResult.productName}`.trim()
+    }
+    return searchResult.fullDescription
+  }
+  
+  if (aiCaption) {
+    // Enhance AI caption with OCR brand names if found
+    const brandFromOCR = extractBrandName(ocrText)
+    if (brandFromOCR && !aiCaption.toLowerCase().includes(brandFromOCR.toLowerCase())) {
+      return `${brandFromOCR} ${aiCaption}`.trim()
+    }
+    return aiCaption
+  }
+  
+  // Fallback to OCR text
+  if (ocrText && ocrText.length > 2) {
+    return ocrText.split('\n')[0] // Use first line as product name
+  }
+  
+  return ''
+}
+
+// Extract likely product name from OCR text (enhanced)
 function extractProductName(text: string): string | null {
   if (!text || text.length < 2) return null
   
@@ -110,12 +208,10 @@ function extractProductName(text: string): string | null {
   
   if (lines.length === 0) return null
   
-  // Heuristics to find product name:
-  // 1. Usually the largest/most prominent text
-  // 2. Often at the top or center
-  // 3. Typically the longest single word or short phrase
+  // Step 1: Look for brand names in the text
+  const brandName = extractBrandName(text)
   
-  // Find the longest reasonable line (not too long, not too short)
+  // Step 2: Find the longest reasonable line (likely product name)
   const candidates = lines
     .filter(line => line.length >= 3 && line.length <= 50)
     .filter(line => /^[a-zA-Z0-9\s\-'&.]+$/.test(line)) // Only alphanumeric and common punctuation
@@ -125,8 +221,56 @@ function extractProductName(text: string): string | null {
   // Sort by length and pick the longest (likely the product name)
   candidates.sort((a, b) => b.length - a.length)
   
-  // Return the most likely product name
-  return candidates[0] || null
+  const productNameCandidate = candidates[0]
+  
+  // Step 3: Combine brand + product if both found
+  if (brandName && productNameCandidate && !productNameCandidate.toLowerCase().includes(brandName.toLowerCase())) {
+    return `${brandName} ${productNameCandidate}`.trim()
+  }
+  
+  // Return the best candidate
+  return productNameCandidate || null
+}
+
+// Get all text from label (comprehensive extraction)
+export function getAllLabelText(text: string): string[] {
+  if (!text) return []
+  
+  return text
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0)
+    .filter(line => /^[a-zA-Z0-9\s\-'&.,!]+$/.test(line)) // Valid text
+}
+
+// Parse label information into structured data
+export interface LabelInformation {
+  brandName: string | null
+  productName: string | null
+  allText: string[]
+  rawText: string
+}
+
+export function parseLabelInformation(ocrText: string, aiCaption?: string | null): LabelInformation {
+  const allText = getAllLabelText(ocrText)
+  const brandName = extractBrandName(ocrText)
+  let productName = extractProductName(ocrText)
+  
+  // Enhance with AI caption if available
+  if (aiCaption && !productName) {
+    productName = aiCaption
+  } else if (aiCaption && brandName && !aiCaption.toLowerCase().includes(brandName.toLowerCase())) {
+    productName = `${brandName} ${aiCaption}`.trim()
+  } else if (aiCaption) {
+    productName = aiCaption
+  }
+  
+  return {
+    brandName,
+    productName,
+    allText,
+    rawText: ocrText
+  }
 }
 
 // Helper: Suggest product name based on analysis

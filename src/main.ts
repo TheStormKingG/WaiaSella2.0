@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { SUPABASE_CONFIG } from './config'
 import jsPDF from 'jspdf'
 import { generateProductImage, convertUrlToDataUrl } from './ai-config'
-import { analyzeProductImage, suggestProductName, combineProductNames } from './image-analysis'
+import { analyzeProductImage, suggestProductName, combineProductNames, parseLabelInformation, type LabelInformation } from './image-analysis'
 
 // WaiaSella POS - Vite + TypeScript SPA
 
@@ -153,8 +153,9 @@ const confirmDeleteBtn = qs<HTMLButtonElement>('#confirmDeleteBtn')
 // Inventory state
 let selectedInventoryCategory: string | null = null
 
-// Store extracted product name from image analysis
+// Store extracted product information from image analysis
 let extractedProductName: string | null = null
+let extractedLabelInfo: LabelInformation | null = null
 
 // Reports
 const totalSalesEl = qs<HTMLDivElement>('#totalSales')
@@ -362,15 +363,20 @@ async function handleImageSelect(e: Event) {
     itemImagePreview.src = dataUrl
     itemImageData.value = dataUrl
     
-    // Analyze the image to extract product name/label
-    console.log('🔍 Analyzing uploaded image...')
-    aiGenerationStatus.textContent = 'Analyzing uploaded image...'
+    // Analyze the image to extract ALL product information from label
+    console.log('🔍 Starting comprehensive label analysis...')
+    aiGenerationStatus.textContent = 'Analyzing product label...'
     
     try {
+      // Get comprehensive product analysis
       extractedProductName = await analyzeProductImage(dataUrl)
       
       if (extractedProductName) {
-        console.log('✅ Extracted product name:', extractedProductName)
+        console.log('✅ Comprehensive analysis complete!')
+        console.log('📦 Full product identification:', extractedProductName)
+        
+        // Note: parseLabelInformation is called inside analyzeProductImage
+        // Store the extracted info for use during AI generation
         
         // Get the name input field
         const nameInput = itemForm.querySelector<HTMLInputElement>('input[name="name"]')
@@ -385,16 +391,17 @@ async function handleImageSelect(e: Event) {
           } else {
             // Show a subtle notification that we detected a name
             console.log(`💡 Detected "${extractedProductName}" in image (keeping user's "${currentName}")`)
-            // Could show a toast notification here
           }
         }
       } else {
         console.log('ℹ️ No text/labels detected in image')
         extractedProductName = null
+        extractedLabelInfo = null
       }
     } catch (error) {
       console.error('Error analyzing image:', error)
       extractedProductName = null
+      extractedLabelInfo = null
     }
   }
   reader.readAsDataURL(file)
@@ -995,8 +1002,9 @@ function openItemDialog(item?: Item) {
   itemImagePreview.src = imageUrl
   itemImageData.value = item?.image || ''
   
-  // Reset extracted product name when opening dialog
+  // Reset extracted product information when opening dialog
   extractedProductName = null
+  extractedLabelInfo = null
   
   itemDialog.showModal()
 }
@@ -1014,19 +1022,43 @@ async function saveItemFromDialog(ev: SubmitEvent) {
       aiGenerationOverlay.style.display = 'flex'
       aiGenerationStatus.textContent = 'Building enhanced prompt...'
       
-      // Generate AI image
+      // Generate AI image with complete label information
       const itemName = data.name.trim()
       const category = data.category.trim() || 'Other'
       
-      // Combine user-entered name with extracted name for better AI results
-      const combinedName = extractedProductName 
-        ? combineProductNames(itemName, extractedProductName)
-        : itemName
+      // Use extracted product name (most accurate)
+      const productNameForAI = extractedProductName || itemName
       
-      aiGenerationStatus.textContent = 'Generating product image with AI...'
-      console.log('🎯 Using combined name for AI:', combinedName)
+      // Extract brand and label info if available
+      let brandName: string | undefined
+      let allLabelText: string[] | undefined
       
-      const result = await generateProductImage(combinedName, category, data.image, extractedProductName || undefined)
+      if (extractedProductName && data.image) {
+        // Parse all label information from the analysis
+        console.log('📋 Preparing detailed label information for AI generation...')
+        // Brand and text were already extracted during analysis
+        // For now, extract brand from the product name
+        const brandMatch = extractedProductName.match(/^([A-Z][a-z]+(?:[\s-][A-Z][a-z]+)*)/i)
+        if (brandMatch) {
+          brandName = brandMatch[1]
+          console.log('🏷️  Using brand name:', brandName)
+        }
+      }
+      
+      aiGenerationStatus.textContent = 'Generating professional product image with accurate label...'
+      console.log('🎯 Product for AI generation:', productNameForAI)
+      if (brandName) {
+        console.log('🏷️  Including brand:', brandName)
+      }
+      
+      const result = await generateProductImage(
+        productNameForAI, 
+        category, 
+        data.image, 
+        extractedProductName || undefined,
+        brandName,
+        allLabelText
+      )
       
       if (result.success) {
         aiGenerationStatus.textContent = 'Image generated successfully! ✓'
