@@ -17,9 +17,9 @@
 
 | Name | Value |
 |------|-------|
-| `VITE_AI_SERVICE` | `gemini` |
-| `VITE_AI_API_KEY` | `AIzaSyDBXIK7rNRX5rFZ8vu5C165ONYP1OP2c9I` |
-| `VITE_AI_MODEL` | `gemini-2.0-flash-exp` |
+| `VITE_AI_SERVICE` | `pollinations` |
+| `VITE_AI_API_KEY` | `none` |
+| `VITE_AI_MODEL` | `flux` |
 | `VITE_SUPABASE_URL` | *(your existing Supabase URL)* |
 | `VITE_SUPABASE_ANON_KEY` | *(your existing Supabase key)* |
 
