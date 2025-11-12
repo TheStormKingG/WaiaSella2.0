@@ -2,17 +2,17 @@
 // Configure your preferred AI service here
 
 export interface AIConfig {
-  service: 'pollinations' | 'huggingface' | 'stability' | 'replicate' | 'dalle' | 'custom'
+  service: 'pollinations'
   apiKey: string
   endpoint?: string
   model?: string
 }
 
-// Configure your AI service here
+// Using ONLY Pollinations - free, no API key needed
 export const AI_CONFIG: AIConfig = {
-  service: (import.meta.env.VITE_AI_SERVICE || 'pollinations') as any,
-  apiKey: import.meta.env.VITE_AI_API_KEY || 'none', // No API key needed for free services!
-  model: import.meta.env.VITE_AI_MODEL || 'flux'
+  service: 'pollinations',
+  apiKey: 'none', // Pollinations doesn't need an API key
+  model: 'flux'
 }
 
 // Product image generation prompt template (enhanced with detailed label info)
@@ -94,33 +94,45 @@ export interface ImageGenerationResult {
 
 // Pollinations.ai - Completely FREE, no API key needed!
 async function generateWithPollinations(prompt: string): Promise<ImageGenerationResult> {
+  console.log('🌸 Pollinations.ai - Starting image generation...')
+  console.log('📝 Prompt:', prompt.substring(0, 100) + '...')
+  
   try {
     // Pollinations uses a simple URL-based API - completely free!
     const encodedPrompt = encodeURIComponent(prompt)
     const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&enhance=true`
     
-    console.log('🌸 Generating with Pollinations.ai (FREE):', prompt)
+    console.log('🔗 Request URL:', imageUrl.substring(0, 100) + '...')
     
     // Fetch the image
+    console.log('⏳ Fetching image from Pollinations...')
     const response = await fetch(imageUrl)
+    
     if (!response.ok) {
+      console.error('❌ Pollinations API returned error:', response.status, response.statusText)
       return { 
         success: false, 
-        error: `Pollinations API error: ${response.status}` 
+        error: `Pollinations API error: ${response.status} ${response.statusText}` 
       }
     }
     
+    console.log('✓ Image received, converting to base64...')
+    
     // Convert to base64
     const blob = await response.blob()
+    console.log('📦 Blob size:', (blob.size / 1024).toFixed(2), 'KB')
+    
     return new Promise((resolve) => {
       const reader = new FileReader()
       reader.onloadend = () => {
+        console.log('✅ Image converted successfully!')
         resolve({
           success: true,
           imageData: reader.result as string
         })
       }
-      reader.onerror = () => {
+      reader.onerror = (error) => {
+        console.error('❌ FileReader error:', error)
         resolve({
           success: false,
           error: 'Failed to convert image to base64'
@@ -129,6 +141,7 @@ async function generateWithPollinations(prompt: string): Promise<ImageGeneration
       reader.readAsDataURL(blob)
     })
   } catch (error) {
+    console.error('❌ Pollinations generation failed:', error)
     return { 
       success: false, 
       error: `Pollinations error: ${error instanceof Error ? error.message : 'Unknown error'}` 
@@ -429,41 +442,10 @@ export async function generateProductImage(
   }
   
   console.log('🖼️  Using detailed prompt with complete label information')
-  console.log('🍌 Using service:', AI_CONFIG.service)
-  console.log('   Available services: pollinations, huggingface, stability, replicate, dalle')
+  console.log('🌸 Using Pollinations.ai (FREE - No API key needed)')
   
-  // Validate service is set
-  if (!AI_CONFIG.service) {
-    console.error('❌ No AI service configured! Defaulting to pollinations...')
-    return await generateWithPollinations(enhancedPrompt)
-  }
-  
-  // Call appropriate AI service
-  const service = AI_CONFIG.service.toLowerCase().trim()
-  console.log('   Using service (normalized):', service)
-  
-  switch (service) {
-    case 'pollinations':
-      return await generateWithPollinations(enhancedPrompt)
-    case 'huggingface':
-      return await generateWithHuggingFace(enhancedPrompt)
-    case 'stability':
-      return await generateWithStability(enhancedPrompt)
-    case 'replicate':
-      return await generateWithReplicate(enhancedPrompt)
-    case 'dalle':
-      return await generateWithDalle(enhancedPrompt)
-    case 'custom':
-      // For custom endpoints
-      if (!AI_CONFIG.endpoint) {
-        return { success: false, error: 'Custom endpoint not configured' }
-      }
-      // Implement custom API call here
-      return { success: false, error: 'Custom service not implemented' }
-    default:
-      console.error(`❌ Unknown service: "${service}". Falling back to pollinations...`)
-      return await generateWithPollinations(enhancedPrompt)
-  }
+  // Use Pollinations - simple and free!
+  return await generateWithPollinations(enhancedPrompt)
 }
 
 // Convert image URL to base64 data URL (for external URLs from APIs like DALL-E)
