@@ -13,6 +13,7 @@ const STORAGE_KEYS = {
   soldTally: 'ws.soldTally',
   transactionCounter: 'ws.transactionCounter',
   cart: 'ws.cart',
+  cartMode: 'ws.cartMode',
   currentView: 'ws.currentView',
   inventoryView: 'ws.inventoryView',
   selectedInventoryCategory: 'ws.selectedInventoryCategory',
@@ -78,6 +79,7 @@ let transactions: Transaction[] = load<Transaction[]>(STORAGE_KEYS.transactions)
 let soldTally: Record<string, number> = load<Record<string, number>>(STORAGE_KEYS.soldTally) ?? {}
 let cart: Record<string, number> = load<Record<string, number>>(STORAGE_KEYS.cart) ?? {}
 let selectedCategory = 'All'
+let cartMode: 'sale' | 'order' = (load<string>(STORAGE_KEYS.cartMode) === 'order') ? 'order' : 'sale'
 let customCategories: string[] = load<string[]>(STORAGE_KEYS.customCategories) ?? []
 customCategories = unique([...customCategories, 'Other'])
 save(STORAGE_KEYS.customCategories, customCategories)
@@ -99,6 +101,8 @@ const cartPanel = qs<HTMLElement>('#cartPanel')
 const cartToggle = qs<HTMLButtonElement>('#cartToggle')
 const cartHeaderCount = qs<HTMLSpanElement>('#cartHeaderCount')
 const cartHeaderTotal = qs<HTMLSpanElement>('#cartHeaderTotal')
+const cartModeLabel = qs<HTMLSpanElement>('#cartModeLabel')
+const cartModeToggle = qs<HTMLButtonElement>('#cartModeToggle')
 
 // Receipt
 const receiptDialog = qs<HTMLDialogElement>('#receiptDialog')
@@ -346,6 +350,11 @@ completeSaleBtn.addEventListener('click', completeSale)
 cartToggle.addEventListener('click', () => {
   cartPanel.classList.toggle('collapsed')
 })
+cartModeToggle.addEventListener('click', () => {
+  cartMode = cartMode === 'sale' ? 'order' : 'sale'
+  save(STORAGE_KEYS.cartMode, cartMode)
+  updateCartModeUI()
+})
 closeReceiptBtn.addEventListener('click', () => receiptDialog.close())
 whatsappReceiptBtn.addEventListener('click', shareReceiptWhatsApp)
 downloadReceiptBtn.addEventListener('click', downloadReceiptPDF)
@@ -555,6 +564,17 @@ function showAddToCartAnimation(element: HTMLElement) {
   }, 600)
 }
 
+function updateCartModeUI() {
+  if (cartModeLabel) {
+    cartModeLabel.textContent = cartMode === 'sale' ? '(Sale)' : '(Order)'
+  }
+  if (cartModeToggle) {
+    cartModeToggle.textContent = cartMode === 'sale' ? 'Switch to Order' : 'Switch to Sale'
+    cartModeToggle.setAttribute('aria-pressed', cartMode === 'order' ? 'true' : 'false')
+    cartModeToggle.setAttribute('title', cartMode === 'sale' ? 'Switch cart to order mode' : 'Switch cart to sale mode')
+  }
+}
+
 function renderProducts() {
   const term = cashierSearch.value.toLowerCase()
   const filtered = inventory.filter(
@@ -582,6 +602,7 @@ function renderProducts() {
 }
 
 function renderCart() {
+  updateCartModeUI()
   const entries = Object.entries(cart)
   cartItemsEl.classList.toggle('empty', entries.length === 0)
   cartItemsEl.innerHTML = ''
