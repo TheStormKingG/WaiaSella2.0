@@ -121,6 +121,7 @@ const inventoryItemsView = qs<HTMLDivElement>('#inventoryItemsView')
 const inventoryList = qs<HTMLUListElement>('#inventoryList')
 const inventorySearch = qs<HTMLInputElement>('#inventorySearch')
 const addItemFab = qs<HTMLButtonElement>('#addItemFab')
+addItemFab.style.display = 'none'
 const headerSearch = inventorySearch // Using the same element now in header
 const manageCategoriesView = qs<HTMLDivElement>('#manageCategoriesView')
 const categoryManageList = qs<HTMLUListElement>('#categoryManageList')
@@ -266,13 +267,21 @@ tabs.forEach((t) =>
       salesSearch.style.display = 'block'
       inventorySearch.style.display = 'none'
       headerBackBtn.style.display = 'none'
+      addItemFab.style.display = 'none'
     } else if (id === 'inventoryView') {
       salesSearch.style.display = 'none'
       // Search bar visibility controlled by inventory sub-view
+      const savedInventoryView = load<string>(STORAGE_KEYS.inventoryView)
+      if (savedInventoryView === 'items') {
+        addItemFab.style.display = 'flex'
+      } else {
+        addItemFab.style.display = 'none'
+      }
     } else {
       salesSearch.style.display = 'none'
       inventorySearch.style.display = 'none'
       headerBackBtn.style.display = 'none'
+      addItemFab.style.display = 'none'
     }
     
     if (id === 'reportsView') renderReports()
@@ -771,6 +780,7 @@ function showInventoryItems() {
   save(STORAGE_KEYS.selectedInventoryCategory, selectedInventoryCategory)
   headerBackBtn.style.display = 'block'
   inventorySearch.style.display = 'block'
+  addItemFab.style.display = 'flex'
   headerTitle.textContent = selectedInventoryCategory || 'All Items'
   renderInventoryItems()
 }
@@ -783,6 +793,7 @@ function showInventoryCategories() {
   save(STORAGE_KEYS.inventoryView, 'categories')
   headerBackBtn.style.display = 'none'
   inventorySearch.style.display = 'none'
+  addItemFab.style.display = 'none'
   headerTitle.textContent = 'Inventory'
 }
 
@@ -793,6 +804,7 @@ function showManageCategories() {
   save(STORAGE_KEYS.inventoryView, 'manage')
   headerBackBtn.style.display = 'block'
   inventorySearch.style.display = 'none'
+  addItemFab.style.display = 'none'
   headerTitle.textContent = 'Manage Categories'
   renderManageCategories()
 }
