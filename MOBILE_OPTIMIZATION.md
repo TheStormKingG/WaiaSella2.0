@@ -1,5 +1,7 @@
 # 📱 Mobile Optimization - Low Memory Solution
 
+> **Archived Note:** This document captures the previous AI-assisted image pipeline. With AI generation removed, mobile devices now only handle manual photo capture/upload, and the cleanup routines are no longer required.
+
 ## 🎯 Problem Solved
 
 **Issue:** "Low memory" error on mobile when uploading product images for AI analysis

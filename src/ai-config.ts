@@ -1,5 +1,8 @@
-// AI Image Generation Configuration
-// Configure your preferred AI service here
+// AI Image Generation Configuration (ARCHIVED)
+// ---------------------------------------------------------------------------
+// NOTE: The application no longer invokes any of the functions in this file.
+// They are retained only for historical reference in case AI image generation
+// is reintroduced in the future.
 
 export interface AIConfig {
   service: 'pollinations'

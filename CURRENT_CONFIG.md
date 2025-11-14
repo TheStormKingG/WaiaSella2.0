@@ -1,5 +1,7 @@
 # 🎯 Current Configuration - Simplified & Optimized
 
+> **Archived Note:** AI image services and lightweight processing were part of the previous automated pipeline. With AI disabled, only manual capture/upload is used. Keep this document only if you plan to reintroduce AI later.
+
 ## ✅ **What's Configured**
 
 ### **AI Service: Pollinations.ai**

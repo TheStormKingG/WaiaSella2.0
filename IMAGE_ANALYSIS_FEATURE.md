@@ -1,5 +1,7 @@
 # 🔍 Image Analysis Feature
 
+> **Archived Note:** Automated image analysis (OCR + AI captioning) is no longer active. Users now capture or upload photos and enter item details manually. This document remains for historical reference only.
+
 ## ✨ What's New
 
 Your WaiaSella POS now **automatically analyzes uploaded product images** to extract product names and labels!

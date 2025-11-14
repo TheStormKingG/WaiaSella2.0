@@ -1,5 +1,7 @@
 # 🎨 FREE AI Image Generation Services
 
+> **Archived Note:** AI image generation has been removed from the product workflow. The details below remain for historical reference only.
+
 ## ✅ Configured and Ready to Use!
 
 Your app now supports **completely FREE** AI image generation services!

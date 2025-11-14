@@ -1,5 +1,6 @@
 // Product Identification System - Logical & Analytical Approach
 // Uses OCR → Search → Analysis → Verification → Generation
+// NOTE: Archived for reference. The current application no longer uses this module.
 
 import Tesseract from 'tesseract.js'
 

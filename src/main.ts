@@ -2,10 +2,6 @@ import '../styles.css'
 import { createClient } from '@supabase/supabase-js'
 import { SUPABASE_CONFIG } from './config'
 import jsPDF from 'jspdf'
-import { generateProductImage, convertUrlToDataUrl } from './ai-config'
-import { analyzeProductImage, suggestProductName, combineProductNames, parseLabelInformation, type LabelInformation } from './image-analysis'
-import { identifyProductComprehensively, type ProductIdentification } from './product-identifier'
-import { getDeviceInfo, clearMemory, memoryCleanupDelay } from './mobile-optimizer'
 
 // WaiaSella POS - Vite + TypeScript SPA
 
@@ -137,9 +133,6 @@ const itemImageCapture = qs<HTMLInputElement>('#itemImageCapture')
 const uploadImageBtn = qs<HTMLButtonElement>('#uploadImageBtn')
 const captureImageBtn = qs<HTMLButtonElement>('#captureImageBtn')
 const itemImageData = qs<HTMLInputElement>('#itemImageData')
-const generateAiImage = qs<HTMLInputElement>('#generateAiImage')
-const aiGenerationOverlay = qs<HTMLDivElement>('#aiGenerationOverlay')
-const aiGenerationStatus = qs<HTMLDivElement>('#aiGenerationStatus')
 
 // Category modals
 const renameCategoryDialog = qs<HTMLDialogElement>('#renameCategoryDialog')
@@ -155,11 +148,6 @@ const confirmDeleteBtn = qs<HTMLButtonElement>('#confirmDeleteBtn')
 
 // Inventory state
 let selectedInventoryCategory: string | null = null
-
-// Store extracted product information from image analysis
-let extractedProductName: string | null = null
-let extractedLabelInfo: LabelInformation | null = null
-let productIdentification: ProductIdentification | null = null
 
 // Reports
 const totalSalesEl = qs<HTMLDivElement>('#totalSales')
@@ -380,76 +368,15 @@ headerBackBtn.addEventListener('click', () => {
 })
 
 // Image upload/capture
-async function handleImageSelect(e: Event) {
+function handleImageSelect(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (!file) return
-  
+
   const reader = new FileReader()
-  reader.onload = async (event) => {
+  reader.onload = (event) => {
     const dataUrl = event.target?.result as string
     itemImagePreview.src = dataUrl
     itemImageData.value = dataUrl
-    
-    // Intelligent product identification (with memory management for ALL devices)
-    console.log('\n')
-    
-    try {
-      // Get device info
-      const deviceInfo = getDeviceInfo()
-      
-      // Clear memory before starting heavy processing
-      console.log('🧹 Clearing memory before analysis...')
-      clearMemory()
-      await memoryCleanupDelay(100)
-      
-      // Run comprehensive identification with memory cleanup between steps
-      console.log('🎯 Starting comprehensive identification (all devices)...')
-      aiGenerationStatus.textContent = 'Analyzing product...'
-      
-      productIdentification = await identifyProductComprehensively(dataUrl)
-      
-      if (productIdentification) {
-        extractedProductName = productIdentification.fullName
-        
-        console.log('\n✨ IDENTIFICATION SUCCESS!')
-        console.log(`   Brand: ${productIdentification.brandName}`)
-        console.log(`   Product: ${productIdentification.productName}`)
-        console.log(`   Full Name: ${productIdentification.fullName}`)
-        console.log(`   Confidence: ${Math.round(productIdentification.confidence * 100)}%`)
-        console.log(`   Verified: ${productIdentification.verifiedBySearch ? 'YES ✓' : 'NO'}`)
-        console.log(`   All Label Text: [${productIdentification.allTextFromLabel.join(', ')}]`)
-        console.log('\n')
-        
-        // Auto-fill name field
-        const nameInput = itemForm.querySelector<HTMLInputElement>('input[name="name"]')
-        if (nameInput) {
-          const currentName = nameInput.value.trim()
-          if (!currentName || currentName.toLowerCase() === 'new item' || currentName.toLowerCase() === 'item') {
-            nameInput.value = productIdentification.fullName
-            console.log(`📝 Auto-filled with verified name: "${productIdentification.fullName}"`)
-          } else {
-            console.log(`💡 Identified "${productIdentification.fullName}" (keeping user's "${currentName}")`)
-          }
-        }
-      } else {
-        console.log('\n⚠️  Could not identify product from image')
-        console.log('   You can enter the name manually\n')
-      }
-      
-      // Clear memory after all processing
-      console.log('🧹 Clearing memory after analysis...')
-      clearMemory()
-      await memoryCleanupDelay(100)
-      
-    } catch (error) {
-      console.error('❌ Product identification error:', error)
-      extractedProductName = null
-      productIdentification = null
-      
-      // Clear memory on error too
-      console.log('🧹 Clearing memory after error...')
-      clearMemory()
-    }
   }
   reader.readAsDataURL(file)
 }
@@ -1056,114 +983,15 @@ function openItemDialog(item?: Item) {
     deleteItemBtn.style.display = 'none'
   }
   
-  // Reset extracted product information when opening dialog
-  extractedProductName = null
-  extractedLabelInfo = null
-  productIdentification = null
-  
   itemDialog.showModal()
 }
 
-async function saveItemFromDialog(ev: SubmitEvent) {
+function saveItemFromDialog(ev: SubmitEvent) {
   ev.preventDefault()
   const data = Object.fromEntries(new FormData(itemForm) as any) as Record<string, string>
   const existingItem = inventory.find((i) => i.id === (data.id || ''))
   const newStock = Number(data.stock) || 0
-  
-  // Check if AI generation is requested
-  if (generateAiImage.checked) {
-    try {
-      // Show loading overlay
-      aiGenerationOverlay.style.display = 'flex'
-      aiGenerationStatus.textContent = 'Building enhanced prompt...'
-      
-      // Generate AI image with VERIFIED brand and product information
-      const itemName = data.name.trim()
-      const category = data.category.trim() || 'Other'
-      
-      // Use verified product identification if available
-      let productNameForAI = itemName
-      let brandName: string | undefined
-      let allLabelText: string[] | undefined
-      let verified = false
-      
-      if (productIdentification) {
-        // We have verified product information!
-        productNameForAI = productIdentification.fullName
-        brandName = productIdentification.brandName
-        allLabelText = productIdentification.allTextFromLabel
-        verified = productIdentification.verifiedBySearch
-        
-        console.log('\n🎨 Using VERIFIED product information for AI generation:')
-        console.log(`   Brand: ${brandName}`)
-        console.log(`   Product: ${productIdentification.productName}`)
-        console.log(`   Full Name: ${productNameForAI}`)
-        console.log(`   All Label Text: [${allLabelText.join(', ')}]`)
-        console.log(`   Verified by Search: ${verified ? 'YES ✓' : 'NO'}\n`)
-      } else {
-        console.log('⚠️  No verified product info, using user input')
-      }
-      
-      aiGenerationStatus.textContent = verified 
-        ? 'Generating with verified product information...'
-        : 'Generating product image...'
-      
-      const result = await generateProductImage(
-        productNameForAI, 
-        category, 
-        data.image, 
-        productNameForAI,
-        brandName,
-        allLabelText
-      )
-      
-      if (result.success) {
-        aiGenerationStatus.textContent = 'Image generated successfully! ✓'
-        
-        // Use the generated image
-        let imageData = result.imageData
-        if (!imageData && result.imageUrl) {
-          aiGenerationStatus.textContent = 'Converting image...'
-          imageData = await convertUrlToDataUrl(result.imageUrl)
-        }
-        
-        if (imageData) {
-          itemImagePreview.src = imageData
-          itemImageData.value = imageData
-          data.image = imageData
-        }
-        
-        // Brief pause to show success message
-        await new Promise(resolve => setTimeout(resolve, 800))
-      } else {
-        // Show error but continue with save
-        aiGenerationStatus.textContent = `Error: ${result.error || 'Generation failed'}`
-        await new Promise(resolve => setTimeout(resolve, 2000))
-        console.error('AI generation error:', result.error)
-        
-        // Ask user if they want to continue without AI image
-        if (!confirm(`AI image generation failed: ${result.error}\n\nContinue saving item with current image?`)) {
-          aiGenerationOverlay.style.display = 'none'
-          return
-        }
-      }
-    } catch (error) {
-      console.error('AI generation error:', error)
-      const errorMsg = error instanceof Error ? error.message : 'Unknown error'
-      aiGenerationStatus.textContent = `Error: ${errorMsg}`
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      if (!confirm(`AI image generation failed: ${errorMsg}\n\nContinue saving item with current image?`)) {
-        aiGenerationOverlay.style.display = 'none'
-        return
-      }
-    } finally {
-      // Hide loading overlay
-      aiGenerationOverlay.style.display = 'none'
-      generateAiImage.checked = false // Reset checkbox for next time
-    }
-  }
-  
+
   const payload: Item = {
     id: data.id || id(),
     name: data.name.trim(),

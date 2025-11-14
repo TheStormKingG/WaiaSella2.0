@@ -1,5 +1,7 @@
 # 🧹 Memory Management Strategy
 
+> **Archived Note:** The aggressive cleanup described here supported the former AI image generation pipeline. With AI disabled, the manual workflow no longer depends on these routines, but the techniques are retained for future reference.
+
 ## ✅ **Solution: Aggressive Memory Cleanup**
 
 Instead of skipping OCR on mobile, we now **run the full 5-step process on ALL devices** with aggressive memory cleanup between each step.

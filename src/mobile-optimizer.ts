@@ -1,4 +1,5 @@
-// Mobile Optimization - Memory Management for All Devices
+// Mobile Optimization - Memory Management for All Devices (ARCHIVED)
+// NOTE: The manual-only image workflow no longer uses these helpers.
 
 export function isMobileDevice(): boolean {
   // Check if running on mobile device

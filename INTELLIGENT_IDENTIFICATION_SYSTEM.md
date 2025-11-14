@@ -1,5 +1,7 @@
 # 🧠 Intelligent Product Identification System
 
+> **Archived Note:** The intelligent identification pipeline has been retired. Product identification now depends on manual entry. Keep this document for historical or future reference only.
+
 ## 🎯 **Logical & Analytical Approach**
 
 This system mirrors how a human would identify a product: **See → Read → Search → Verify → Generate**

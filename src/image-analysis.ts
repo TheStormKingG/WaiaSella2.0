@@ -1,4 +1,5 @@
 // Image Analysis Module - Extract product names and text from images
+// NOTE: Archived for reference. The live app no longer imports or uses this module.
 import Tesseract from 'tesseract.js'
 
 export interface ImageAnalysisResult {
