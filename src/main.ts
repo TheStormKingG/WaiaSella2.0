@@ -87,10 +87,10 @@ const tabs = qsa<HTMLButtonElement>('.tab')
 const views = qsa<HTMLElement>('.view')
 const headerTitle = qs<HTMLHeadingElement>('.app-header h1')
 
-// Sales
+// Cashier
 const categoryFilter = qs<HTMLSelectElement>('#categoryFilter')
 const productGrid = qs<HTMLDivElement>('#productGrid')
-const salesSearch = qs<HTMLInputElement>('#salesSearch') // Now in header
+const cashierSearch = qs<HTMLInputElement>('#cashierSearch') // Now in header
 const cartItemsEl = qs<HTMLDivElement>('#cartItems')
 const cartTaxEl = qs<HTMLSpanElement>('#cartTax')
 const cartTotalEl = qs<HTMLSpanElement>('#cartTotal')
@@ -263,13 +263,13 @@ tabs.forEach((t) =>
     save(STORAGE_KEYS.currentView, id)
     
     // Hide/show search bars and back button based on view
-    if (id === 'salesView') {
-      salesSearch.style.display = 'block'
+    if (id === 'cashierView') {
+      cashierSearch.style.display = 'block'
       inventorySearch.style.display = 'none'
       headerBackBtn.style.display = 'none'
       addItemFab.style.display = 'none'
     } else if (id === 'inventoryView') {
-      salesSearch.style.display = 'none'
+      cashierSearch.style.display = 'none'
       // Search bar visibility controlled by inventory sub-view
       const savedInventoryView = load<string>(STORAGE_KEYS.inventoryView)
       if (savedInventoryView === 'items') {
@@ -278,7 +278,7 @@ tabs.forEach((t) =>
         addItemFab.style.display = 'none'
       }
     } else {
-      salesSearch.style.display = 'none'
+      cashierSearch.style.display = 'none'
       inventorySearch.style.display = 'none'
       headerBackBtn.style.display = 'none'
       addItemFab.style.display = 'none'
@@ -294,7 +294,11 @@ tabs.forEach((t) =>
 )
 
 // Restore last view on load
-const savedView = load<string>(STORAGE_KEYS.currentView)
+let savedView = load<string>(STORAGE_KEYS.currentView)
+if (savedView === 'salesView') {
+  savedView = 'cashierView'
+  save(STORAGE_KEYS.currentView, savedView)
+}
 if (savedView) {
   tabs.forEach((x) => x.classList.remove('active'))
   const activeTab = Array.from(tabs).find(t => t.dataset.target === savedView)
@@ -304,8 +308,8 @@ if (savedView) {
     qs<HTMLElement>('#' + savedView).classList.add('active')
     headerTitle.textContent = activeTab.textContent?.trim() ?? ''
     
-    if (savedView === 'salesView') {
-      salesSearch.style.display = 'block'
+    if (savedView === 'cashierView') {
+      cashierSearch.style.display = 'block'
     } else if (savedView === 'inventoryView') {
       const savedInventoryView = load<string>(STORAGE_KEYS.inventoryView)
       const savedCategory = load<string>(STORAGE_KEYS.selectedInventoryCategory)
@@ -328,12 +332,12 @@ if (savedView) {
     }
   }
 } else {
-  // Default to sales view
-  salesSearch.style.display = 'block'
+  // Default to cashier view
+  cashierSearch.style.display = 'block'
 }
 
-// Sales interactions
-salesSearch.addEventListener('input', renderProducts)
+// Cashier interactions
+cashierSearch.addEventListener('input', renderProducts)
 categoryFilter.addEventListener('change', () => {
   selectedCategory = categoryFilter.value
   renderProducts()
@@ -552,7 +556,7 @@ function showAddToCartAnimation(element: HTMLElement) {
 }
 
 function renderProducts() {
-  const term = salesSearch.value.toLowerCase()
+  const term = cashierSearch.value.toLowerCase()
   const filtered = inventory.filter(
     (i) => (selectedCategory === 'All' || i.category === selectedCategory) && (i.name.toLowerCase().includes(term) || i.category.toLowerCase().includes(term))
   )

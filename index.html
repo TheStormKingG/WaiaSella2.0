@@ -7,15 +7,15 @@
   </head>
   <body>
     <header class="app-header">
-      <h1>Sales</h1>
-      <input id="salesSearch" class="header-search" placeholder="Search products..." style="display: none;" />
+      <h1>Cashier</h1>
+      <input id="cashierSearch" class="header-search" placeholder="Search products..." style="display: none;" />
       <input id="inventorySearch" class="header-search" placeholder="Search inventory..." style="display: none;" />
       <button id="headerBackBtn" class="header-back-btn" style="display: none;">← Back</button>
     </header>
 
     <main id="app" class="app">
-      <!-- Sales View -->
-      <section id="salesView" class="view active">
+      <!-- Cashier View -->
+      <section id="cashierView" class="view active">
         <div class="sales-layout">
         <div class="sales-left">
           <div class="search-filter-bar">
@@ -113,9 +113,9 @@
     </main>
 
     <nav class="tabbar">
-      <button class="tab active" data-target="salesView">
+      <button class="tab active" data-target="cashierView">
         <span class="icon">🛒</span>
-        <span>Sales</span>
+        <span>Cashier</span>
       </button>
       <button class="tab" data-target="inventoryView">
         <span class="icon">📦</span>

@@ -504,7 +504,7 @@ body {
     min-width: auto;
   }
   
-  /* Sales screen - 2 columns with vertical scroll on mobile */
+/* Cashier screen - 2 columns with vertical scroll on mobile */
   #productGrid {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
