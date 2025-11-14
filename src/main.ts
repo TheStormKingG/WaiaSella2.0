@@ -16,6 +16,7 @@ const STORAGE_KEYS = {
   currentView: 'ws.currentView',
   inventoryView: 'ws.inventoryView',
   selectedInventoryCategory: 'ws.selectedInventoryCategory',
+  customCategories: 'ws.customCategories',
 } as const
 
 type Item = {
@@ -77,6 +78,9 @@ let transactions: Transaction[] = load<Transaction[]>(STORAGE_KEYS.transactions)
 let soldTally: Record<string, number> = load<Record<string, number>>(STORAGE_KEYS.soldTally) ?? {}
 let cart: Record<string, number> = load<Record<string, number>>(STORAGE_KEYS.cart) ?? {}
 let selectedCategory = 'All'
+let customCategories: string[] = load<string[]>(STORAGE_KEYS.customCategories) ?? []
+customCategories = unique([...customCategories, 'Other'])
+save(STORAGE_KEYS.customCategories, customCategories)
 
 // Elements
 const tabs = qsa<HTMLButtonElement>('.tab')
@@ -120,6 +124,11 @@ const addItemFab = qs<HTMLButtonElement>('#addItemFab')
 const headerSearch = inventorySearch // Using the same element now in header
 const manageCategoriesView = qs<HTMLDivElement>('#manageCategoriesView')
 const categoryManageList = qs<HTMLUListElement>('#categoryManageList')
+const addCategoryBtn = qs<HTMLButtonElement>('#addCategoryBtn')
+const addCategoryDialog = qs<HTMLDialogElement>('#addCategoryDialog')
+const addCategoryForm = qs<HTMLFormElement>('#addCategoryForm')
+const addCategoryInput = qs<HTMLInputElement>('#addCategoryInput')
+const cancelAddCategoryBtn = qs<HTMLButtonElement>('#cancelAddCategoryBtn')
 const headerBackBtn = qs<HTMLButtonElement>('#headerBackBtn')
 const itemDialog = qs<HTMLDialogElement>('#itemDialog')
 const itemForm = qs<HTMLFormElement>('#itemForm')
@@ -366,6 +375,12 @@ headerBackBtn.addEventListener('click', () => {
     showInventoryCategories()
   }
 })
+addCategoryBtn.addEventListener('click', openAddCategoryDialog)
+addCategoryForm.addEventListener('submit', (e) => {
+  e.preventDefault()
+  addCategory()
+})
+cancelAddCategoryBtn.addEventListener('click', () => addCategoryDialog.close())
 
 // Image upload/capture
 function handleImageSelect(e: Event) {
@@ -395,8 +410,18 @@ cancelRenameBtn.addEventListener('click', () => renameCategoryDialog.close())
 confirmDeleteBtn.addEventListener('click', deleteCategory)
 cancelDeleteBtn.addEventListener('click', () => deleteCategoryDialog.close())
 
+function getAllCategories(): string[] {
+  const inventoryCategories = unique(inventory.map((i) => i.category))
+  const combined = unique([...inventoryCategories, ...customCategories, 'Other'])
+  return combined.sort((a, b) => {
+    if (a === 'Other') return 1
+    if (b === 'Other') return -1
+    return a.localeCompare(b, undefined, { sensitivity: 'base' })
+  })
+}
+
 function renderCategoryFilter() {
-  const categories = ['All', ...unique(inventory.map((i) => i.category))]
+  const categories = ['All', ...getAllCategories()]
   categoryFilter.innerHTML = ''
   categories.forEach((c) => {
     const option = h('option', { value: c })
@@ -690,7 +715,7 @@ async function completeSale() {
 
 // Inventory
 function renderInventoryCategories() {
-  const categories = unique(inventory.map(i => i.category))
+  const categories = getAllCategories()
   inventoryCategories.innerHTML = ''
   
   // Add "Manage Categories" button - matching product style
@@ -773,7 +798,7 @@ function showManageCategories() {
 }
 
 function renderManageCategories() {
-  const categories = unique(inventory.map(i => i.category))
+  const categories = getAllCategories()
   categoryManageList.innerHTML = ''
   
   categories.forEach(category => {
@@ -799,10 +824,50 @@ function renderManageCategories() {
     deleteBtn.textContent = 'Delete'
     deleteBtn.addEventListener('click', () => openDeleteCategoryDialog(category))
     
+    if (category === 'Other') {
+      renameBtn.disabled = true
+      renameBtn.style.opacity = '0.6'
+      renameBtn.style.cursor = 'not-allowed'
+      deleteBtn.disabled = true
+      deleteBtn.style.opacity = '0.6'
+      deleteBtn.style.cursor = 'not-allowed'
+      deleteBtn.title = 'Default category cannot be deleted'
+      renameBtn.title = 'Default category cannot be renamed'
+    }
+    
     actions.append(renameBtn, deleteBtn)
     li.append(info, actions)
     categoryManageList.appendChild(li)
   })
+}
+
+function openAddCategoryDialog() {
+  addCategoryInput.value = ''
+  addCategoryDialog.showModal()
+  addCategoryInput.focus()
+}
+
+function addCategory() {
+  const newName = addCategoryInput.value.trim()
+  
+  if (!newName) {
+    addCategoryDialog.close()
+    return
+  }
+  
+  const exists = getAllCategories().some(cat => cat.toLowerCase() === newName.toLowerCase())
+  if (exists) {
+    alert('A category with this name already exists!')
+    return
+  }
+  
+  customCategories = unique([...customCategories, newName])
+  persist()
+  addCategoryDialog.close()
+  renderManageCategories()
+  renderInventoryCategories()
+  renderCategoryFilter()
+  populateCategoryDatalist()
 }
 
 function openRenameCategoryDialog(category: string) {
@@ -816,6 +881,12 @@ function openRenameCategoryDialog(category: string) {
 function renameCategory() {
   const oldName = oldCategoryName.value
   const newName = renameCategoryInput.value.trim()
+  
+  if (oldName === 'Other') {
+    alert('The default category cannot be renamed.')
+    renameCategoryDialog.close()
+    return
+  }
   
   if (!newName || newName === oldName) {
     renameCategoryDialog.close()
@@ -835,6 +906,7 @@ function renameCategory() {
       item.category = newName
     }
   })
+  customCategories = unique([...customCategories.filter((c) => c !== oldName), newName])
   
   persist()
   renameCategoryDialog.close()
@@ -844,6 +916,11 @@ function renameCategory() {
 }
 
 function openDeleteCategoryDialog(category: string) {
+  if (category === 'Other') {
+    alert('The default category cannot be deleted.')
+    return
+  }
+  
   const categoryItems = inventory.filter(i => i.category === category)
   const itemCount = categoryItems.length
   
@@ -861,6 +938,7 @@ function deleteCategory() {
       item.category = 'Other'
     }
   })
+  customCategories = customCategories.filter((c) => c !== category)
   
   persist()
   deleteCategoryDialog.close()
@@ -1016,7 +1094,7 @@ function saveItemFromDialog(ev: SubmitEvent) {
 
 function populateCategoryDatalist() {
   categoryList.innerHTML = ''
-  unique(inventory.map((i) => i.category)).forEach((c) => {
+  getAllCategories().forEach((c) => {
     categoryList.appendChild(h('option', { value: c }))
   })
 }
@@ -1235,6 +1313,7 @@ function persist() {
   save(STORAGE_KEYS.inventory, inventory)
   save(STORAGE_KEYS.transactions, transactions)
   save(STORAGE_KEYS.soldTally, soldTally)
+  save(STORAGE_KEYS.customCategories, customCategories)
 }
 function seed(items: Item[]) { save(STORAGE_KEYS.inventory, items); return items }
 

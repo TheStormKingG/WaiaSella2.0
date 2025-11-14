@@ -63,7 +63,10 @@
           <ul id="inventoryList" class="inventory-list" style="padding: 8px 12px;"></ul>
         </div>
         <div id="manageCategoriesView" style="display: none;">
-          <div style="padding: 8px 12px;">
+          <div style="padding: 12px;">
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
+              <button id="addCategoryBtn" type="button" class="btn primary">+ Add Category</button>
+            </div>
             <ul id="categoryManageList" class="category-manage-list"></ul>
           </div>
         </div>
@@ -192,6 +195,21 @@
         <input type="hidden" name="image" id="itemImageData" />
       </form>
       <datalist id="categoryList"></datalist>
+    </dialog>
+
+    <!-- Add Category Modal -->
+    <dialog id="addCategoryDialog" class="dialog">
+      <form method="dialog" id="addCategoryForm" class="dialog-body">
+        <h3>Add Category</h3>
+        <label style="display: grid; gap: 8px;">
+          <span>Category Name</span>
+          <input id="addCategoryInput" type="text" required style="height: 42px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border);" />
+        </label>
+        <menu class="dialog-actions">
+          <button type="button" id="cancelAddCategoryBtn" class="btn">Cancel</button>
+          <button type="submit" class="btn primary">Add</button>
+        </menu>
+      </form>
     </dialog>
 
     <!-- Rename Category Modal -->
