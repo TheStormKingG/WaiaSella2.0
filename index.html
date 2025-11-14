@@ -81,6 +81,16 @@
         </button>
       </section>
 
+      <!-- Orders View -->
+      <section id="ordersView" class="view">
+        <h2 class="section-title">Orders</h2>
+        <div class="card" id="ordersContainer" style="padding: 16px; line-height: 1.6;">
+          <p style="margin: 0; color: var(--muted);">
+            Orders will appear here once created. Switch the cart to <strong>Order</strong> mode to start capturing customer orders.
+          </p>
+        </div>
+      </section>
+
       <!-- Reports View -->
       <section id="reportsView" class="view">
         <h2 class="section-title">Reports</h2>
@@ -114,6 +124,25 @@
         <h2 class="section-title">Reorder List</h2>
         <div id="reorderContainer"></div>
       </section>
+
+      <!-- Settings View -->
+      <section id="settingsView" class="view">
+        <h2 class="section-title">Settings</h2>
+        <div id="settingsContainer" class="settings-grid">
+          <div class="card settings-card">
+            <h3>Profile & Store</h3>
+            <p>Update store details, contact information, and receipt footer.</p>
+          </div>
+          <div class="card settings-card">
+            <h3>Inventory Defaults</h3>
+            <p>Configure default low stock threshold, tax rate, and categories.</p>
+          </div>
+          <div class="card settings-card">
+            <h3>Integrations</h3>
+            <p>Manage integrations with Supabase, payment providers, and exports.</p>
+          </div>
+        </div>
+      </section>
     </main>
 
     <nav class="tabbar">
@@ -125,13 +154,17 @@
         <span class="icon">📦</span>
         <span>Inventory</span>
       </button>
+      <button class="tab" data-target="ordersView">
+        <span class="icon">🧾</span>
+        <span>Orders</span>
+      </button>
       <button class="tab" data-target="reportsView">
         <span class="icon">📊</span>
         <span>Reports</span>
       </button>
-      <button class="tab" data-target="reorderView">
-        <span class="icon">🔁</span>
-        <span>Reorder</span>
+      <button class="tab" data-target="settingsView">
+        <span class="icon">⚙️</span>
+        <span>Settings</span>
       </button>
     </nav>
 

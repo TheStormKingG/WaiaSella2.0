@@ -48,6 +48,7 @@ type Transaction = {
   tax: number
   total: number
   profit: number
+  mode: 'sale' | 'order'
 }
 
 const seedItems: Item[] = [
@@ -75,7 +76,10 @@ if (supabase) {
 
 // App State
 let inventory: Item[] = load<Item[]>(STORAGE_KEYS.inventory) ?? seed(seedItems)
-let transactions: Transaction[] = load<Transaction[]>(STORAGE_KEYS.transactions) ?? []
+let transactions: Transaction[] = (load<Transaction[]>(STORAGE_KEYS.transactions) ?? []).map((tx) => ({
+  ...tx,
+  mode: (tx as Transaction).mode ?? 'sale',
+}))
 let soldTally: Record<string, number> = load<Record<string, number>>(STORAGE_KEYS.soldTally) ?? {}
 let cart: Record<string, number> = load<Record<string, number>>(STORAGE_KEYS.cart) ?? {}
 let selectedCategory = 'All'
@@ -135,6 +139,7 @@ const addCategoryForm = qs<HTMLFormElement>('#addCategoryForm')
 const addCategoryInput = qs<HTMLInputElement>('#addCategoryInput')
 const cancelAddCategoryBtn = qs<HTMLButtonElement>('#cancelAddCategoryBtn')
 const headerBackBtn = qs<HTMLButtonElement>('#headerBackBtn')
+headerBackBtn.dataset.reorder = 'false'
 const itemDialog = qs<HTMLDialogElement>('#itemDialog')
 const itemForm = qs<HTMLFormElement>('#itemForm')
 const itemDialogTitle = qs<HTMLHeadingElement>('#itemDialogTitle')
@@ -147,6 +152,10 @@ const itemImageCapture = qs<HTMLInputElement>('#itemImageCapture')
 const uploadImageBtn = qs<HTMLButtonElement>('#uploadImageBtn')
 const captureImageBtn = qs<HTMLButtonElement>('#captureImageBtn')
 const itemImageData = qs<HTMLInputElement>('#itemImageData')
+
+// Orders & Settings
+const ordersContainer = qs<HTMLDivElement>('#ordersContainer')
+const settingsContainer = qs<HTMLDivElement>('#settingsContainer')
 
 // Category modals
 const renameCategoryDialog = qs<HTMLDialogElement>('#renameCategoryDialog')
@@ -244,6 +253,26 @@ function getSettingsImage(): string {
   `)
 }
 
+function getReorderImage(): string {
+  return 'data:image/svg+xml,' + encodeURIComponent(`
+    <svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="reorderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#2563eb;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#60a5fa;stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <rect width="400" height="300" rx="24" fill="#f3f6ff"/>
+      <path d="M140 150c0-44.18 35.82-80 80-80" stroke="url(#reorderGradient)" stroke-width="16" stroke-linecap="round" fill="none"/>
+      <path d="M220 70l20 20-20 20" fill="none" stroke="url(#reorderGradient)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M260 150c0 44.18-35.82 80-80 80" stroke="#93c5fd" stroke-width="16" stroke-linecap="round" fill="none"/>
+      <path d="M180 230l-20-20 20-20" fill="none" stroke="#93c5fd" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="200" cy="150" r="38" fill="white" stroke="url(#reorderGradient)" stroke-width="10"/>
+      <circle cx="200" cy="150" r="18" fill="url(#reorderGradient)"/>
+    </svg>
+  `)
+}
+
 // Format currency without cents
 function fmtNoCents(n: number): string {
   return `GY$${Math.round(n || 0).toLocaleString()}`
@@ -253,6 +282,8 @@ function fmtNoCents(n: number): string {
 renderCategoryFilter()
 renderProducts()
 renderCart()
+renderOrders()
+renderSettings()
 populateCategoryDatalist()
 
 // Tab switching
@@ -265,6 +296,7 @@ tabs.forEach((t) =>
     qs<HTMLElement>('#' + id).classList.add('active')
     headerTitle.textContent = t.textContent?.trim() ?? ''
     save(STORAGE_KEYS.currentView, id)
+    headerBackBtn.dataset.reorder = 'false'
     
     // Hide/show search bars and back button based on view
     if (id === 'cashierView') {
@@ -288,12 +320,13 @@ tabs.forEach((t) =>
       addItemFab.style.display = 'none'
     }
     
-    if (id === 'reportsView') renderReports()
-    if (id === 'reorderView') renderReorder()
     if (id === 'inventoryView') {
       showInventoryCategories()
       renderInventory()
     }
+    if (id === 'ordersView') renderOrders()
+    if (id === 'reportsView') renderReports()
+    if (id === 'settingsView') renderSettings()
   })
 )
 
@@ -331,9 +364,15 @@ if (savedView) {
       renderInventory()
     } else if (savedView === 'reportsView') {
       renderReports()
+    } else if (savedView === 'ordersView') {
+      renderOrders()
+    } else if (savedView === 'settingsView') {
+      renderSettings()
     } else if (savedView === 'reorderView') {
       renderReorder()
     }
+  } else if (savedView === 'reorderView') {
+    openReorderView()
   }
 } else {
   // Default to cashier view
@@ -392,6 +431,26 @@ deleteItemBtn.addEventListener('click', () => {
   }
 })
 headerBackBtn.addEventListener('click', () => {
+  if (headerBackBtn.dataset.reorder === 'true') {
+    headerBackBtn.dataset.reorder = 'false'
+    tabs.forEach((x) => x.classList.remove('active'))
+    const inventoryTab = Array.from(tabs).find(t => t.dataset.target === 'inventoryView')
+    if (inventoryTab) {
+      inventoryTab.classList.add('active')
+    }
+    views.forEach((v) => v.classList.remove('active'))
+    qs<HTMLElement>('#inventoryView').classList.add('active')
+    headerTitle.textContent = inventoryTab?.textContent?.trim() ?? 'Inventory'
+    save(STORAGE_KEYS.currentView, 'inventoryView')
+    showInventoryCategories()
+    renderInventory()
+    inventorySearch.style.display = 'none'
+    cashierSearch.style.display = 'none'
+    headerBackBtn.style.display = 'none'
+    addItemFab.style.display = 'none'
+    return
+  }
+
   const savedInventoryView = load<string>(STORAGE_KEYS.inventoryView)
   if (savedInventoryView === 'manage' || savedInventoryView === 'items') {
     showInventoryCategories()
@@ -732,7 +791,7 @@ async function completeSale() {
   save(STORAGE_KEYS.transactionCounter, newCounter)
   const txId = `waia${newCounter}`
   
-  const tx: Transaction = { id: txId, date: new Date().toISOString(), items, subtotal, tax, total, profit }
+  const tx: Transaction = { id: txId, date: new Date().toISOString(), items, subtotal, tax, total, profit, mode: cartMode }
   transactions.unshift(tx)
   cart = {}
   save(STORAGE_KEYS.cart, cart)
@@ -746,6 +805,7 @@ async function completeSale() {
   renderReports()
   renderInventory()
   renderReorder()
+  renderOrders()
   showReceipt(tx, saved)
 }
 
@@ -753,10 +813,31 @@ async function completeSale() {
 function renderInventoryCategories() {
   const categories = getAllCategories()
   inventoryCategories.innerHTML = ''
+  const lowStockItems = inventory.filter(item => {
+    const lowPoint = item.lowPoint ?? LOW_STOCK_THRESHOLD
+    return item.stock <= lowPoint
+  })
+  
+  // Add Reorder card
+  const reorderCard = h('div', { class: 'product reorder-card' })
+  const reorderImg = h('img', {
+    class: 'thumb',
+    alt: 'Reorder Suggestions',
+    src: getReorderImage()
+  })
+  const reorderBody = h('div', { class: 'body' })
+  reorderBody.append(
+    h('div', { class: 'title', style: 'font-weight: 700; color: #2563eb;' }, 'Reorder'),
+    h('div', { style: 'font-size: 9px; color: #6b7280; margin: 2px 0;' }, `${lowStockItems.length} item${lowStockItems.length === 1 ? '' : 's'} need attention`),
+    h('div', { class: 'muted', style: 'font-size: 9px;' }, 'View low stock & restock recommendations')
+  )
+  reorderCard.append(reorderImg, reorderBody)
+  reorderCard.addEventListener('click', openReorderView)
+  inventoryCategories.appendChild(reorderCard)
   
   // Add "Manage Categories" button - matching product style
   const totalInventoryValue = inventory.reduce((sum, item) => sum + item.price, 0)
-  const manageBtn = h('div', { class: 'product' })
+  const manageBtn = h('div', { class: 'product manage-card' })
   const manageImg = h('img', { 
     class: 'thumb', 
     alt: 'Manage Categories', 
@@ -806,6 +887,7 @@ function showInventoryItems() {
   save(STORAGE_KEYS.inventoryView, 'items')
   save(STORAGE_KEYS.selectedInventoryCategory, selectedInventoryCategory)
   headerBackBtn.style.display = 'block'
+  headerBackBtn.dataset.reorder = 'false'
   inventorySearch.style.display = 'block'
   addItemFab.style.display = 'flex'
   headerTitle.textContent = selectedInventoryCategory || 'All Items'
@@ -819,6 +901,7 @@ function showInventoryCategories() {
   inventoryCategories.style.display = 'grid'
   save(STORAGE_KEYS.inventoryView, 'categories')
   headerBackBtn.style.display = 'none'
+  headerBackBtn.dataset.reorder = 'false'
   inventorySearch.style.display = 'none'
   addItemFab.style.display = 'none'
   headerTitle.textContent = 'Inventory'
@@ -830,6 +913,7 @@ function showManageCategories() {
   manageCategoriesView.style.display = 'block'
   save(STORAGE_KEYS.inventoryView, 'manage')
   headerBackBtn.style.display = 'block'
+  headerBackBtn.dataset.reorder = 'false'
   inventorySearch.style.display = 'none'
   addItemFab.style.display = 'none'
   headerTitle.textContent = 'Manage Categories'
@@ -907,6 +991,20 @@ function addCategory() {
   renderInventoryCategories()
   renderCategoryFilter()
   populateCategoryDatalist()
+}
+
+function openReorderView() {
+  tabs.forEach((x) => x.classList.remove('active'))
+  views.forEach((v) => v.classList.remove('active'))
+  qs<HTMLElement>('#reorderView').classList.add('active')
+  headerTitle.textContent = 'Reorder'
+  save(STORAGE_KEYS.currentView, 'reorderView')
+  cashierSearch.style.display = 'none'
+  inventorySearch.style.display = 'none'
+  headerBackBtn.style.display = 'block'
+  headerBackBtn.dataset.reorder = 'true'
+  addItemFab.style.display = 'none'
+  renderReorder()
 }
 
 function openRenameCategoryDialog(category: string) {
@@ -1044,6 +1142,42 @@ function renderInventoryItems() {
   })
 }
 
+function renderOrders() {
+  if (!ordersContainer) return
+  const orders = transactions.filter((tx) => tx.mode === 'order')
+  if (orders.length === 0) {
+    ordersContainer.innerHTML = `
+      <p style="margin: 0; color: var(--muted);">
+        No orders recorded yet. Switch the cart to <strong>Order</strong> mode and complete to capture orders without checking out.
+      </p>
+    `
+    return
+  }
+  
+  ordersContainer.innerHTML = ''
+  orders.forEach((order) => {
+    const card = h('div', { class: 'order-card' })
+    const meta = h('div', { class: 'order-meta' })
+    const date = new Date(order.date)
+    meta.append(
+      h('div', { class: 'order-id' }, `Order #${order.id.toUpperCase()}`),
+      h('div', { class: 'order-date' }, date.toLocaleString())
+    )
+    const summary = h('div', { class: 'order-summary' })
+    summary.append(
+      h('div', null, `${order.items.length} item${order.items.length === 1 ? '' : 's'}`),
+      h('div', { class: 'order-total' }, fmt(order.total))
+    )
+    card.append(meta, summary)
+    ordersContainer.appendChild(card)
+  })
+}
+
+function renderSettings() {
+  // Placeholder for future dynamic settings; currently static in markup.
+  if (!settingsContainer) return
+}
+
 function renderInventory() {
   if (selectedInventoryCategory === null && inventoryItemsView.style.display === 'none') {
     renderInventoryCategories()
@@ -1140,12 +1274,13 @@ function populateCategoryDatalist() {
 
 // Reports
 function renderReports() {
-  const totalSales = transactions.reduce((s, t) => s + t.total, 0)
-  const totalProfit = transactions.reduce((s, t) => s + t.profit, 0)
+  const sales = transactions.filter((t) => t.mode !== 'order')
+  const totalSales = sales.reduce((s, t) => s + t.total, 0)
+  const totalProfit = sales.reduce((s, t) => s + t.profit, 0)
   const lowStock = inventory.filter((i) => i.stock <= LOW_STOCK_THRESHOLD).length
   totalSalesEl.textContent = fmt(totalSales)
   totalProfitEl.textContent = fmt(totalProfit)
-  totalTransactionsEl.textContent = String(transactions.length)
+  totalTransactionsEl.textContent = String(sales.length)
   lowStockCountEl.textContent = String(lowStock)
 
   const arr = Object.entries(soldTally)

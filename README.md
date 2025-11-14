@@ -3,7 +3,7 @@ WaiaSella POS 2.0 (Vite + TypeScript)
 Overview
 
 - Single‑page app built with Vite + TypeScript.
-- Implements Cashier + Cart, Inventory, Reports, and Reorder views.
+- Implements Cashier + Cart, Inventory, Orders, Reports, Reorder (via Inventory), and Settings views.
 - Data persists to `localStorage` (inventory + transactions locally).
 - Cashier transactions automatically saved to Supabase `sales` table when configured.
 
