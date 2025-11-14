@@ -572,6 +572,8 @@ function updateCartModeUI() {
     cartModeToggle.textContent = cartMode === 'sale' ? 'Switch to Order' : 'Switch to Sale'
     cartModeToggle.setAttribute('aria-pressed', cartMode === 'order' ? 'true' : 'false')
     cartModeToggle.setAttribute('title', cartMode === 'sale' ? 'Switch cart to order mode' : 'Switch cart to sale mode')
+    cartModeToggle.classList.toggle('sale', cartMode === 'sale')
+    cartModeToggle.classList.toggle('order', cartMode === 'order')
   }
 }
 
