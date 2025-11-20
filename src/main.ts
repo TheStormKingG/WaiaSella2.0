@@ -915,6 +915,7 @@ function initSettingsTabs() {
       })
     })
   }
+  
 }
 
 // Operational Expenses event listeners
