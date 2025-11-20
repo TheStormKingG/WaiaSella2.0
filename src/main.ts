@@ -637,11 +637,11 @@ if (isAuthenticated) {
 // Init
 if (isAuthenticated) {
   renderCategoryFilter()
-  renderProducts()
-  renderCart()
+renderProducts()
+renderCart()
   renderOrders()
   renderSettings()
-  populateCategoryDatalist()
+populateCategoryDatalist()
   populateSellableCategoryFilter()
   renderExpenses()
   renderSellableTable()
@@ -701,7 +701,7 @@ tabs.forEach((t) =>
     const targetView = qs<HTMLElement>('#' + id)
     if (targetView) {
       targetView.classList.add('active')
-      headerTitle.textContent = t.textContent?.trim() ?? ''
+    headerTitle.textContent = t.textContent?.trim() ?? ''
       save(STORAGE_KEYS.currentView, id)
       headerBackBtn.dataset.reorder = 'false'
       
@@ -746,7 +746,7 @@ tabs.forEach((t) =>
         renderInventory()
       }
       if (id === 'ordersView') renderOrders()
-      if (id === 'reportsView') renderReports()
+    if (id === 'reportsView') renderReports()
       if (id === 'settingsView') renderSettings()
       if (id === 'expenseView') {
         const savedExpenseTab = load<string>(STORAGE_KEYS.expenseTab) || 'sellable'
@@ -956,7 +956,7 @@ deleteItemBtn.addEventListener('click', () => {
     renderInventoryCategories()
     renderInventory()
     renderCategoryFilter()
-    renderProducts()
+      renderProducts()
     renderReports()
     
     console.log(`🗑️  Deleted item: ${item.name}`)
@@ -1305,6 +1305,17 @@ async function completeSale() {
   const entries = Object.entries(cart)
   if (!entries.length) return
   
+  // If in order mode, prompt for customer name
+  let customerName: string | null = null
+  if (cartMode === 'order') {
+    const nameInput = prompt('Enter customer name:')
+    if (nameInput === null) {
+      // User cancelled
+      return
+    }
+    customerName = nameInput.trim() || null
+  }
+  
   // Play cash register sound
   playCashRegisterSound()
   vibrate([20, 10, 20]) // Longer vibration pattern for sale completion
@@ -1315,8 +1326,11 @@ async function completeSale() {
     const it = inventory.find((x) => x.id === id)!
     subtotal += it.price * qty
     profit += (it.price - it.cost) * qty
+    // Only reduce stock for sales, not orders
+    if (cartMode === 'sale') {
     it.stock -= qty
     soldTally[id] = (soldTally[id] || 0) + qty
+    }
     return { itemId: id, name: it.name, qty, price: it.price, cost: it.cost }
   })
   const tax = subtotal * TAX_RATE
@@ -1327,7 +1341,17 @@ async function completeSale() {
   save(STORAGE_KEYS.transactionCounter, newCounter)
   const txId = `waia${newCounter}`
   
-  const tx: Transaction = { id: txId, date: new Date().toISOString(), items, subtotal, tax, total, profit, mode: cartMode }
+  const tx: Transaction = { 
+    id: txId, 
+    date: new Date().toISOString(), 
+    items, 
+    subtotal, 
+    tax, 
+    total, 
+    profit, 
+    mode: cartMode,
+    customerName: customerName || undefined
+  }
   transactions.unshift(tx)
   cart = {}
   save(STORAGE_KEYS.cart, cart)
