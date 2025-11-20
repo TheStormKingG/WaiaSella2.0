@@ -2001,28 +2001,33 @@ function renderOrders() {
   orders.forEach((order) => {
     const card = h('div', { 
       class: 'order-card',
-      style: 'cursor: pointer; transition: background 0.2s ease;',
+      style: 'cursor: pointer; transition: background 0.2s ease; display: flex; align-items: center; gap: 16px;',
       onclick: () => openOrderDetails(order)
     })
-    const meta = h('div', { class: 'order-meta' })
+    
+    // Customer name on the left (big text, without "Customer" prefix)
+    if (order.customerName) {
+      const customerNameDiv = h('div', { 
+        style: 'font-size: 24px; font-weight: 700; color: var(--ink); flex-shrink: 0; min-width: 150px;'
+      }, order.customerName)
+      card.appendChild(customerNameDiv)
+    }
+    
+    // Main content area
+    const contentDiv = h('div', { style: 'flex: 1; display: flex; justify-content: space-between; align-items: center;' })
+    const meta = h('div', { class: 'order-meta', style: 'flex: 1;' })
     const date = new Date(order.date)
     const topRow = h('div', { style: 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;' })
     topRow.append(
-      h('div', { class: 'order-id' }, `Order #${order.id.toUpperCase()}`),
+      h('div', { class: 'order-id' }, `Order #${order.id}`),
       h('div', { class: 'order-date' }, date.toLocaleString())
     )
     meta.appendChild(topRow)
     
-    // Add customer name and cashier name if available
-    const infoRow = h('div', { style: 'display: flex; flex-direction: column; gap: 4px; margin-top: 8px;' })
-    if (order.customerName) {
-      infoRow.appendChild(h('div', { style: 'font-size: 13px; color: var(--ink); font-weight: 500;' }, `Customer: ${order.customerName}`))
-    }
+    // Add cashier name if available
     if (order.cashierName) {
-      infoRow.appendChild(h('div', { style: 'font-size: 13px; color: var(--muted);' }, `Cashier: ${order.cashierName}`))
-    }
-    if (order.customerName || order.cashierName) {
-      meta.appendChild(infoRow)
+      const cashierRow = h('div', { style: 'font-size: 13px; color: var(--muted); margin-top: 4px;' }, `Cashier: ${order.cashierName}`)
+      meta.appendChild(cashierRow)
     }
     
     const summary = h('div', { class: 'order-summary' })
@@ -2030,7 +2035,9 @@ function renderOrders() {
       h('div', null, `${order.items.length} item${order.items.length === 1 ? '' : 's'}`),
       h('div', { class: 'order-total' }, fmt(order.total))
     )
-    card.append(meta, summary)
+    
+    contentDiv.append(meta, summary)
+    card.appendChild(contentDiv)
     ordersContainer.appendChild(card)
   })
 }
