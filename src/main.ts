@@ -181,6 +181,10 @@ const itemImageData = qs<HTMLInputElement>('#itemImageData')
 // Orders & Settings
 const ordersContainer = qs<HTMLDivElement>('#ordersContainer')
 const settingsContainer = qs<HTMLDivElement>('#settingsContainer')
+const orderDetailsDialog = qs<HTMLDialogElement>('#orderDetailsDialog')
+const orderDetailsTitle = qs<HTMLHeadingElement>('#orderDetailsTitle')
+const orderDetailsContent = qs<HTMLDivElement>('#orderDetailsContent')
+const closeOrderDetailsBtn = qs<HTMLButtonElement>('#closeOrderDetailsBtn')
 
 // Individual User Views
 const storesContainer = qs<HTMLDivElement>('#storesContainer')
