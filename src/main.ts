@@ -617,6 +617,15 @@ function showApp() {
   
   // Show/hide tabs based on user type
   updateTabsForUserType()
+  
+  // Re-initialize settings tabs to ensure event listeners are attached
+  initSettingsTabs()
+  
+  // Ensure Add User button has event listener
+  const addUserBtn = qs<HTMLButtonElement>('#addUserBtn')
+  if (addUserBtn && !addUserBtn.onclick) {
+    addUserBtn.addEventListener('click', () => openUserDialog())
+  }
 }
 
 function handleLogout() {
