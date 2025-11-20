@@ -695,20 +695,26 @@ function renderIndividualReports() {
 
 // Tab switching
 tabs.forEach((t) =>
-  t.addEventListener('click', () => {
+  t.addEventListener('click', (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
     // Only handle clicks on visible tabs
-    if (t.style.display === 'none') return
+    const computedStyle = window.getComputedStyle(t)
+    if (computedStyle.display === 'none') return
     
     tabs.forEach((x) => x.classList.remove('active'))
     t.classList.add('active')
-    const id = t.dataset.target!
+    const id = t.dataset.target
+    if (!id) return
+    
     views.forEach((v) => v.classList.remove('active'))
     const targetView = qs<HTMLElement>('#' + id)
-    if (targetView) {
+    if (targetView && headerTitle) {
       targetView.classList.add('active')
-    headerTitle.textContent = t.textContent?.trim() ?? ''
+      headerTitle.textContent = t.textContent?.trim() ?? ''
       save(STORAGE_KEYS.currentView, id)
-      headerBackBtn.dataset.reorder = 'false'
+      if (headerBackBtn) headerBackBtn.dataset.reorder = 'false'
       
       // Render individual views if needed
       if (id === 'storesView') {
