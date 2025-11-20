@@ -544,6 +544,16 @@ function showApp() {
   updateTabsForUserType()
 }
 
+function handleLogout() {
+  isAuthenticated = false
+  currentUser = ''
+  userType = 'business'
+  save(STORAGE_KEYS.isAuthenticated, false)
+  save(STORAGE_KEYS.currentUser, '')
+  save(STORAGE_KEYS.userType, 'business')
+  showAuth()
+}
+
 function showAuth() {
   if (authView) authView.style.display = 'block'
   if (appHeader) appHeader.style.display = 'none'
