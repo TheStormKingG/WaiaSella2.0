@@ -65,6 +65,7 @@ const STORAGE_KEYS = {
   isAuthenticated: 'ws.isAuthenticated',
   userType: 'ws.userType',
   currentUser: 'ws.currentUser',
+  currentUserRole: 'ws.currentUserRole',
 } as const
 
 type Expense = {
@@ -161,6 +162,7 @@ let expenses: Expense[] = load<Expense[]>(STORAGE_KEYS.expenses) ?? []
 let isAuthenticated = load<boolean>(STORAGE_KEYS.isAuthenticated) ?? false
 let userType: 'business' | 'individual' = (load<string>(STORAGE_KEYS.userType) as 'business' | 'individual') || 'business'
 let currentUser = load<string>(STORAGE_KEYS.currentUser) || ''
+let currentUserRole: 'admin' | 'cashier' | 'observer' | null = (load<string>(STORAGE_KEYS.currentUserRole) as 'admin' | 'cashier' | 'observer' | null) || null
 
 // Elements
 const tabs = qsa<HTMLButtonElement>('.tab')
@@ -561,17 +563,46 @@ function updateTabsForUserType() {
     businessTabs.forEach(tab => tab.style.display = 'flex')
     individualTabs.forEach(tab => tab.style.display = 'none')
     
-    // Set first business tab as active if no active tab
-    const activeTab = Array.from(businessTabs).find(t => t.classList.contains('active'))
-    if (!activeTab && businessTabs.length > 0) {
-      businessTabs[0].classList.add('active')
-      const target = businessTabs[0].dataset.target
+    // Apply role-based access control for business users
+    if (currentUserRole) {
+      businessTabs.forEach(tab => {
+        const targetView = tab.dataset.target
+        if (currentUserRole === 'admin') {
+          // Admin can see all tabs
+          tab.style.display = 'flex'
+        } else if (currentUserRole === 'cashier') {
+          // Cashier can see only Cashier and Orders
+          if (targetView === 'cashierView' || targetView === 'ordersView') {
+            tab.style.display = 'flex'
+          } else {
+            tab.style.display = 'none'
+          }
+        } else if (currentUserRole === 'observer') {
+          // Observer can see only Orders
+          if (targetView === 'ordersView') {
+            tab.style.display = 'flex'
+          } else {
+            tab.style.display = 'none'
+          }
+        } else {
+          // Default: show all if role is not set
+          tab.style.display = 'flex'
+        }
+      })
+    }
+    
+    // Set first visible business tab as active if no active tab
+    const visibleTabs = Array.from(businessTabs).filter(t => window.getComputedStyle(t).display !== 'none')
+    const activeTab = visibleTabs.find(t => t.classList.contains('active'))
+    if (!activeTab && visibleTabs.length > 0) {
+      visibleTabs[0].classList.add('active')
+      const target = visibleTabs[0].dataset.target
       if (target) {
         views.forEach(v => v.classList.remove('active'))
         const targetView = qs<HTMLElement>('#' + target)
         if (targetView) {
           targetView.classList.add('active')
-          headerTitle.textContent = businessTabs[0].textContent?.trim() ?? ''
+          headerTitle.textContent = visibleTabs[0].textContent?.trim() ?? ''
         }
       }
     }
