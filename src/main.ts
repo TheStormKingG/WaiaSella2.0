@@ -40,6 +40,10 @@ function fmt(n: number) {
   }).format(n || 0)
   return `GY$${formatted}`
 }
+function seed(items: Item[]) { 
+  save('ws.inventory', items)
+  return items 
+}
 
 const TAX_RATE = 0.16 // 16% VAT
 const LOW_STOCK_THRESHOLD = 5
@@ -2601,5 +2605,4 @@ function persist() {
   save(STORAGE_KEYS.customCategories, customCategories)
   save(STORAGE_KEYS.expenses, expenses)
 }
-function seed(items: Item[]) { save(STORAGE_KEYS.inventory, items); return items }
 
