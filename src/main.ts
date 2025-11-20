@@ -1438,7 +1438,8 @@ async function completeSale() {
     total, 
     profit, 
     mode: cartMode,
-    customerName: customerName || undefined
+    customerName: customerName || undefined,
+    cashierName: currentUser || undefined
   }
   transactions.unshift(tx)
   cart = {}
