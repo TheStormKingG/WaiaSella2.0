@@ -2146,19 +2146,37 @@ function markOrderDelivered(order: Transaction) {
 }
 
 function cancelOrderAction(order: Transaction) {
-  if (!confirm(`Cancel order #${order.id}?\n\nThis will permanently delete this order.`)) {
+  if (!confirm(`Cancel order #${order.id}?\n\nThis will convert the order to a sale and remove it from orders.`)) {
     return
   }
   
-  // Remove order from transactions
-  transactions = transactions.filter((tx) => tx.id !== order.id)
+  // Convert order to sale
+  // Find the order in transactions and change its mode from 'order' to 'sale'
+  const orderIndex = transactions.findIndex((tx) => tx.id === order.id)
+  if (orderIndex !== -1) {
+    // Change mode to sale
+    transactions[orderIndex].mode = 'sale'
+    
+    // Reduce inventory stock for all items (since it's now a sale)
+    order.items.forEach((item) => {
+      const inventoryItem = inventory.find((i) => i.id === item.itemId)
+      if (inventoryItem) {
+        inventoryItem.stock -= item.qty
+        soldTally[item.itemId] = (soldTally[item.itemId] || 0) + item.qty
+      }
+    })
+  }
   
   persist()
   orderDetailsDialog?.close()
   currentOrderView = null
   renderOrders()
+  renderInventory()
+  renderProducts()
+  renderReports()
+  renderReorder()
   
-  alert(`Order #${order.id} has been cancelled.`)
+  alert(`Order #${order.id} has been cancelled and converted to a sale.`)
 }
 
 // Close order details modal
