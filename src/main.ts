@@ -47,6 +47,28 @@ function seed(items: Item[]) {
 
 const TAX_RATE = 0.16 // 16% VAT
 const LOW_STOCK_THRESHOLD = 5
+
+// Get next order number (resets daily at midnight, starts at 0001)
+function getNextOrderNumber(): string {
+  const now = new Date()
+  const today = now.toDateString() // e.g., "Mon Jan 01 2024"
+  const storedDate = load<string>(STORAGE_KEYS.orderCounterDate)
+  
+  let counter = load<number>(STORAGE_KEYS.orderCounter) ?? 0
+  
+  // Reset counter if it's a new day
+  if (storedDate !== today) {
+    counter = 0
+    save(STORAGE_KEYS.orderCounterDate, today)
+  }
+  
+  // Increment counter
+  counter++
+  save(STORAGE_KEYS.orderCounter, counter)
+  
+  // Format as 4-digit number with leading zeros (e.g., 0001, 0002, etc.)
+  return counter.toString().padStart(4, '0')
+}
 const STORAGE_KEYS = {
   inventory: 'ws.inventory',
   transactions: 'ws.transactions',
@@ -66,6 +88,8 @@ const STORAGE_KEYS = {
   userType: 'ws.userType',
   currentUser: 'ws.currentUser',
   currentUserRole: 'ws.currentUserRole',
+  orderCounter: 'ws.orderCounter',
+  orderCounterDate: 'ws.orderCounterDate',
 } as const
 
 type Expense = {
@@ -1584,14 +1608,23 @@ async function completeSale() {
   })
   const tax = subtotal * TAX_RATE
   const total = subtotal + tax
-  // Generate sequential transaction ID
-  const txCounter = load<number>(STORAGE_KEYS.transactionCounter) ?? 0
-  const newCounter = txCounter + 1
-  save(STORAGE_KEYS.transactionCounter, newCounter)
-  const txId = `waia${newCounter}`
   
-  const tx: Transaction = { 
-    id: txId, 
+  // Generate transaction ID - use order number for orders, regular counter for sales
+  let txId: string
+  if (cartMode === 'order') {
+    // For orders, use daily resetting order number (0001, 0002, etc.)
+    const orderNumber = getNextOrderNumber()
+    txId = orderNumber
+  } else {
+    // For sales, use regular sequential counter
+    const txCounter = load<number>(STORAGE_KEYS.transactionCounter) ?? 0
+    const newCounter = txCounter + 1
+    save(STORAGE_KEYS.transactionCounter, newCounter)
+    txId = `waia${newCounter}`
+  }
+  
+  const tx: Transaction = {
+    id: txId,
     date: new Date().toISOString(), 
     items, 
     subtotal, 
