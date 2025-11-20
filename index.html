@@ -375,8 +375,8 @@
           <div id="orderDetailsContent"></div>
         </div>
         <div class="dialog-actions">
-          <button id="cancelOrderBtn" class="btn" type="button">Cancel</button>
-          <button id="deliveredOrderBtn" class="btn primary" type="button">Delivered</button>
+          <button id="cancelOrderBtn" class="btn" type="button" style="background: #ef4444; border-color: #ef4444; color: white;">Cancel</button>
+          <button id="deliveredOrderBtn" class="btn primary" type="button" style="background: #22c55e; border-color: #22c55e; color: white;">Delivered</button>
         </div>
       </dialog>
 
@@ -394,7 +394,25 @@
         </div>
         <div class="dialog-actions">
           <button id="closeCancelOrderConfirmBtn" class="btn" type="button">No, Keep Order</button>
-          <button id="confirmCancelOrderBtn" class="btn primary" type="button" style="background: #ef4444; border-color: #ef4444;">Yes, Cancel Order</button>
+          <button id="confirmCancelOrderBtn" class="btn primary" type="button" style="background: #ef4444; border-color: #ef4444; color: white;">Yes, Cancel Order</button>
+        </div>
+      </dialog>
+
+      <!-- Deliver Order Confirmation Modal -->
+      <dialog id="deliverOrderDialog" class="dialog">
+        <div class="dialog-header">
+          <h2>Mark Order as Delivered</h2>
+          <button id="closeDeliverOrderDialog" class="dialog-close" type="button">×</button>
+        </div>
+        <div class="dialog-body">
+          <p id="deliverOrderMessage" style="margin: 0; font-size: 16px; color: var(--ink);">
+            Are you sure you want to mark this order as delivered? This will convert the order to a completed sale and reduce inventory stock accordingly.
+          </p>
+          <input type="hidden" id="deliverOrderId" value="">
+        </div>
+        <div class="dialog-actions">
+          <button id="closeDeliverOrderConfirmBtn" class="btn" type="button">No, Keep as Order</button>
+          <button id="confirmDeliverOrderBtn" class="btn primary" type="button" style="background: #22c55e; border-color: #22c55e; color: white;">Yes, Mark as Delivered</button>
         </div>
       </dialog>
 
