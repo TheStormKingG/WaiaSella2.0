@@ -886,18 +886,8 @@ reportTabs.forEach(tab => {
     switchReportTab(tabName)
   })
 })
-
-// Settings tabs - declared early but initialized later
-let settingsTabs: NodeListOf<HTMLButtonElement> | HTMLButtonElement[] = [] as any
-let storeProfileView: HTMLDivElement | null = null
-let usersView: HTMLDivElement | null = null
-let settingsTabContents: HTMLDivElement[] = [] as any
-let storeProfileContainer: HTMLDivElement | null = null
-let usersContainer: HTMLDivElement | null = null
-let addUserBtn: HTMLButtonElement | null = null
-let usersList: HTMLDivElement | null = null
-
-// Initialize settings tab elements after DOM is ready
+  
+  // Initialize settings tab elements after DOM is ready
 function initSettingsTabs() {
   settingsTabs = qsa<HTMLButtonElement>('.expense-tab[data-settings-tab]')
   storeProfileView = qs<HTMLDivElement>('#storeProfileView')
