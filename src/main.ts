@@ -2046,7 +2046,7 @@ function openOrderDetails(order: Transaction) {
   if (!orderDetailsDialog || !orderDetailsTitle || !orderDetailsContent) return
   
   const date = new Date(order.date)
-  orderDetailsTitle.textContent = `Order #${order.id.toUpperCase()}`
+  orderDetailsTitle.textContent = `Order #${order.id}`
   
   // Build order details HTML
   let itemsHtml = '<div style="margin-bottom: 20px;"><h3 style="margin: 0 0 12px 0; font-size: 18px;">Items</h3>'
