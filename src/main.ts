@@ -503,26 +503,51 @@ function switchUserType(type: 'business' | 'individual') {
   }
 }
 
-function handleLogin(email: string, password: string) {
+function handleLogin(identifier: string, password: string) {
   // Simple authentication (in production, this would connect to a backend)
   // For now, just check if credentials exist in localStorage
+  // Identifier can be either email or username (name)
   const users = load<Record<string, { password: string; userType: 'business' | 'individual'; name?: string; role?: 'admin' | 'cashier' | 'observer' }>>('ws.users') ?? {}
   
-  if (users[email] && users[email].password === password) {
+  const trimmedIdentifier = identifier.trim().toLowerCase()
+  
+  // Try to find user by email first (exact match, case-insensitive)
+  let userEmail: string | null = null
+  let user: { password: string; userType: 'business' | 'individual'; name?: string; role?: 'admin' | 'cashier' | 'observer' } | null = null
+  
+  if (users[trimmedIdentifier]) {
+    // Direct email match
+    userEmail = trimmedIdentifier
+    user = users[trimmedIdentifier]
+  } else {
+    // Search by name (username) - case-insensitive partial match
+    const foundEntry = Object.entries(users).find(([email, userData]) => {
+      const userName = userData.name?.trim().toLowerCase() || ''
+      return userName === trimmedIdentifier || userName.includes(trimmedIdentifier)
+    })
+    
+    if (foundEntry) {
+      userEmail = foundEntry[0]
+      user = foundEntry[1]
+    }
+  }
+  
+  // Authenticate if user found and password matches
+  if (userEmail && user && user.password === password) {
     isAuthenticated = true
-    currentUser = email
-    userType = users[email].userType
+    currentUser = userEmail
+    userType = user.userType
     // Get role if user is a business user
-    currentUserRole = users[email].userType === 'business' ? (users[email].role || 'cashier') : null
+    currentUserRole = user.userType === 'business' ? (user.role || 'cashier') : null
     save(STORAGE_KEYS.isAuthenticated, true)
-    save(STORAGE_KEYS.currentUser, email)
+    save(STORAGE_KEYS.currentUser, userEmail)
     save(STORAGE_KEYS.userType, userType)
     save(STORAGE_KEYS.currentUserRole, currentUserRole || '')
     showApp()
     return true
   }
   
-  showAuthError('Invalid email or password')
+  showAuthError('Invalid username/email or password')
   return false
 }
 
