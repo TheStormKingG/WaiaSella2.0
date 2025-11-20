@@ -2056,8 +2056,9 @@ function renderUsers() {
         style: 'background: #ef4444; color: white; border-color: #ef4444;',
         onclick: () => {
           if (confirm(`Delete user "${displayName}" (${email})?`)) {
-            delete users[email]
-            save('ws.users', users)
+            const allUsers = load<Record<string, { password: string; userType: 'business' | 'individual'; name?: string; role?: 'admin' | 'cashier' | 'observer' }>>('ws.users') ?? {}
+            delete allUsers[email]
+            save('ws.users', allUsers)
             renderUsers()
           }
         }
@@ -2077,7 +2078,7 @@ function renderUsers() {
 function openUserDialog(userEmail?: string) {
   if (!userDialog || !userForm || !userDialogTitle) return
   
-  const users = load<Record<string, { password: string; userType: 'business' | 'individual'; name?: string }>>('ws.users') ?? {}
+  const users = load<Record<string, { password: string; userType: 'business' | 'individual'; name?: string; role?: 'admin' | 'cashier' | 'observer' }>>('ws.users') ?? {}
   
   if (userEmail && users[userEmail]) {
     // Edit mode
@@ -2087,7 +2088,7 @@ function openUserDialog(userEmail?: string) {
     ;(userForm.elements.namedItem('email') as HTMLInputElement).value = userEmail
     ;(userForm.elements.namedItem('email') as HTMLInputElement).readOnly = true
     ;(userForm.elements.namedItem('name') as HTMLInputElement).value = user.name || ''
-    ;(userForm.elements.namedItem('role') as HTMLSelectElement).value = user.userType
+    ;(userForm.elements.namedItem('role') as HTMLSelectElement).value = user.role || 'cashier'
     ;(userForm.elements.namedItem('password') as HTMLInputElement).value = ''
     ;(userForm.elements.namedItem('password') as HTMLInputElement).placeholder = 'Leave blank to keep current password'
     ;(userForm.elements.namedItem('password') as HTMLInputElement).required = false
@@ -2113,14 +2114,14 @@ function saveUserFromDialog(ev: SubmitEvent) {
   const email = (data.email as string).trim().toLowerCase()
   const name = (data.name as string).trim()
   const password = data.password as string
-  const role = data.role as 'business' | 'individual'
+  const role = data.role as 'admin' | 'cashier' | 'observer'
   
   if (!email || !role) {
     alert('Please fill in all required fields.')
     return
   }
   
-  const users = load<Record<string, { password: string; userType: 'business' | 'individual'; name?: string }>>('ws.users') ?? {}
+  const users = load<Record<string, { password: string; userType: 'business' | 'individual'; name?: string; role?: 'admin' | 'cashier' | 'observer' }>>('ws.users') ?? {}
   
   const isEditMode = !!existingEmail && existingEmail === email
   
@@ -2131,14 +2132,16 @@ function saveUserFromDialog(ev: SubmitEvent) {
       return
     }
     
-    // Update user data
+    // Update user data - preserve userType (always business for users added through this dialog)
     users[email] = {
+      ...users[email],
       password: password && password.length >= 6 ? password : users[email].password, // Keep existing password if new one is empty or too short
-      userType: role,
+      userType: 'business', // Always business for users managed through Settings
+      role: role,
       name: name
     }
     
-    // If email changed (shouldn't happen due to readOnly, but just in case)
+    // Validate password if provided
     if (password && password.length < 6) {
       alert('Password must be at least 6 characters long if provided.')
       return
@@ -2155,10 +2158,11 @@ function saveUserFromDialog(ev: SubmitEvent) {
       return
     }
     
-    // Save new user
+    // Save new user - always business type, with specified role
     users[email] = {
       password: password,
-      userType: role,
+      userType: 'business',
+      role: role,
       name: name
     }
   }
