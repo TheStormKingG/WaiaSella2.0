@@ -82,10 +82,22 @@
     </section>
 
     <header class="app-header" style="display: none;">
-      <h1>Cashier</h1>
-      <input id="cashierSearch" class="header-search" placeholder="Search products..." style="display: none;" />
-      <input id="inventorySearch" class="header-search" placeholder="Search inventory..." style="display: none;" />
-      <button id="headerBackBtn" class="header-back-btn" style="display: none;">← Back</button>
+      <div class="header-left">
+        <h1>Cashier</h1>
+        <input id="cashierSearch" class="header-search" placeholder="Search products..." style="display: none;" />
+        <input id="inventorySearch" class="header-search" placeholder="Search inventory..." style="display: none;" />
+        <button id="headerBackBtn" class="header-back-btn" style="display: none;">← Back</button>
+      </div>
+      <div class="header-right">
+        <div id="userInfo" class="user-info">
+          <span id="userName" class="user-name"></span>
+          <span id="userTypeBadge" class="user-type-badge"></span>
+        </div>
+        <button id="logoutBtn" class="logout-btn">
+          <span class="icon">🚪</span>
+          <span>Logout</span>
+        </button>
+      </div>
     </header>
 
     <main id="app" class="app" style="display: none;">

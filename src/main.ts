@@ -267,6 +267,9 @@ const authError = qs<HTMLDivElement>('#authError')
 const appHeader = qs<HTMLElement>('.app-header')
 const appMain = qs<HTMLElement>('#app')
 const appTabbar = qs<HTMLElement>('.tabbar')
+const userName = qs<HTMLSpanElement>('#userName')
+const userTypeBadge = qs<HTMLSpanElement>('#userTypeBadge')
+const logoutBtnHeader = qs<HTMLButtonElement>('#logoutBtn')
 
 // App icon color schemes - matching modern app icon style (defined early to avoid TDZ)
 const categoryColors = [
@@ -519,11 +522,23 @@ function updateTabsForUserType() {
   }
 }
 
+function updateUserInfo() {
+  if (userName) {
+    userName.textContent = currentUser || 'User'
+  }
+  if (userTypeBadge) {
+    userTypeBadge.textContent = userType === 'business' ? 'Business' : 'Individual'
+  }
+}
+
 function showApp() {
   if (authView) authView.style.display = 'none'
   if (appHeader) appHeader.style.display = 'flex'
   if (appMain) appMain.style.display = 'block'
   if (appTabbar) appTabbar.style.display = 'grid'
+  
+  // Update user info
+  updateUserInfo()
   
   // Show/hide tabs based on user type
   updateTabsForUserType()
