@@ -258,7 +258,12 @@ const ordersContainer = qs<HTMLDivElement>('#ordersContainer')
 const orderDetailsDialog = qs<HTMLDialogElement>('#orderDetailsDialog')
 const orderDetailsTitle = qs<HTMLHeadingElement>('#orderDetailsTitle')
 const orderDetailsContent = qs<HTMLDivElement>('#orderDetailsContent')
-const closeOrderDetailsBtn = qs<HTMLButtonElement>('#closeOrderDetailsBtn')
+const closeOrderDetailsXBtn = qs<HTMLButtonElement>('#closeOrderDetailsXBtn')
+const cancelOrderBtn = qs<HTMLButtonElement>('#cancelOrderBtn')
+const deliveredOrderBtn = qs<HTMLButtonElement>('#deliveredOrderBtn')
+
+// Store current order for button handlers
+let currentOrderView: Transaction | null = null
 const customerNameDialog = qs<HTMLDialogElement>('#customerNameDialog')
 const customerNameForm = qs<HTMLFormElement>('#customerNameForm')
 const customerNameInput = qs<HTMLInputElement>('#customerNameInput')

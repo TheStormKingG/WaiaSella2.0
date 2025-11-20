@@ -367,12 +367,16 @@
 
       <!-- Order Details Modal -->
       <dialog id="orderDetailsDialog" class="dialog">
+        <div class="dialog-header">
+          <h2 id="orderDetailsTitle" style="margin: 0; font-size: 24px;">Order Details</h2>
+          <button id="closeOrderDetailsXBtn" class="dialog-close" type="button">×</button>
+        </div>
         <div class="dialog-body">
-          <h2 id="orderDetailsTitle" style="margin: 0 0 20px 0; font-size: 24px;">Order Details</h2>
           <div id="orderDetailsContent"></div>
-          <menu class="dialog-actions" style="margin-top: 20px;">
-            <button id="closeOrderDetailsBtn" class="btn primary" style="width: 100%;">Close</button>
-          </menu>
+        </div>
+        <div class="dialog-actions">
+          <button id="cancelOrderBtn" class="btn" type="button">Cancel</button>
+          <button id="deliveredOrderBtn" class="btn primary" type="button">Delivered</button>
         </div>
       </dialog>
 
