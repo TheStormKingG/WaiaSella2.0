@@ -133,8 +133,15 @@ if (supabase) {
   console.warn('⚠ Supabase not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env file')
 }
 
-// App State
-let inventory: Item[] = load<Item[]>(STORAGE_KEYS.inventory) ?? seed(getSeedItems())
+// App State - Initialize lazily to avoid initialization order issues
+let inventory: Item[] | null = null
+function getInventory(): Item[] {
+  if (inventory === null) {
+    const loaded = load<Item[]>(STORAGE_KEYS.inventory)
+    inventory = loaded ?? seed(getSeedItems())
+  }
+  return inventory
+}
 let transactions: Transaction[] = (load<Transaction[]>(STORAGE_KEYS.transactions) ?? []).map((tx) => ({
   ...tx,
   mode: (tx as Transaction).mode ?? 'sale',
