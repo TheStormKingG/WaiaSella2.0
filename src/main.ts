@@ -182,6 +182,12 @@ const itemImageData = qs<HTMLInputElement>('#itemImageData')
 const ordersContainer = qs<HTMLDivElement>('#ordersContainer')
 const settingsContainer = qs<HTMLDivElement>('#settingsContainer')
 
+// Individual User Views
+const storesContainer = qs<HTMLDivElement>('#storesContainer')
+const individualOrdersContainer = qs<HTMLDivElement>('#individualOrdersContainer')
+const historyContainer = qs<HTMLDivElement>('#historyContainer')
+const individualReportsContainer = qs<HTMLDivElement>('#individualReportsContainer')
+
 // Expense tabs
 const expenseTabs = qsa<HTMLButtonElement>('.expense-tab')
 const sellableView = qs<HTMLDivElement>('#sellableView')
@@ -468,11 +474,59 @@ function handleSignup(email: string, password: string, confirmPassword: string, 
   return true
 }
 
+function updateTabsForUserType() {
+  const businessTabs = qsa<HTMLButtonElement>('.business-tab')
+  const individualTabs = qsa<HTMLButtonElement>('.individual-tab')
+  
+  if (userType === 'business') {
+    // Show business tabs, hide individual tabs
+    businessTabs.forEach(tab => tab.style.display = 'flex')
+    individualTabs.forEach(tab => tab.style.display = 'none')
+    
+    // Set first business tab as active if no active tab
+    const activeTab = Array.from(businessTabs).find(t => t.classList.contains('active'))
+    if (!activeTab && businessTabs.length > 0) {
+      businessTabs[0].classList.add('active')
+      const target = businessTabs[0].dataset.target
+      if (target) {
+        views.forEach(v => v.classList.remove('active'))
+        const targetView = qs<HTMLElement>('#' + target)
+        if (targetView) {
+          targetView.classList.add('active')
+          headerTitle.textContent = businessTabs[0].textContent?.trim() ?? ''
+        }
+      }
+    }
+  } else {
+    // Show individual tabs, hide business tabs
+    businessTabs.forEach(tab => tab.style.display = 'none')
+    individualTabs.forEach(tab => tab.style.display = 'flex')
+    
+    // Set first individual tab as active if no active tab
+    const activeTab = Array.from(individualTabs).find(t => t.classList.contains('active'))
+    if (!activeTab && individualTabs.length > 0) {
+      individualTabs[0].classList.add('active')
+      const target = individualTabs[0].dataset.target
+      if (target) {
+        views.forEach(v => v.classList.remove('active'))
+        const targetView = qs<HTMLElement>('#' + target)
+        if (targetView) {
+          targetView.classList.add('active')
+          headerTitle.textContent = individualTabs[0].textContent?.trim() ?? ''
+        }
+      }
+    }
+  }
+}
+
 function showApp() {
   if (authView) authView.style.display = 'none'
   if (appHeader) appHeader.style.display = 'flex'
   if (appMain) appMain.style.display = 'block'
   if (appTabbar) appTabbar.style.display = 'grid'
+  
+  // Show/hide tabs based on user type
+  updateTabsForUserType()
 }
 
 function showAuth() {
@@ -526,25 +580,82 @@ if (isAuthenticated) {
   renderSellableTable()
 }
 
+// Individual view render functions
+function renderStores() {
+  if (!storesContainer) return
+  storesContainer.innerHTML = `
+    <div style="text-align: center; padding: 40px 20px;">
+      <h3 style="margin: 0 0 16px 0; color: var(--text);">Browse Stores</h3>
+      <p style="margin: 0; color: var(--muted);">Available stores will appear here.</p>
+    </div>
+  `
+}
+
+function renderIndividualOrders() {
+  if (!individualOrdersContainer) return
+  individualOrdersContainer.innerHTML = `
+    <div style="text-align: center; padding: 40px 20px;">
+      <h3 style="margin: 0 0 16px 0; color: var(--text);">My Orders</h3>
+      <p style="margin: 0; color: var(--muted);">Your order history will appear here.</p>
+    </div>
+  `
+}
+
+function renderHistory() {
+  if (!historyContainer) return
+  historyContainer.innerHTML = `
+    <div style="text-align: center; padding: 40px 20px;">
+      <h3 style="margin: 0 0 16px 0; color: var(--text);">Purchase History</h3>
+      <p style="margin: 0; color: var(--muted);">Your purchase history will appear here.</p>
+    </div>
+  `
+}
+
+function renderIndividualReports() {
+  if (!individualReportsContainer) return
+  individualReportsContainer.innerHTML = `
+    <div style="text-align: center; padding: 40px 20px;">
+      <h3 style="margin: 0 0 16px 0; color: var(--text);">My Reports</h3>
+      <p style="margin: 0; color: var(--muted);">Your reports and analytics will appear here.</p>
+    </div>
+  `
+}
+
 // Tab switching
 tabs.forEach((t) =>
   t.addEventListener('click', () => {
+    // Only handle clicks on visible tabs
+    if (t.style.display === 'none') return
+    
     tabs.forEach((x) => x.classList.remove('active'))
     t.classList.add('active')
     const id = t.dataset.target!
     views.forEach((v) => v.classList.remove('active'))
-    qs<HTMLElement>('#' + id).classList.add('active')
-    headerTitle.textContent = t.textContent?.trim() ?? ''
-    save(STORAGE_KEYS.currentView, id)
-    headerBackBtn.dataset.reorder = 'false'
-    
-    // Hide/show search bars and back button based on view
-    if (id === 'cashierView') {
-      cashierSearch.style.display = 'block'
-      inventorySearch.style.display = 'none'
-      headerBackBtn.style.display = 'none'
-      addItemFab.style.display = 'none'
-    } else if (id === 'expenseView') {
+    const targetView = qs<HTMLElement>('#' + id)
+    if (targetView) {
+      targetView.classList.add('active')
+      headerTitle.textContent = t.textContent?.trim() ?? ''
+      save(STORAGE_KEYS.currentView, id)
+      headerBackBtn.dataset.reorder = 'false'
+      
+      // Render individual views if needed
+      if (id === 'storesView') {
+        renderStores()
+      } else if (id === 'individualOrdersView') {
+        renderIndividualOrders()
+      } else if (id === 'historyView') {
+        renderHistory()
+      } else if (id === 'individualReportsView') {
+        renderIndividualReports()
+      }
+      
+      // Hide/show search bars and back button based on view
+      if (id === 'cashierView') {
+        cashierSearch.style.display = 'block'
+        inventorySearch.style.display = 'none'
+        headerBackBtn.style.display = 'none'
+        addItemFab.style.display = 'none'
+      } else if (id === 'expenseView') {
       cashierSearch.style.display = 'none'
       // Search bar visibility controlled by expense sub-view
       const savedExpenseView = load<string>(STORAGE_KEYS.expenseView)
@@ -656,18 +767,42 @@ if (savedView === 'salesView') {
   savedView = 'cashierView'
   save(STORAGE_KEYS.currentView, savedView)
 }
+if (!savedView) {
+  savedView = userType === 'business' ? 'cashierView' : 'storesView'
+}
+
 if (savedView) {
   tabs.forEach((x) => x.classList.remove('active'))
-  const activeTab = Array.from(tabs).find(t => t.dataset.target === savedView)
+  
+  // Filter tabs based on user type
+  const visibleTabs = userType === 'business' 
+    ? Array.from(tabs).filter(t => t.classList.contains('business-tab'))
+    : Array.from(tabs).filter(t => t.classList.contains('individual-tab'))
+  
+  const activeTab = visibleTabs.find(t => t.dataset.target === savedView) || visibleTabs[0]
   if (activeTab) {
     activeTab.classList.add('active')
+    const targetId = activeTab.dataset.target || savedView
     views.forEach((v) => v.classList.remove('active'))
-    qs<HTMLElement>('#' + savedView).classList.add('active')
-    headerTitle.textContent = activeTab.textContent?.trim() ?? ''
-    
-    if (savedView === 'cashierView') {
-      cashierSearch.style.display = 'block'
-    } else if (savedView === 'expenseView' || savedView === 'inventoryView') {
+    const targetView = qs<HTMLElement>('#' + targetId)
+    if (targetView) {
+      targetView.classList.add('active')
+      headerTitle.textContent = activeTab.textContent?.trim() ?? ''
+      
+      // Render individual views if needed
+      if (targetId === 'storesView') {
+        renderStores()
+      } else if (targetId === 'individualOrdersView') {
+        renderIndividualOrders()
+      } else if (targetId === 'historyView') {
+        renderHistory()
+      } else if (targetId === 'individualReportsView') {
+        renderIndividualReports()
+      }
+      
+      if (targetId === 'cashierView') {
+        cashierSearch.style.display = 'block'
+      } else if (targetId === 'expenseView' || targetId === 'inventoryView') {
       const savedExpenseView = load<string>(STORAGE_KEYS.expenseView) || load<string>('ws.inventoryView')
       const savedCategory = load<string>(STORAGE_KEYS.selectedInventoryCategory)
       const savedExpenseTab = load<string>(STORAGE_KEYS.expenseTab) || 'sellable'

@@ -447,25 +447,44 @@
     </main>
 
     <nav class="tabbar" style="display: none;">
-      <button class="tab" data-target="ordersView">
+      <!-- Business User Tabs -->
+      <button class="tab business-tab" data-target="ordersView">
         <span class="icon">🧾</span>
         <span>Orders</span>
       </button>
-      <button class="tab active" data-target="cashierView">
+      <button class="tab business-tab active" data-target="cashierView">
         <span class="icon">🛒</span>
         <span>Cashier</span>
       </button>
-      <button class="tab" data-target="expenseView">
+      <button class="tab business-tab" data-target="expenseView">
         <span class="icon">📦</span>
         <span>Expense</span>
       </button>
-      <button class="tab" data-target="reportsView">
+      <button class="tab business-tab" data-target="reportsView">
         <span class="icon">📊</span>
         <span>Reports</span>
       </button>
-      <button class="tab" data-target="settingsView">
+      <button class="tab business-tab" data-target="settingsView">
         <span class="icon">⚙️</span>
         <span>Settings</span>
+      </button>
+      
+      <!-- Individual User Tabs -->
+      <button class="tab individual-tab" data-target="storesView">
+        <span class="icon">🏪</span>
+        <span>Stores</span>
+      </button>
+      <button class="tab individual-tab" data-target="individualOrdersView">
+        <span class="icon">📋</span>
+        <span>Orders</span>
+      </button>
+      <button class="tab individual-tab" data-target="historyView">
+        <span class="icon">📜</span>
+        <span>History</span>
+      </button>
+      <button class="tab individual-tab" data-target="individualReportsView">
+        <span class="icon">📊</span>
+        <span>Reports</span>
       </button>
     </nav>
 
