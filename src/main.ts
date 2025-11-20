@@ -827,20 +827,15 @@ if (savedView) {
       }
     }
   }
-}
-        renderInventory()
-      }
-    } else if (savedView === 'reportsView') {
-      renderReports()
-      const savedReportTab = load<string>(STORAGE_KEYS.reportTab) || 'general'
-      switchReportTab(savedReportTab)
-    } else if (savedView === 'ordersView') {
-      renderOrders()
-    } else if (savedView === 'settingsView') {
-      renderSettings()
-    } else if (savedView === 'reorderView') {
-      renderReorder()
-    }
+  
+  if (savedView === 'reportsView') {
+    renderReports()
+    const savedReportTab = load<string>(STORAGE_KEYS.reportTab) || 'general'
+    switchReportTab(savedReportTab)
+  } else if (savedView === 'ordersView') {
+    renderOrders()
+  } else if (savedView === 'settingsView') {
+    renderSettings()
   } else if (savedView === 'reorderView') {
     openReorderView()
   }
