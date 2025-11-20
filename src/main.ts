@@ -656,35 +656,36 @@ tabs.forEach((t) =>
         headerBackBtn.style.display = 'none'
         addItemFab.style.display = 'none'
       } else if (id === 'expenseView') {
-      cashierSearch.style.display = 'none'
-      // Search bar visibility controlled by expense sub-view
-      const savedExpenseView = load<string>(STORAGE_KEYS.expenseView)
-      if (savedExpenseView === 'items') {
-        addItemFab.style.display = 'flex'
+        cashierSearch.style.display = 'none'
+        // Search bar visibility controlled by expense sub-view
+        const savedExpenseView = load<string>(STORAGE_KEYS.expenseView)
+        if (savedExpenseView === 'items') {
+          addItemFab.style.display = 'flex'
+        } else {
+          addItemFab.style.display = 'none'
+        }
+        // Restore expense tab
+        const savedExpenseTab = load<string>(STORAGE_KEYS.expenseTab) || 'sellable'
+        switchExpenseTab(savedExpenseTab)
       } else {
+        cashierSearch.style.display = 'none'
+        inventorySearch.style.display = 'none'
+        headerBackBtn.style.display = 'none'
         addItemFab.style.display = 'none'
       }
-      // Restore expense tab
-      const savedExpenseTab = load<string>(STORAGE_KEYS.expenseTab) || 'sellable'
-      switchExpenseTab(savedExpenseTab)
-    } else {
-      cashierSearch.style.display = 'none'
-      inventorySearch.style.display = 'none'
-      headerBackBtn.style.display = 'none'
-      addItemFab.style.display = 'none'
-    }
-    
-    if (id === 'expenseView') {
-      showInventoryCategories()
-      renderInventory()
-    }
-    if (id === 'ordersView') renderOrders()
-    if (id === 'reportsView') renderReports()
-    if (id === 'settingsView') renderSettings()
-    if (id === 'expenseView') {
-      const savedExpenseTab = load<string>(STORAGE_KEYS.expenseTab) || 'sellable'
-      if (savedExpenseTab === 'operational') {
-        renderExpenses()
+      
+      if (id === 'expenseView') {
+        showInventoryCategories()
+        renderInventory()
+      }
+      if (id === 'ordersView') renderOrders()
+      if (id === 'reportsView') renderReports()
+      if (id === 'settingsView') renderSettings()
+      if (id === 'expenseView') {
+        const savedExpenseTab = load<string>(STORAGE_KEYS.expenseTab) || 'sellable'
+        if (savedExpenseTab === 'operational') {
+          renderExpenses()
+        }
       }
     }
   })
@@ -803,24 +804,29 @@ if (savedView) {
       if (targetId === 'cashierView') {
         cashierSearch.style.display = 'block'
       } else if (targetId === 'expenseView' || targetId === 'inventoryView') {
-      const savedExpenseView = load<string>(STORAGE_KEYS.expenseView) || load<string>('ws.inventoryView')
-      const savedCategory = load<string>(STORAGE_KEYS.selectedInventoryCategory)
-      const savedExpenseTab = load<string>(STORAGE_KEYS.expenseTab) || 'sellable'
-      switchExpenseTab(savedExpenseTab)
-      
-      if (savedExpenseTab === 'operational') {
-        renderExpenses()
-      } else {
-        if (savedExpenseView === 'manage') {
-          showManageCategories()
-        } else if (savedExpenseView === 'items') {
-          if (savedCategory) {
-            selectedInventoryCategory = savedCategory
-          }
-          showInventoryItems()
+        const savedExpenseView = load<string>(STORAGE_KEYS.expenseView) || load<string>('ws.inventoryView')
+        const savedCategory = load<string>(STORAGE_KEYS.selectedInventoryCategory)
+        const savedExpenseTab = load<string>(STORAGE_KEYS.expenseTab) || 'sellable'
+        switchExpenseTab(savedExpenseTab)
+        
+        if (savedExpenseTab === 'operational') {
+          renderExpenses()
         } else {
-          showInventoryCategories()
+          if (savedExpenseView === 'manage') {
+            showManageCategories()
+          } else if (savedExpenseView === 'items') {
+            if (savedCategory) {
+              selectedInventoryCategory = savedCategory
+            }
+            showInventoryItems()
+          } else {
+            showInventoryCategories()
+          }
         }
+      }
+    }
+  }
+}
         renderInventory()
       }
     } else if (savedView === 'reportsView') {
