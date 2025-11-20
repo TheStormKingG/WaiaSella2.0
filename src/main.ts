@@ -18,6 +18,7 @@ const STORAGE_KEYS = {
   expenseView: 'ws.expenseView',
   expenseTab: 'ws.expenseTab',
   reportTab: 'ws.reportTab',
+  settingsTab: 'ws.settingsTab',
   selectedInventoryCategory: 'ws.selectedInventoryCategory',
   customCategories: 'ws.customCategories',
   expenses: 'ws.expenses',

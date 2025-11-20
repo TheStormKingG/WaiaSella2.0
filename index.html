@@ -478,19 +478,50 @@
 
       <!-- Settings View -->
       <section id="settingsView" class="view">
-        <h2 class="section-title">Settings</h2>
-        <div id="settingsContainer" class="settings-grid">
-          <div class="card settings-card">
-            <h3>Profile & Store</h3>
-            <p>Update store details, contact information, and receipt footer.</p>
+        <div class="expense-tabs">
+          <button class="expense-tab active" data-settings-tab="storeProfile">
+            <span>Store Profile</span>
+          </button>
+          <button class="expense-tab" data-settings-tab="users">
+            <span>Users</span>
+          </button>
+        </div>
+        
+        <!-- Store Profile Tab Content -->
+        <div id="storeProfileView" class="expense-tab-content active">
+          <h2 class="section-title">Store Profile</h2>
+          <div id="storeProfileContainer" class="card" style="padding: 20px;">
+            <div class="settings-grid">
+              <div class="card settings-card">
+                <h3>Store Information</h3>
+                <p>Update store name, address, contact information, and business details.</p>
+              </div>
+              <div class="card settings-card">
+                <h3>Receipt Settings</h3>
+                <p>Configure receipt footer, tax information, and receipt format.</p>
+              </div>
+              <div class="card settings-card">
+                <h3>Expense Defaults</h3>
+                <p>Configure default low stock threshold, tax rate, and categories.</p>
+              </div>
+              <div class="card settings-card">
+                <h3>Integrations</h3>
+                <p>Manage integrations with Supabase, payment providers, and exports.</p>
+              </div>
+            </div>
           </div>
-          <div class="card settings-card">
-            <h3>Expense Defaults</h3>
-            <p>Configure default low stock threshold, tax rate, and categories.</p>
-          </div>
-          <div class="card settings-card">
-            <h3>Integrations</h3>
-            <p>Manage integrations with Supabase, payment providers, and exports.</p>
+        </div>
+        
+        <!-- Users Tab Content -->
+        <div id="usersView" class="expense-tab-content">
+          <h2 class="section-title">Users</h2>
+          <div id="usersContainer" class="card" style="padding: 20px;">
+            <div style="margin-bottom: 16px;">
+              <button id="addUserBtn" class="btn primary">+ Add User</button>
+            </div>
+            <div id="usersList" style="display: flex; flex-direction: column; gap: 12px;">
+              <p style="color: var(--muted);">User management will appear here.</p>
+            </div>
           </div>
         </div>
       </section>
