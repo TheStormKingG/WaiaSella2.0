@@ -66,6 +66,7 @@ type Transaction = {
   total: number
   profit: number
   mode: 'sale' | 'order'
+  customerName?: string
 }
 
 const seedItems: Item[] = [
@@ -1165,6 +1166,9 @@ function updateCartModeUI() {
     cartModeToggle.setAttribute('title', cartMode === 'sale' ? 'Switch cart to order mode' : 'Switch cart to sale mode')
     cartModeToggle.classList.toggle('sale', cartMode === 'sale')
     cartModeToggle.classList.toggle('order', cartMode === 'order')
+  }
+  if (completeSaleBtn) {
+    completeSaleBtn.textContent = cartMode === 'sale' ? 'Complete Sale' : 'Complete Order'
   }
 }
 
