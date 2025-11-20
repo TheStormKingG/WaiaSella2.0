@@ -6,16 +6,91 @@
     <title>WaiaSella POS</title>
   </head>
   <body>
-    <header class="app-header">
+    <!-- Login/Signup View -->
+    <section id="authView" class="view active">
+      <div class="auth-container">
+        <div class="auth-card">
+          <div class="auth-header">
+            <h1>WaiaSella</h1>
+            <p class="auth-subtitle">Point of Sale System</p>
+          </div>
+          
+          <!-- Auth Toggle -->
+          <div class="auth-toggle">
+            <button id="loginTabBtn" class="auth-toggle-btn active" data-auth-mode="login">
+              Login
+            </button>
+            <button id="signupTabBtn" class="auth-toggle-btn" data-auth-mode="signup">
+              Sign Up
+            </button>
+          </div>
+          
+          <!-- Login Form -->
+          <div id="loginForm" class="auth-form active">
+            <form id="loginFormElement">
+              <div class="form-group">
+                <label for="loginEmail">Email or Username</label>
+                <input type="text" id="loginEmail" name="email" required placeholder="Enter your email or username">
+              </div>
+              <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" name="password" required placeholder="Enter your password">
+              </div>
+              <button type="submit" class="btn primary" style="width: 100%; margin-top: 8px;">Login</button>
+            </form>
+          </div>
+          
+          <!-- Signup Form -->
+          <div id="signupForm" class="auth-form">
+            <form id="signupFormElement">
+              <div class="form-group">
+                <label for="signupEmail">Email or Username</label>
+                <input type="text" id="signupEmail" name="email" required placeholder="Enter your email or username">
+              </div>
+              <div class="form-group">
+                <label for="signupPassword">Password</label>
+                <input type="password" id="signupPassword" name="password" required placeholder="Create a password">
+              </div>
+              <div class="form-group">
+                <label for="signupConfirmPassword">Confirm Password</label>
+                <input type="password" id="signupConfirmPassword" name="confirmPassword" required placeholder="Confirm your password">
+              </div>
+              
+              <!-- User Type Toggle -->
+              <div class="form-group">
+                <label>Account Type</label>
+                <div class="user-type-toggle">
+                  <button type="button" id="businessTypeBtn" class="user-type-btn active" data-user-type="business">
+                    <span class="icon">🏪</span>
+                    <span>Business</span>
+                  </button>
+                  <button type="button" id="individualTypeBtn" class="user-type-btn" data-user-type="individual">
+                    <span class="icon">👤</span>
+                    <span>Individual</span>
+                  </button>
+                </div>
+                <input type="hidden" id="userType" name="userType" value="business">
+              </div>
+              
+              <button type="submit" class="btn primary" style="width: 100%; margin-top: 8px;">Sign Up</button>
+            </form>
+          </div>
+          
+          <div id="authError" class="auth-error" style="display: none;"></div>
+        </div>
+      </div>
+    </section>
+
+    <header class="app-header" style="display: none;">
       <h1>Cashier</h1>
       <input id="cashierSearch" class="header-search" placeholder="Search products..." style="display: none;" />
       <input id="inventorySearch" class="header-search" placeholder="Search inventory..." style="display: none;" />
       <button id="headerBackBtn" class="header-back-btn" style="display: none;">← Back</button>
     </header>
 
-    <main id="app" class="app">
+    <main id="app" class="app" style="display: none;">
       <!-- Cashier View -->
-      <section id="cashierView" class="view active">
+      <section id="cashierView" class="view">
         <div class="sales-layout">
         <div class="sales-left">
           <div class="search-filter-bar">
@@ -371,7 +446,7 @@
       </section>
     </main>
 
-    <nav class="tabbar">
+    <nav class="tabbar" style="display: none;">
       <button class="tab" data-target="ordersView">
         <span class="icon">🧾</span>
         <span>Orders</span>

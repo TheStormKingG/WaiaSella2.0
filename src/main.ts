@@ -21,6 +21,9 @@ const STORAGE_KEYS = {
   selectedInventoryCategory: 'ws.selectedInventoryCategory',
   customCategories: 'ws.customCategories',
   expenses: 'ws.expenses',
+  isAuthenticated: 'ws.isAuthenticated',
+  userType: 'ws.userType',
+  currentUser: 'ws.currentUser',
 } as const
 
 type Expense = {
@@ -334,16 +337,152 @@ function fmtNoCents(n: number): string {
   return `GY$${Math.round(n || 0).toLocaleString()}`
 }
 
+// Auth handlers
+function showAuthError(message: string) {
+  if (authError) {
+    authError.textContent = message
+    authError.style.display = 'block'
+    setTimeout(() => {
+      authError.style.display = 'none'
+    }, 5000)
+  }
+}
+
+function switchAuthMode(mode: 'login' | 'signup') {
+  if (mode === 'login') {
+    loginTabBtn?.classList.add('active')
+    signupTabBtn?.classList.remove('active')
+    loginForm?.classList.add('active')
+    signupForm?.classList.remove('active')
+  } else {
+    loginTabBtn?.classList.remove('active')
+    signupTabBtn?.classList.add('active')
+    loginForm?.classList.remove('active')
+    signupForm?.classList.add('active')
+  }
+  if (authError) authError.style.display = 'none'
+}
+
+function switchUserType(type: 'business' | 'individual') {
+  userType = type
+  if (userTypeInput) userTypeInput.value = type
+  if (type === 'business') {
+    businessTypeBtn?.classList.add('active')
+    individualTypeBtn?.classList.remove('active')
+  } else {
+    businessTypeBtn?.classList.remove('active')
+    individualTypeBtn?.classList.add('active')
+  }
+}
+
+function handleLogin(email: string, password: string) {
+  // Simple authentication (in production, this would connect to a backend)
+  // For now, just check if credentials exist in localStorage
+  const users = load<Record<string, { password: string; userType: 'business' | 'individual' }>>('ws.users') ?? {}
+  
+  if (users[email] && users[email].password === password) {
+    isAuthenticated = true
+    currentUser = email
+    userType = users[email].userType
+    save(STORAGE_KEYS.isAuthenticated, true)
+    save(STORAGE_KEYS.currentUser, email)
+    save(STORAGE_KEYS.userType, userType)
+    showApp()
+    return true
+  }
+  
+  showAuthError('Invalid email or password')
+  return false
+}
+
+function handleSignup(email: string, password: string, confirmPassword: string, accountType: 'business' | 'individual') {
+  if (password !== confirmPassword) {
+    showAuthError('Passwords do not match')
+    return false
+  }
+  
+  if (password.length < 6) {
+    showAuthError('Password must be at least 6 characters')
+    return false
+  }
+  
+  const users = load<Record<string, { password: string; userType: 'business' | 'individual' }>>('ws.users') ?? {}
+  
+  if (users[email]) {
+    showAuthError('User already exists. Please login instead.')
+    return false
+  }
+  
+  users[email] = { password, userType: accountType }
+  save('ws.users', users)
+  
+  isAuthenticated = true
+  currentUser = email
+  userType = accountType
+  save(STORAGE_KEYS.isAuthenticated, true)
+  save(STORAGE_KEYS.currentUser, email)
+  save(STORAGE_KEYS.userType, userType)
+  showApp()
+  return true
+}
+
+function showApp() {
+  if (authView) authView.style.display = 'none'
+  if (appHeader) appHeader.style.display = 'flex'
+  if (appMain) appMain.style.display = 'block'
+  if (appTabbar) appTabbar.style.display = 'grid'
+}
+
+function showAuth() {
+  if (authView) authView.style.display = 'block'
+  if (appHeader) appHeader.style.display = 'none'
+  if (appMain) appMain.style.display = 'none'
+  if (appTabbar) appTabbar.style.display = 'none'
+}
+
+// Auth event listeners
+loginTabBtn?.addEventListener('click', () => switchAuthMode('login'))
+signupTabBtn?.addEventListener('click', () => switchAuthMode('signup'))
+businessTypeBtn?.addEventListener('click', () => switchUserType('business'))
+individualTypeBtn?.addEventListener('click', () => switchUserType('individual'))
+
+loginFormElement?.addEventListener('submit', (e) => {
+  e.preventDefault()
+  const data = new FormData(loginFormElement)
+  const email = (data.get('email') as string).trim()
+  const password = data.get('password') as string
+  handleLogin(email, password)
+})
+
+signupFormElement?.addEventListener('submit', (e) => {
+  e.preventDefault()
+  const data = new FormData(signupFormElement)
+  const email = (data.get('email') as string).trim()
+  const password = data.get('password') as string
+  const confirmPassword = data.get('confirmPassword') as string
+  const accountType = (data.get('userType') as 'business' | 'individual') || 'business'
+  handleSignup(email, password, confirmPassword, accountType)
+})
+
+// Check authentication on load
+if (isAuthenticated) {
+  showApp()
+} else {
+  showAuth()
+}
+
 // Init
-renderCategoryFilter()
-renderProducts()
-renderCart()
-renderOrders()
-renderSettings()
-populateCategoryDatalist()
-populateSellableCategoryFilter()
-renderExpenses()
-renderSellableTable()
+if (isAuthenticated) {
+  renderCategoryFilter()
+  renderProducts()
+  renderCart()
+  renderOrders()
+  renderSettings()
+  populateCategoryDatalist()
+  populateSellableCategoryFilter()
+  renderExpenses()
+  renderSellableTable()
+}
 
 // Tab switching
 tabs.forEach((t) =>
