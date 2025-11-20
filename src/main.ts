@@ -183,7 +183,6 @@ const itemImageData = qs<HTMLInputElement>('#itemImageData')
 
 // Orders & Settings
 const ordersContainer = qs<HTMLDivElement>('#ordersContainer')
-const settingsContainer = qs<HTMLDivElement>('#settingsContainer')
 const orderDetailsDialog = qs<HTMLDialogElement>('#orderDetailsDialog')
 const orderDetailsTitle = qs<HTMLHeadingElement>('#orderDetailsTitle')
 const orderDetailsContent = qs<HTMLDivElement>('#orderDetailsContent')
@@ -837,6 +836,8 @@ const usersList = qs<HTMLDivElement>('#usersList')
 
 // Settings tab switching
 function switchSettingsTab(tabName: 'storeProfile' | 'users') {
+  if (settingsTabs.length === 0 || settingsTabContents.length === 0) return
+  
   settingsTabs.forEach(tab => {
     if (tab.dataset.settingsTab === tabName) {
       tab.classList.add('active')
@@ -861,12 +862,14 @@ function switchSettingsTab(tabName: 'storeProfile' | 'users') {
   }
 }
 
-settingsTabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    const tabName = tab.dataset.settingsTab as 'storeProfile' | 'users'
-    switchSettingsTab(tabName)
+if (settingsTabs.length > 0) {
+  settingsTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabName = tab.dataset.settingsTab as 'storeProfile' | 'users'
+      switchSettingsTab(tabName)
+    })
   })
-})
+}
 
 // Operational Expenses event listeners
 if (addExpenseBtn) addExpenseBtn.addEventListener('click', () => openExpenseDialog())
