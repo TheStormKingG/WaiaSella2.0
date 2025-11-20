@@ -272,12 +272,15 @@ body {
   background: var(--card);
 }
 .order-meta {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 4px;
+  flex: 1;
 }
 .order-id {
   font-weight: 700;
   color: var(--ink);
+  font-size: 16px;
 }
 .order-date {
   font-size: 12px;

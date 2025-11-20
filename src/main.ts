@@ -1764,10 +1764,25 @@ function renderOrders() {
     })
     const meta = h('div', { class: 'order-meta' })
     const date = new Date(order.date)
-    meta.append(
+    const topRow = h('div', { style: 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;' })
+    topRow.append(
       h('div', { class: 'order-id' }, `Order #${order.id.toUpperCase()}`),
       h('div', { class: 'order-date' }, date.toLocaleString())
     )
+    meta.appendChild(topRow)
+    
+    // Add customer name and cashier name if available
+    const infoRow = h('div', { style: 'display: flex; flex-direction: column; gap: 4px; margin-top: 8px;' })
+    if (order.customerName) {
+      infoRow.appendChild(h('div', { style: 'font-size: 13px; color: var(--ink); font-weight: 500;' }, `Customer: ${order.customerName}`))
+    }
+    if (order.cashierName) {
+      infoRow.appendChild(h('div', { style: 'font-size: 13px; color: var(--muted);' }, `Cashier: ${order.cashierName}`))
+    }
+    if (order.customerName || order.cashierName) {
+      meta.appendChild(infoRow)
+    }
+    
     const summary = h('div', { class: 'order-summary' })
     summary.append(
       h('div', null, `${order.items.length} item${order.items.length === 1 ? '' : 's'}`),
