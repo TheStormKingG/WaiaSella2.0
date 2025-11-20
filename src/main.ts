@@ -108,6 +108,11 @@ save(STORAGE_KEYS.customCategories, customCategories)
 // Operational Expenses
 let expenses: Expense[] = load<Expense[]>(STORAGE_KEYS.expenses) ?? []
 
+// Authentication
+let isAuthenticated = load<boolean>(STORAGE_KEYS.isAuthenticated) ?? false
+let userType: 'business' | 'individual' = (load<string>(STORAGE_KEYS.userType) as 'business' | 'individual') || 'business'
+let currentUser = load<string>(STORAGE_KEYS.currentUser) || ''
+
 // Elements
 const tabs = qsa<HTMLButtonElement>('.tab')
 const views = qsa<HTMLElement>('.view')
@@ -240,6 +245,22 @@ const topSellingEl = qs<HTMLUListElement>('#topSelling')
 
 // Reorder
 const reorderContainer = qs<HTMLDivElement>('#reorderContainer')
+
+// Authentication Elements
+const authView = qs<HTMLElement>('#authView')
+const loginTabBtn = qs<HTMLButtonElement>('#loginTabBtn')
+const signupTabBtn = qs<HTMLButtonElement>('#signupTabBtn')
+const loginForm = qs<HTMLDivElement>('#loginForm')
+const signupForm = qs<HTMLDivElement>('#signupForm')
+const loginFormElement = qs<HTMLFormElement>('#loginFormElement')
+const signupFormElement = qs<HTMLFormElement>('#signupFormElement')
+const businessTypeBtn = qs<HTMLButtonElement>('#businessTypeBtn')
+const individualTypeBtn = qs<HTMLButtonElement>('#individualTypeBtn')
+const userTypeInput = qs<HTMLInputElement>('#userType')
+const authError = qs<HTMLDivElement>('#authError')
+const appHeader = qs<HTMLElement>('.app-header')
+const appMain = qs<HTMLElement>('#app')
+const appTabbar = qs<HTMLElement>('.tabbar')
 
 // App icon color schemes - matching modern app icon style (defined early to avoid TDZ)
 const categoryColors = [
