@@ -2152,37 +2152,36 @@ function markOrderDelivered(order: Transaction) {
 }
 
 function cancelOrderAction(order: Transaction) {
-  if (!confirm(`Cancel order #${order.id}?\n\nThis will convert the order to a sale and remove it from orders.`)) {
+  if (!cancelOrderDialog || !cancelOrderMessage || !cancelOrderId) return
+  
+  // Show confirmation modal
+  cancelOrderMessage.textContent = `Are you sure you want to cancel order #${order.id}? This will permanently delete the order from both orders and sales.`
+  cancelOrderId.value = order.id
+  cancelOrderDialog.showModal()
+}
+
+function confirmCancelOrder() {
+  if (!cancelOrderId || !cancelOrderDialog) return
+  
+  const orderId = cancelOrderId.value
+  const order = transactions.find((tx) => tx.id === orderId)
+  
+  if (!order) {
+    cancelOrderDialog.close()
     return
   }
   
-  // Convert order to sale
-  // Find the order in transactions and change its mode from 'order' to 'sale'
-  const orderIndex = transactions.findIndex((tx) => tx.id === order.id)
-  if (orderIndex !== -1) {
-    // Change mode to sale
-    transactions[orderIndex].mode = 'sale'
-    
-    // Reduce inventory stock for all items (since it's now a sale)
-    order.items.forEach((item) => {
-      const inventoryItem = inventory.find((i) => i.id === item.itemId)
-      if (inventoryItem) {
-        inventoryItem.stock -= item.qty
-        soldTally[item.itemId] = (soldTally[item.itemId] || 0) + item.qty
-      }
-    })
-  }
+  // Remove order from transactions completely (from both orders and sales)
+  transactions = transactions.filter((tx) => tx.id !== orderId)
   
   persist()
+  cancelOrderDialog.close()
   orderDetailsDialog?.close()
   currentOrderView = null
   renderOrders()
-  renderInventory()
-  renderProducts()
   renderReports()
-  renderReorder()
   
-  alert(`Order #${order.id} has been cancelled and converted to a sale.`)
+  alert(`Order #${orderId} has been cancelled and removed.`)
 }
 
 // Close order details modal
