@@ -337,6 +337,27 @@ function fmtNoCents(n: number): string {
   return `GY$${Math.round(n || 0).toLocaleString()}`
 }
 
+// Initialize default admin accounts
+function initializeAdminAccounts() {
+  const users = load<Record<string, { password: string; userType: 'business' | 'individual' }>>('ws.users') ?? {}
+  
+  // Create adminb (Business admin) if it doesn't exist
+  if (!users['adminb']) {
+    users['adminb'] = { password: '123456', userType: 'business' }
+  }
+  
+  // Create admini (Individual admin) if it doesn't exist
+  if (!users['admini']) {
+    users['admini'] = { password: '123456', userType: 'individual' }
+  }
+  
+  // Save the updated users
+  save('ws.users', users)
+}
+
+// Initialize admin accounts on load
+initializeAdminAccounts()
+
 // Auth handlers
 function showAuthError(message: string) {
   if (authError) {
