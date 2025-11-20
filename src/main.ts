@@ -1056,6 +1056,11 @@ if (document.readyState === 'loading') {
   initSettingsTabs()
 }
 
+// User Dialog event listeners - attach at module level
+if (userForm) userForm.addEventListener('submit', saveUserFromDialog)
+if (closeUserDialogBtn) closeUserDialogBtn.addEventListener('click', () => userDialog?.close())
+if (cancelUserBtn) cancelUserBtn.addEventListener('click', () => userDialog?.close())
+
 // Cashier interactions
 cashierSearch.addEventListener('input', renderProducts)
 categoryFilter.addEventListener('change', () => {
@@ -2038,6 +2043,14 @@ function renderUsers() {
     
     const actions = h('div', { style: 'display: flex; gap: 8px;' })
     if (email !== currentUser) {
+      const editBtn = h('button', {
+        class: 'btn',
+        style: 'background: #2563eb; color: white; border-color: #2563eb;',
+        onclick: () => {
+          openUserDialog(email)
+        }
+      }, 'Edit')
+      
       const deleteBtn = h('button', {
         class: 'btn',
         style: 'background: #ef4444; color: white; border-color: #ef4444;',
@@ -2049,6 +2062,8 @@ function renderUsers() {
           }
         }
       }, 'Delete')
+      
+      actions.appendChild(editBtn)
       actions.appendChild(deleteBtn)
     } else {
       actions.appendChild(h('span', { style: 'color: var(--muted); font-size: 14px;' }, 'Current User'))
@@ -2059,13 +2074,32 @@ function renderUsers() {
   })
 }
 
-function openUserDialog() {
+function openUserDialog(userEmail?: string) {
   if (!userDialog || !userForm || !userDialogTitle) return
   
-  userDialogTitle.textContent = 'Add User'
-  userForm.reset()
-  ;(userForm.elements.namedItem('id') as HTMLInputElement).value = ''
-  ;(userForm.elements.namedItem('role') as HTMLSelectElement).value = ''
+  const users = load<Record<string, { password: string; userType: 'business' | 'individual'; name?: string }>>('ws.users') ?? {}
+  
+  if (userEmail && users[userEmail]) {
+    // Edit mode
+    const user = users[userEmail]
+    userDialogTitle.textContent = 'Edit User'
+    ;(userForm.elements.namedItem('id') as HTMLInputElement).value = userEmail
+    ;(userForm.elements.namedItem('email') as HTMLInputElement).value = userEmail
+    ;(userForm.elements.namedItem('email') as HTMLInputElement).readOnly = true
+    ;(userForm.elements.namedItem('name') as HTMLInputElement).value = user.name || ''
+    ;(userForm.elements.namedItem('role') as HTMLSelectElement).value = user.userType
+    ;(userForm.elements.namedItem('password') as HTMLInputElement).value = ''
+    ;(userForm.elements.namedItem('password') as HTMLInputElement).placeholder = 'Leave blank to keep current password'
+    ;(userForm.elements.namedItem('password') as HTMLInputElement).required = false
+  } else {
+    // Add mode
+    userDialogTitle.textContent = 'Add User'
+    userForm.reset()
+    ;(userForm.elements.namedItem('id') as HTMLInputElement).value = ''
+    ;(userForm.elements.namedItem('email') as HTMLInputElement).readOnly = false
+    ;(userForm.elements.namedItem('password') as HTMLInputElement).placeholder = 'Minimum 6 characters'
+    ;(userForm.elements.namedItem('password') as HTMLInputElement).required = true
+  }
   
   userDialog.showModal()
 }
@@ -2075,34 +2109,58 @@ function saveUserFromDialog(ev: SubmitEvent) {
   if (!userForm) return
   
   const data = Object.fromEntries(new FormData(userForm) as any) as Record<string, string>
+  const existingEmail = (data.id as string).trim().toLowerCase()
   const email = (data.email as string).trim().toLowerCase()
   const name = (data.name as string).trim()
   const password = data.password as string
   const role = data.role as 'business' | 'individual'
   
-  if (!email || !password || !role) {
+  if (!email || !role) {
     alert('Please fill in all required fields.')
-    return
-  }
-  
-  if (password.length < 6) {
-    alert('Password must be at least 6 characters long.')
     return
   }
   
   const users = load<Record<string, { password: string; userType: 'business' | 'individual'; name?: string }>>('ws.users') ?? {}
   
-  // Check if user already exists
-  if (users[email]) {
-    alert('A user with this email already exists.')
-    return
-  }
+  const isEditMode = !!existingEmail && existingEmail === email
   
-  // Save new user
-  users[email] = {
-    password: password,
-    userType: role,
-    name: name
+  if (isEditMode) {
+    // Edit mode - update existing user
+    if (!users[email]) {
+      alert('User not found.')
+      return
+    }
+    
+    // Update user data
+    users[email] = {
+      password: password && password.length >= 6 ? password : users[email].password, // Keep existing password if new one is empty or too short
+      userType: role,
+      name: name
+    }
+    
+    // If email changed (shouldn't happen due to readOnly, but just in case)
+    if (password && password.length < 6) {
+      alert('Password must be at least 6 characters long if provided.')
+      return
+    }
+  } else {
+    // Add mode - create new user
+    if (users[email]) {
+      alert('A user with this email already exists.')
+      return
+    }
+    
+    if (!password || password.length < 6) {
+      alert('Password must be at least 6 characters long.')
+      return
+    }
+    
+    // Save new user
+    users[email] = {
+      password: password,
+      userType: role,
+      name: name
+    }
   }
   
   save('ws.users', users)
