@@ -2129,23 +2129,43 @@ function openOrderDetails(order: Transaction) {
 
 // Handle order actions
 function markOrderDelivered(order: Transaction) {
-  if (!confirm(`Mark order #${order.id} as delivered?\n\nThis will reduce inventory stock for all items in this order.`)) {
+  if (!deliverOrderDialog || !deliverOrderMessage || !deliverOrderId) return
+  
+  // Show confirmation modal
+  deliverOrderMessage.textContent = `Are you sure you want to mark order #${order.id} as delivered? This will convert the order to a completed sale and reduce inventory stock accordingly.`
+  deliverOrderId.value = order.id
+  deliverOrderDialog.showModal()
+}
+
+function confirmDeliverOrder() {
+  if (!deliverOrderId || !deliverOrderDialog) return
+  
+  const orderId = deliverOrderId.value
+  const order = transactions.find((tx) => tx.id === orderId)
+  
+  if (!order) {
+    deliverOrderDialog.close()
     return
   }
   
-  // Reduce stock for all items in the order
-  order.items.forEach((item) => {
-    const inventoryItem = inventory.find((i) => i.id === item.itemId)
-    if (inventoryItem) {
-      inventoryItem.stock -= item.qty
-      soldTally[item.itemId] = (soldTally[item.itemId] || 0) + item.qty
-    }
-  })
-  
-  // Remove order from transactions (or mark as delivered - for now we'll remove it)
-  transactions = transactions.filter((tx) => tx.id !== order.id)
+  // Convert order to sale
+  const orderIndex = transactions.findIndex((tx) => tx.id === orderId)
+  if (orderIndex !== -1) {
+    // Change mode to sale
+    transactions[orderIndex].mode = 'sale'
+    
+    // Reduce inventory stock for all items (since it's now a completed sale)
+    order.items.forEach((item) => {
+      const inventoryItem = inventory.find((i) => i.id === item.itemId)
+      if (inventoryItem) {
+        inventoryItem.stock -= item.qty
+        soldTally[item.itemId] = (soldTally[item.itemId] || 0) + item.qty
+      }
+    })
+  }
   
   persist()
+  deliverOrderDialog.close()
   orderDetailsDialog?.close()
   currentOrderView = null
   renderOrders()
@@ -2154,7 +2174,7 @@ function markOrderDelivered(order: Transaction) {
   renderReports()
   renderReorder()
   
-  alert(`Order #${order.id} marked as delivered. Inventory updated.`)
+  alert(`Order #${orderId} marked as delivered. Inventory updated.`)
 }
 
 function cancelOrderAction(order: Transaction) {
