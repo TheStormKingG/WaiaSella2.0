@@ -2112,9 +2112,68 @@ function openOrderDetails(order: Transaction) {
   orderDetailsDialog.showModal()
 }
 
-// Close order details modal
-closeOrderDetailsBtn?.addEventListener('click', () => {
+// Handle order actions
+function markOrderDelivered(order: Transaction) {
+  if (!confirm(`Mark order #${order.id} as delivered?\n\nThis will reduce inventory stock for all items in this order.`)) {
+    return
+  }
+  
+  // Reduce stock for all items in the order
+  order.items.forEach((item) => {
+    const inventoryItem = inventory.find((i) => i.id === item.itemId)
+    if (inventoryItem) {
+      inventoryItem.stock -= item.qty
+      soldTally[item.itemId] = (soldTally[item.itemId] || 0) + item.qty
+    }
+  })
+  
+  // Remove order from transactions (or mark as delivered - for now we'll remove it)
+  transactions = transactions.filter((tx) => tx.id !== order.id)
+  
+  persist()
   orderDetailsDialog?.close()
+  currentOrderView = null
+  renderOrders()
+  renderInventory()
+  renderProducts()
+  renderReports()
+  renderReorder()
+  
+  alert(`Order #${order.id} marked as delivered. Inventory updated.`)
+}
+
+function cancelOrderAction(order: Transaction) {
+  if (!confirm(`Cancel order #${order.id}?\n\nThis will permanently delete this order.`)) {
+    return
+  }
+  
+  // Remove order from transactions
+  transactions = transactions.filter((tx) => tx.id !== order.id)
+  
+  persist()
+  orderDetailsDialog?.close()
+  currentOrderView = null
+  renderOrders()
+  
+  alert(`Order #${order.id} has been cancelled.`)
+}
+
+// Close order details modal
+closeOrderDetailsXBtn?.addEventListener('click', () => {
+  orderDetailsDialog?.close()
+  currentOrderView = null
+})
+
+cancelOrderBtn?.addEventListener('click', () => {
+  if (currentOrderView) {
+    cancelOrderAction(currentOrderView)
+  }
+})
+
+deliveredOrderBtn?.addEventListener('click', () => {
+  if (currentOrderView) {
+    markOrderDelivered(currentOrderView)
+  }
 })
 
 function renderSettings() {
