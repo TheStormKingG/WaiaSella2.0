@@ -71,7 +71,59 @@
         
         <!-- Sellable Tab Content (current inventory) -->
         <div id="sellableView" class="expense-tab-content active">
-          <div id="inventoryCategories" style="padding: 8px 12px;">
+          <!-- Table View -->
+          <div id="sellableTableView" style="padding: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <h3 style="margin: 0;">Sellable Items</h3>
+              <button id="addItemBtn" type="button" class="btn primary">+ Add Item</button>
+            </div>
+            
+            <!-- Filters and Search -->
+            <div class="card" style="margin-bottom: 16px;">
+              <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;">
+                <div style="flex: 1; min-width: 200px;">
+                  <label style="display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px;">Search</label>
+                  <input id="sellableSearch" type="text" class="expense-filter-input" placeholder="Search items...">
+                </div>
+                <div style="min-width: 150px;">
+                  <label style="display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px;">Category</label>
+                  <select id="sellableCategoryFilter" class="expense-filter-input">
+                    <option value="">All Categories</option>
+                  </select>
+                </div>
+                <button id="clearSellableFilters" type="button" class="btn" style="white-space: nowrap;">Clear</button>
+              </div>
+            </div>
+            
+            <!-- Items Table -->
+            <div class="card">
+              <div style="overflow-x: auto;">
+                <table id="sellableTable" class="expenses-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Cost</th>
+                      <th>Price</th>
+                      <th>Unit</th>
+                      <th>Quantity</th>
+                      <th>Expiry Date</th>
+                      <th>Low Level</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="sellableTableBody">
+                    <!-- Items will be rendered here -->
+                  </tbody>
+                </table>
+                <div id="sellableEmpty" class="expenses-empty">
+                  <p>No items found. Click "Add Item" to create your first item.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Legacy Views (hidden by default, kept for backward compatibility) -->
+          <div id="inventoryCategories" style="padding: 8px 12px; display: none;">
             <!-- Categories will be rendered here as app buttons -->
           </div>
           <div id="inventoryItemsView" style="display: none;">
@@ -85,7 +137,7 @@
               <ul id="categoryManageList" class="category-manage-list"></ul>
             </div>
           </div>
-          <button id="addItemFab" class="fab" title="Add Item" aria-label="Add Item">
+          <button id="addItemFab" class="fab" title="Add Item" aria-label="Add Item" style="display: none;">
             <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
               <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
             </svg>
@@ -350,6 +402,14 @@
           <label>
             <span>Low Point</span>
             <input name="lowPoint" type="number" step="1" min="0" placeholder="e.g. 10" />
+          </label>
+          <label>
+            <span>Unit</span>
+            <input name="unit" type="text" placeholder="e.g., kg, pcs, box" />
+          </label>
+          <label>
+            <span>Expiry Date</span>
+            <input name="expiryDate" type="date" />
           </label>
         </div>
         

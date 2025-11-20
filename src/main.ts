@@ -41,6 +41,8 @@ type Item = {
   image?: string
   lowPoint?: number
   maxStock?: number
+  unit?: string
+  expiryDate?: string
 }
 
 type TransactionItem = {
@@ -176,6 +178,15 @@ const expenseTabs = qsa<HTMLButtonElement>('.expense-tab')
 const sellableView = qs<HTMLDivElement>('#sellableView')
 const operationalView = qs<HTMLDivElement>('#operationalView')
 const expenseTabContents = qsa<HTMLDivElement>('.expense-tab-content')
+
+// Sellable table
+const sellableTableView = qs<HTMLDivElement>('#sellableTableView')
+const addItemBtn = qs<HTMLButtonElement>('#addItemBtn')
+const sellableSearch = qs<HTMLInputElement>('#sellableSearch')
+const sellableCategoryFilter = qs<HTMLSelectElement>('#sellableCategoryFilter')
+const clearSellableFiltersBtn = qs<HTMLButtonElement>('#clearSellableFilters')
+const sellableTableBody = qs<HTMLTableSectionElement>('#sellableTableBody')
+const sellableEmpty = qs<HTMLDivElement>('#sellableEmpty')
 
 // Operational Expenses
 const addExpenseBtn = qs<HTMLButtonElement>('#addExpenseBtn')
@@ -321,7 +332,9 @@ renderCart()
 renderOrders()
 renderSettings()
 populateCategoryDatalist()
+populateSellableCategoryFilter()
 renderExpenses()
+renderSellableTable()
 
 // Tab switching
 tabs.forEach((t) =>
@@ -403,6 +416,8 @@ expenseTabs.forEach(tab => {
     switchExpenseTab(tabName)
     if (tabName === 'operational') {
       renderExpenses()
+    } else if (tabName === 'sellable') {
+      renderSellableTable()
     }
   })
 })
@@ -1272,6 +1287,118 @@ function renderSettings() {
   if (!settingsContainer) return
 }
 
+// Sellable Table
+function renderSellableTable() {
+  if (!sellableTableBody || !sellableEmpty) return
+  
+  // Get filter values
+  const searchTerm = sellableSearch?.value.toLowerCase() || ''
+  const categoryFilter = sellableCategoryFilter?.value || ''
+  
+  // Filter items
+  let filteredItems = inventory.filter(item => {
+    // Search filter
+    if (searchTerm) {
+      const matchesSearch = 
+        item.name.toLowerCase().includes(searchTerm) ||
+        item.category.toLowerCase().includes(searchTerm) ||
+        item.unit?.toLowerCase().includes(searchTerm)
+      if (!matchesSearch) return false
+    }
+    
+    // Category filter
+    if (categoryFilter && item.category !== categoryFilter) return false
+    
+    return true
+  })
+  
+  // Sort by name
+  filteredItems.sort((a, b) => a.name.localeCompare(b.name))
+  
+  // Clear table
+  sellableTableBody.innerHTML = ''
+  
+  if (filteredItems.length === 0) {
+    sellableEmpty.style.display = 'block'
+  } else {
+    sellableEmpty.style.display = 'none'
+    
+    // Render items
+    filteredItems.forEach(item => {
+      const row = h('tr')
+      const expiryDate = item.expiryDate ? new Date(item.expiryDate) : null
+      const isExpired = expiryDate && expiryDate < new Date()
+      const expiryDateStr = expiryDate ? expiryDate.toLocaleDateString() : '-'
+      
+      row.innerHTML = `
+        <td>${item.name}</td>
+        <td style="font-weight: 600;">${fmt(item.cost)}</td>
+        <td style="font-weight: 600;">${fmt(item.price)}</td>
+        <td>${item.unit || '-'}</td>
+        <td>${item.stock}</td>
+        <td style="${isExpired ? 'color: #ef4444; font-weight: 600;' : ''}">${expiryDateStr}</td>
+        <td>${item.lowPoint || '-'}</td>
+        <td>
+          <div class="expense-actions">
+            <button class="btn-edit" data-item-id="${item.id}">Edit</button>
+            <button class="btn-delete" data-item-id="${item.id}">Delete</button>
+          </div>
+        </td>
+      `
+      
+      sellableTableBody.appendChild(row)
+    })
+    
+    // Add event listeners for edit/delete buttons
+    sellableTableBody.querySelectorAll('.btn-edit').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = (e.target as HTMLButtonElement).dataset.itemId
+        if (id) {
+          const item = inventory.find(i => i.id === id)
+          if (item) openItemDialog(item)
+        }
+      })
+    })
+    
+    sellableTableBody.querySelectorAll('.btn-delete').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = (e.target as HTMLButtonElement).dataset.itemId
+        if (id) {
+          const item = inventory.find(i => i.id === id)
+          if (item) {
+            if (confirm(`Delete "${item.name}"?\n\nThis action cannot be undone.`)) {
+              inventory = inventory.filter(i => i.id !== id)
+              persist()
+              renderSellableTable()
+              renderInventoryCategories()
+              renderInventory()
+              renderCategoryFilter()
+              renderProducts()
+              renderReports()
+              console.log(`🗑️  Deleted item: ${item.name}`)
+            }
+          }
+        }
+      })
+    })
+  }
+}
+
+function populateSellableCategoryFilter() {
+  if (!sellableCategoryFilter) return
+  const categories = getAllCategories()
+  sellableCategoryFilter.innerHTML = '<option value="">All Categories</option>'
+  categories.forEach(category => {
+    sellableCategoryFilter.appendChild(h('option', { value: category }, category))
+  })
+}
+
+function clearSellableFilters() {
+  if (sellableSearch) sellableSearch.value = ''
+  if (sellableCategoryFilter) sellableCategoryFilter.value = ''
+  renderSellableTable()
+}
+
 // Operational Expenses
 function renderExpenses() {
   if (!expensesTableBody || !expensesEmpty || !expensesTotal || !expensesTableFooter) return
@@ -1473,6 +1600,8 @@ function openItemDialog(item?: Item) {
   ;(itemForm.elements.namedItem('cost') as HTMLInputElement).value = item?.cost?.toString() ?? ''
   ;(itemForm.elements.namedItem('stock') as HTMLInputElement).value = item?.stock?.toString() ?? ''
   ;(itemForm.elements.namedItem('lowPoint') as HTMLInputElement).value = item?.lowPoint?.toString() ?? ''
+  ;(itemForm.elements.namedItem('unit') as HTMLInputElement).value = item?.unit || ''
+  ;(itemForm.elements.namedItem('expiryDate') as HTMLInputElement).value = item?.expiryDate || ''
   ;(itemForm.elements.namedItem('id') as HTMLInputElement).value = item?.id || ''
   
   // Set image preview
@@ -1506,6 +1635,8 @@ function saveItemFromDialog(ev: SubmitEvent) {
     image: data.image?.trim() || '',
     lowPoint: data.lowPoint ? Number(data.lowPoint) : undefined,
     maxStock: Math.max(newStock, existingItem?.maxStock || 0),
+    unit: data.unit?.trim() || undefined,
+    expiryDate: data.expiryDate?.trim() || undefined,
   }
   const idx = inventory.findIndex((i) => i.id === payload.id)
   if (idx >= 0) inventory[idx] = payload
