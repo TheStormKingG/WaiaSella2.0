@@ -446,11 +446,11 @@ function fmtNoCents(n: number): string {
 
 // Initialize default admin accounts
 function initializeAdminAccounts() {
-  const users = load<Record<string, { password: string; userType: 'business' | 'individual' }>>('ws.users') ?? {}
+  const users = load<Record<string, { password: string; userType: 'business' | 'individual'; name?: string; role?: 'admin' | 'cashier' | 'observer' }>>('ws.users') ?? {}
   
   // Create adminb (Business admin) if it doesn't exist
   if (!users['adminb']) {
-    users['adminb'] = { password: '123456', userType: 'business', name: 'Admin Business' }
+    users['adminb'] = { password: '123456', userType: 'business', name: 'Admin Business', role: 'admin' }
   }
   
   // Create admini (Individual admin) if it doesn't exist
@@ -506,15 +506,18 @@ function switchUserType(type: 'business' | 'individual') {
 function handleLogin(email: string, password: string) {
   // Simple authentication (in production, this would connect to a backend)
   // For now, just check if credentials exist in localStorage
-  const users = load<Record<string, { password: string; userType: 'business' | 'individual' }>>('ws.users') ?? {}
+  const users = load<Record<string, { password: string; userType: 'business' | 'individual'; name?: string; role?: 'admin' | 'cashier' | 'observer' }>>('ws.users') ?? {}
   
   if (users[email] && users[email].password === password) {
     isAuthenticated = true
     currentUser = email
     userType = users[email].userType
+    // Get role if user is a business user
+    currentUserRole = users[email].userType === 'business' ? (users[email].role || 'cashier') : null
     save(STORAGE_KEYS.isAuthenticated, true)
     save(STORAGE_KEYS.currentUser, email)
     save(STORAGE_KEYS.userType, userType)
+    save(STORAGE_KEYS.currentUserRole, currentUserRole || '')
     showApp()
     return true
   }
