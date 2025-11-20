@@ -328,6 +328,17 @@ const userTypeBadge = qs<HTMLSpanElement>('#userTypeBadge')
 const headerSettingsBtn = qs<HTMLButtonElement>('#headerSettingsBtn')
 const logoutBtnHeader = qs<HTMLButtonElement>('#logoutBtn')
 
+// Settings tabs - MUST be declared BEFORE renderSettings() is called at module init (line 694)
+// These are declared with let and initialized to empty arrays/null to avoid TDZ
+let settingsTabs: NodeListOf<HTMLButtonElement> | HTMLButtonElement[] = [] as any
+let storeProfileView: HTMLDivElement | null = null
+let usersView: HTMLDivElement | null = null
+let settingsTabContents: HTMLDivElement[] = [] as any
+let storeProfileContainer: HTMLDivElement | null = null
+let usersContainer: HTMLDivElement | null = null
+let addUserBtn: HTMLButtonElement | null = null
+let usersList: HTMLDivElement | null = null
+
 // App icon color schemes - matching modern app icon style (defined early to avoid TDZ)
 const categoryColors = [
   { bg: '#FFFFFF', icon: '#1976D2', shadow: 'rgba(0,0,0,0.1)' },
