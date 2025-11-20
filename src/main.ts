@@ -822,6 +822,7 @@ if (savedView) {
           } else {
             showInventoryCategories()
           }
+          renderInventory()
         }
       }
     }
