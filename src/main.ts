@@ -269,6 +269,7 @@ const appMain = qs<HTMLElement>('#app')
 const appTabbar = qs<HTMLElement>('.tabbar')
 const userName = qs<HTMLSpanElement>('#userName')
 const userTypeBadge = qs<HTMLSpanElement>('#userTypeBadge')
+const headerSettingsBtn = qs<HTMLButtonElement>('#headerSettingsBtn')
 const logoutBtnHeader = qs<HTMLButtonElement>('#logoutBtn')
 
 // App icon color schemes - matching modern app icon style (defined early to avoid TDZ)
@@ -583,6 +584,42 @@ signupFormElement?.addEventListener('submit', (e) => {
   const confirmPassword = data.get('confirmPassword') as string
   const accountType = (data.get('userType') as 'business' | 'individual') || 'business'
   handleSignup(email, password, confirmPassword, accountType)
+})
+
+// Header settings button handler
+headerSettingsBtn?.addEventListener('click', () => {
+  // Switch to settings view
+  const settingsViewId = 'settingsView'
+  const targetView = qs<HTMLElement>('#' + settingsViewId)
+  if (targetView) {
+    // Find and activate the settings tab (only for business users)
+    if (userType === 'business') {
+      const settingsTab = Array.from(tabs).find(t => t.dataset.target === settingsViewId && t.classList.contains('business-tab'))
+      if (settingsTab) {
+        tabs.forEach((x) => x.classList.remove('active'))
+        settingsTab.classList.add('active')
+      }
+    }
+    
+    views.forEach((v) => v.classList.remove('active'))
+    targetView.classList.add('active')
+    headerTitle.textContent = 'Settings'
+    save(STORAGE_KEYS.currentView, settingsViewId)
+    
+    // Hide search bars and back button
+    if (cashierSearch) cashierSearch.style.display = 'none'
+    if (inventorySearch) inventorySearch.style.display = 'none'
+    if (headerBackBtn) headerBackBtn.style.display = 'none'
+    if (addItemFab) addItemFab.style.display = 'none'
+    
+    // Render settings
+    renderSettings()
+  }
+})
+
+// Logout button handler
+logoutBtnHeader?.addEventListener('click', () => {
+  handleLogout()
 })
 
 // Check authentication on load
