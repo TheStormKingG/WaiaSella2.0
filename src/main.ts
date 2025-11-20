@@ -186,6 +186,10 @@ const orderDetailsDialog = qs<HTMLDialogElement>('#orderDetailsDialog')
 const orderDetailsTitle = qs<HTMLHeadingElement>('#orderDetailsTitle')
 const orderDetailsContent = qs<HTMLDivElement>('#orderDetailsContent')
 const closeOrderDetailsBtn = qs<HTMLButtonElement>('#closeOrderDetailsBtn')
+const customerNameDialog = qs<HTMLDialogElement>('#customerNameDialog')
+const customerNameForm = qs<HTMLFormElement>('#customerNameForm')
+const customerNameInput = qs<HTMLInputElement>('#customerNameInput')
+const cancelCustomerNameBtn = qs<HTMLButtonElement>('#cancelCustomerNameBtn')
 
 // Individual User Views
 const storesContainer = qs<HTMLDivElement>('#storesContainer')
@@ -1301,19 +1305,55 @@ async function saveSaleToSupabase(tx: Transaction) {
   }
 }
 
+async function getCustomerName(): Promise<string | null> {
+  return new Promise((resolve) => {
+    if (!customerNameDialog || !customerNameForm || !customerNameInput || !cancelCustomerNameBtn) {
+      resolve(null)
+      return
+    }
+    
+    // Reset form
+    customerNameInput.value = ''
+    
+    // Handle form submission
+    const handleSubmit = (e: Event) => {
+      e.preventDefault()
+      const name = customerNameInput.value.trim()
+      customerNameDialog.close()
+      customerNameForm.removeEventListener('submit', handleSubmit)
+      cancelCustomerNameBtn.removeEventListener('click', handleCancel)
+      resolve(name || null)
+    }
+    
+    // Handle cancel
+    const handleCancel = () => {
+      customerNameDialog.close()
+      customerNameForm.removeEventListener('submit', handleSubmit)
+      cancelCustomerNameBtn.removeEventListener('click', handleCancel)
+      resolve(null)
+    }
+    
+    customerNameForm.addEventListener('submit', handleSubmit)
+    cancelCustomerNameBtn.addEventListener('click', handleCancel)
+    
+    // Show modal and focus input
+    customerNameDialog.showModal()
+    setTimeout(() => customerNameInput.focus(), 100)
+  })
+}
+
 async function completeSale() {
   const entries = Object.entries(cart)
   if (!entries.length) return
   
-  // If in order mode, prompt for customer name
+  // If in order mode, prompt for customer name via modal
   let customerName: string | null = null
   if (cartMode === 'order') {
-    const nameInput = prompt('Enter customer name:')
-    if (nameInput === null) {
+    customerName = await getCustomerName()
+    if (customerName === null) {
       // User cancelled
       return
     }
-    customerName = nameInput.trim() || null
   }
   
   // Play cash register sound
