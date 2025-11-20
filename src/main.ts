@@ -261,6 +261,12 @@ const orderDetailsContent = qs<HTMLDivElement>('#orderDetailsContent')
 const closeOrderDetailsXBtn = qs<HTMLButtonElement>('#closeOrderDetailsXBtn')
 const cancelOrderBtn = qs<HTMLButtonElement>('#cancelOrderBtn')
 const deliveredOrderBtn = qs<HTMLButtonElement>('#deliveredOrderBtn')
+const cancelOrderDialog = qs<HTMLDialogElement>('#cancelOrderDialog')
+const cancelOrderMessage = qs<HTMLParagraphElement>('#cancelOrderMessage')
+const cancelOrderId = qs<HTMLInputElement>('#cancelOrderId')
+const closeCancelOrderDialog = qs<HTMLButtonElement>('#closeCancelOrderDialog')
+const closeCancelOrderConfirmBtn = qs<HTMLButtonElement>('#closeCancelOrderConfirmBtn')
+const confirmCancelOrderBtn = qs<HTMLButtonElement>('#confirmCancelOrderBtn')
 
 // Store current order for button handlers
 let currentOrderView: Transaction | null = null

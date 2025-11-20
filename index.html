@@ -380,6 +380,24 @@
         </div>
       </dialog>
 
+      <!-- Cancel Order Confirmation Modal -->
+      <dialog id="cancelOrderDialog" class="dialog">
+        <div class="dialog-header">
+          <h2>Cancel Order</h2>
+          <button id="closeCancelOrderDialog" class="dialog-close" type="button">×</button>
+        </div>
+        <div class="dialog-body">
+          <p id="cancelOrderMessage" style="margin: 0; font-size: 16px; color: var(--ink);">
+            Are you sure you want to cancel this order? This will permanently delete the order from both orders and sales.
+          </p>
+          <input type="hidden" id="cancelOrderId" value="">
+        </div>
+        <div class="dialog-actions">
+          <button id="closeCancelOrderConfirmBtn" class="btn" type="button">No, Keep Order</button>
+          <button id="confirmCancelOrderBtn" class="btn primary" type="button" style="background: #ef4444; border-color: #ef4444;">Yes, Cancel Order</button>
+        </div>
+      </dialog>
+
       <!-- Add User Modal -->
       <dialog id="userDialog" class="dialog">
         <div class="dialog-header">
