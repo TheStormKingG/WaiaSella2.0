@@ -658,7 +658,11 @@ function updateTabsForUserType() {
 
 function updateUserInfo() {
   if (userName) {
-    userName.textContent = currentUser || 'User'
+    // Get the user's name from stored users data
+    const users = load<Record<string, { password: string; userType: 'business' | 'individual'; name?: string; role?: 'admin' | 'cashier' | 'observer' }>>('ws.users') ?? {}
+    const user = currentUser ? users[currentUser] : null
+    const displayName = user?.name || currentUser || 'User'
+    userName.textContent = displayName
   }
   if (userTypeBadge) {
     userTypeBadge.textContent = userType === 'business' ? 'Business' : 'Individual'
