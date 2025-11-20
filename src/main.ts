@@ -825,6 +825,49 @@ reportTabs.forEach(tab => {
   })
 })
 
+// Settings tabs
+const settingsTabs = qsa<HTMLButtonElement>('.expense-tab[data-settings-tab]')
+const storeProfileView = qs<HTMLDivElement>('#storeProfileView')
+const usersView = qs<HTMLDivElement>('#usersView')
+const settingsTabContents = qsa<HTMLDivElement>('#storeProfileView, #usersView')
+const storeProfileContainer = qs<HTMLDivElement>('#storeProfileContainer')
+const usersContainer = qs<HTMLDivElement>('#usersContainer')
+const addUserBtn = qs<HTMLButtonElement>('#addUserBtn')
+const usersList = qs<HTMLDivElement>('#usersList')
+
+// Settings tab switching
+function switchSettingsTab(tabName: 'storeProfile' | 'users') {
+  settingsTabs.forEach(tab => {
+    if (tab.dataset.settingsTab === tabName) {
+      tab.classList.add('active')
+    } else {
+      tab.classList.remove('active')
+    }
+  })
+  
+  settingsTabContents.forEach(content => {
+    if (content.id === `${tabName}View`) {
+      content.classList.add('active')
+    } else {
+      content.classList.remove('active')
+    }
+  })
+  
+  save(STORAGE_KEYS.settingsTab, tabName)
+  
+  // Render content based on tab
+  if (tabName === 'users') {
+    renderUsers()
+  }
+}
+
+settingsTabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    const tabName = tab.dataset.settingsTab as 'storeProfile' | 'users'
+    switchSettingsTab(tabName)
+  })
+})
+
 // Operational Expenses event listeners
 if (addExpenseBtn) addExpenseBtn.addEventListener('click', () => openExpenseDialog())
 if (expenseForm) expenseForm.addEventListener('submit', saveExpenseFromDialog)
