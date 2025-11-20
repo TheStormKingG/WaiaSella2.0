@@ -5,6 +5,41 @@ import jsPDF from 'jspdf'
 
 // WaiaSella POS - Vite + TypeScript SPA
 
+// Helper functions (must be defined before use)
+function pic(seed: number) { return `https://picsum.photos/seed/${seed}/600/400` }
+function qs<T extends Element>(sel: string, el: Document | Element = document) { return el.querySelector(sel) as T }
+function qsa<T extends Element>(sel: string, el: Document | Element = document) { return Array.from(el.querySelectorAll(sel)) as T[] }
+function h<K extends keyof HTMLElementTagNameMap>(tag: K, props?: Record<string, any> | null, ...children: (Node | string | null | undefined)[]) {
+  const el = document.createElement(tag)
+  if (props) {
+    Object.entries(props).forEach(([k, v]) => {
+      if (k === 'style' && typeof v === 'string') el.setAttribute('style', v)
+      else if (k.startsWith('on') && typeof v === 'function') el.addEventListener(k.slice(2).toLowerCase(), v as EventListener)
+      else if (v !== null && v !== undefined) (el as any)[k] = v
+    })
+  }
+  children.filter(Boolean).forEach(child => el.appendChild(typeof child === 'string' ? document.createTextNode(child) : child))
+  return el
+}
+function id() { return Math.random().toString(36).slice(2) }
+function unique<T>(arr: T[]): T[] { return Array.from(new Set(arr)) }
+function load<T>(key: string): T | null {
+  try {
+    const item = localStorage.getItem(key)
+    return item ? JSON.parse(item) : null
+  } catch {
+    return null
+  }
+}
+function save(key: string, value: any) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value))
+  } catch (e) {
+    console.warn('Failed to save to localStorage:', e)
+  }
+}
+function fmt(n: number): string { return `GY$${(n || 0).toFixed(2)}` }
+
 const TAX_RATE = 0.16 // 16% VAT
 const LOW_STOCK_THRESHOLD = 5
 const STORAGE_KEYS = {
