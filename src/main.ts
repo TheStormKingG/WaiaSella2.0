@@ -2202,6 +2202,19 @@ deliveredOrderBtn?.addEventListener('click', () => {
   }
 })
 
+// Cancel Order Confirmation Modal handlers
+closeCancelOrderDialog?.addEventListener('click', () => {
+  cancelOrderDialog?.close()
+})
+
+closeCancelOrderConfirmBtn?.addEventListener('click', () => {
+  cancelOrderDialog?.close()
+})
+
+confirmCancelOrderBtn?.addEventListener('click', () => {
+  confirmCancelOrder()
+})
+
 function renderSettings() {
   // Restore saved settings tab or default to storeProfile
   const savedTab = load<string>(STORAGE_KEYS.settingsTab) || 'storeProfile'
