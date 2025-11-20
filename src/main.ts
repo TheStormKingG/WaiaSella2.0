@@ -67,6 +67,7 @@ type Transaction = {
   profit: number
   mode: 'sale' | 'order'
   customerName?: string
+  cashierName?: string
 }
 
 const seedItems: Item[] = [
@@ -2276,7 +2277,20 @@ function showReceipt(tx: Transaction, saved: boolean) {
   
   receiptTransactionId.textContent = tx.id
   const date = new Date(tx.date)
-  receiptDate.textContent = date.toLocaleString()
+  
+  // Build receipt header with customer name and cashier name
+  let headerInfo = `<div style="color: #6b7280; font-size: 14px;">Transaction #${tx.id}</div>`
+  headerInfo += `<div style="color: #6b7280; font-size: 12px; margin-top: 5px;">${date.toLocaleString()}</div>`
+  
+  if (tx.mode === 'order' && tx.customerName) {
+    headerInfo += `<div style="color: #6b7280; font-size: 14px; margin-top: 8px; font-weight: 500;">Customer: ${tx.customerName}</div>`
+  }
+  
+  if (tx.cashierName) {
+    headerInfo += `<div style="color: #6b7280; font-size: 14px; margin-top: 4px;">Cashier: ${tx.cashierName}</div>`
+  }
+  
+  receiptDate.innerHTML = headerInfo
   
   // Render items
   receiptItems.innerHTML = ''
