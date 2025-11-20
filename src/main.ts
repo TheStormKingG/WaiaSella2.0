@@ -886,35 +886,6 @@ let usersContainer: HTMLDivElement | null = null
 let addUserBtn: HTMLButtonElement | null = null
 let usersList: HTMLDivElement | null = null
 
-// Settings tab switching
-function switchSettingsTab(tabName: 'storeProfile' | 'users') {
-  const tabs = Array.isArray(settingsTabs) ? settingsTabs : Array.from(settingsTabs)
-  if (tabs.length === 0 || settingsTabContents.length === 0) return
-  
-  tabs.forEach(tab => {
-    if (tab.dataset.settingsTab === tabName) {
-      tab.classList.add('active')
-    } else {
-      tab.classList.remove('active')
-    }
-  })
-  
-  settingsTabContents.forEach(content => {
-    if (content.id === `${tabName}View`) {
-      content.classList.add('active')
-    } else {
-      content.classList.remove('active')
-    }
-  })
-  
-  save(STORAGE_KEYS.settingsTab, tabName)
-  
-  // Render content based on tab
-  if (tabName === 'users') {
-    renderUsers()
-  }
-}
-
 // Initialize settings tab elements after DOM is ready
 function initSettingsTabs() {
   settingsTabs = qsa<HTMLButtonElement>('.expense-tab[data-settings-tab]')
@@ -1028,6 +999,35 @@ if (savedView) {
 } else {
   // Default to cashier view
   cashierSearch.style.display = 'block'
+}
+
+// Settings tab switching function - must be after variable declarations
+function switchSettingsTab(tabName: 'storeProfile' | 'users') {
+  const tabs = Array.isArray(settingsTabs) ? settingsTabs : Array.from(settingsTabs)
+  if (tabs.length === 0 || settingsTabContents.length === 0) return
+  
+  tabs.forEach(tab => {
+    if (tab.dataset.settingsTab === tabName) {
+      tab.classList.add('active')
+    } else {
+      tab.classList.remove('active')
+    }
+  })
+  
+  settingsTabContents.forEach(content => {
+    if (content.id === `${tabName}View`) {
+      content.classList.add('active')
+    } else {
+      content.classList.remove('active')
+    }
+  })
+  
+  save(STORAGE_KEYS.settingsTab, tabName)
+  
+  // Render content based on tab
+  if (tabName === 'users') {
+    renderUsers()
+  }
 }
 
 // Initialize settings tabs when DOM is ready
