@@ -2560,44 +2560,10 @@ function shareReceiptWhatsApp() {
 }
 
 
-// Utils
-function fmt(n: number) {
-  // Custom formatter for Guyana Dollars (GY$)
-  const formatted = new Intl.NumberFormat('en-GY', { 
-    minimumFractionDigits: 2, 
-    maximumFractionDigits: 2 
-  }).format(n || 0)
-  return `GY$${formatted}`
-}
-function unique<T>(arr: T[]) { return Array.from(new Set(arr)).filter(Boolean) as T[] }
-function id() { return Math.random().toString(36).slice(2, 10) }
-function pic(seed: number) { return `https://picsum.photos/seed/${seed}/600/400` }
-function qs<T extends Element>(sel: string, el: Document | Element = document) { return el.querySelector(sel) as T }
-function qsa<T extends Element>(sel: string, el: Document | Element = document) { return Array.from(el.querySelectorAll(sel)) as T[] }
-function h<K extends keyof HTMLElementTagNameMap>(tag: K, props?: Record<string, any> | null, ...children: (Node | string | null | undefined)[]) {
-  const el = document.createElement(tag)
-  if (props) {
-    for (const [k, v] of Object.entries(props)) {
-      if (k === 'class') (el as HTMLElement).className = v
-      else if (k === 'style') el.setAttribute('style', v)
-      else if (k === 'onclick') (el as HTMLElement).addEventListener('click', v)
-      else if (k.startsWith('on')) (el as HTMLElement).addEventListener(k.slice(2), v)
-      else if (v !== null && v !== undefined) el.setAttribute(k, v === true ? '' : String(v))
-    }
-  }
-  for (const ch of children.flat()) {
-    if (ch == null) continue
-    el.append(ch as any instanceof Node ? (ch as Node) : document.createTextNode(String(ch)))
-  }
-  return el
-}
+// Additional utility functions
 function btn(label: string, cls = '', onclick?: () => void) { return h('button', { class: cls ? cls : 'btn', onclick }, label) }
 function row(a: Element, b: Element) { const r = h('div', { class: 'row' }); r.append(a, b); return r }
 
-function load<T>(key: string): T | null {
-  try { return JSON.parse(localStorage.getItem(key) || 'null') as T | null } catch { return null }
-}
-function save(key: string, val: unknown) { localStorage.setItem(key, JSON.stringify(val)) }
 function persist() {
   save(STORAGE_KEYS.inventory, inventory)
   save(STORAGE_KEYS.transactions, transactions)
