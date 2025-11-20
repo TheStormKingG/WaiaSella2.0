@@ -1908,8 +1908,56 @@ closeOrderDetailsBtn?.addEventListener('click', () => {
 })
 
 function renderSettings() {
-  // Placeholder for future dynamic settings; currently static in markup.
-  if (!settingsContainer) return
+  // Restore saved settings tab or default to storeProfile
+  const savedTab = load<string>(STORAGE_KEYS.settingsTab) || 'storeProfile'
+  switchSettingsTab(savedTab as 'storeProfile' | 'users')
+}
+
+function renderUsers() {
+  if (!usersList) return
+  
+  const users = load<Record<string, { password: string; userType: 'business' | 'individual' }>>('ws.users') ?? {}
+  const userEntries = Object.entries(users)
+  
+  if (userEntries.length === 0) {
+    usersList.innerHTML = '<p style="color: var(--muted); margin: 0;">No users found. Add a user to get started.</p>'
+    return
+  }
+  
+  usersList.innerHTML = ''
+  userEntries.forEach(([email, userData]) => {
+    const userCard = h('div', {
+      class: 'card',
+      style: 'padding: 16px; display: flex; justify-content: space-between; align-items: center;'
+    })
+    
+    const userInfo = h('div')
+    userInfo.append(
+      h('div', { style: 'font-weight: 600; font-size: 16px; color: var(--ink); margin-bottom: 4px;' }, email),
+      h('div', { style: 'font-size: 14px; color: var(--muted);' }, `Type: ${userData.userType === 'business' ? 'Business' : 'Individual'}`)
+    )
+    
+    const actions = h('div', { style: 'display: flex; gap: 8px;' })
+    if (email !== currentUser) {
+      const deleteBtn = h('button', {
+        class: 'btn',
+        style: 'background: #ef4444; color: white; border-color: #ef4444;',
+        onclick: () => {
+          if (confirm(`Delete user "${email}"?`)) {
+            delete users[email]
+            save('ws.users', users)
+            renderUsers()
+          }
+        }
+      }, 'Delete')
+      actions.appendChild(deleteBtn)
+    } else {
+      actions.appendChild(h('span', { style: 'color: var(--muted); font-size: 14px;' }, 'Current User'))
+    }
+    
+    userCard.append(userInfo, actions)
+    usersList.appendChild(userCard)
+  })
 }
 
 // Sellable Table
