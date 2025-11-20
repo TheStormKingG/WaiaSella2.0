@@ -5,40 +5,41 @@ import jsPDF from 'jspdf'
 
 // WaiaSella POS - Vite + TypeScript SPA
 
-// Helper functions (must be defined before use)
+// Helper functions (must be defined before use - using function declarations for hoisting)
 function pic(seed: number) { return `https://picsum.photos/seed/${seed}/600/400` }
+function id() { return Math.random().toString(36).slice(2, 10) }
+function unique<T>(arr: T[]) { return Array.from(new Set(arr)).filter(Boolean) as T[] }
 function qs<T extends Element>(sel: string, el: Document | Element = document) { return el.querySelector(sel) as T }
 function qsa<T extends Element>(sel: string, el: Document | Element = document) { return Array.from(el.querySelectorAll(sel)) as T[] }
 function h<K extends keyof HTMLElementTagNameMap>(tag: K, props?: Record<string, any> | null, ...children: (Node | string | null | undefined)[]) {
   const el = document.createElement(tag)
   if (props) {
-    Object.entries(props).forEach(([k, v]) => {
-      if (k === 'style' && typeof v === 'string') el.setAttribute('style', v)
-      else if (k.startsWith('on') && typeof v === 'function') el.addEventListener(k.slice(2).toLowerCase(), v as EventListener)
-      else if (v !== null && v !== undefined) (el as any)[k] = v
-    })
+    for (const [k, v] of Object.entries(props)) {
+      if (k === 'class') (el as HTMLElement).className = v
+      else if (k === 'style') el.setAttribute('style', v)
+      else if (k === 'onclick') (el as HTMLElement).addEventListener('click', v)
+      else if (k.startsWith('on')) (el as HTMLElement).addEventListener(k.slice(2), v)
+      else if (v !== null && v !== undefined) el.setAttribute(k, v === true ? '' : String(v))
+    }
   }
-  children.filter(Boolean).forEach(child => el.appendChild(typeof child === 'string' ? document.createTextNode(child) : child))
+  for (const ch of children.flat()) {
+    if (ch == null) continue
+    el.append(ch as any instanceof Node ? (ch as Node) : document.createTextNode(String(ch)))
+  }
   return el
 }
-function id() { return Math.random().toString(36).slice(2) }
-function unique<T>(arr: T[]): T[] { return Array.from(new Set(arr)) }
 function load<T>(key: string): T | null {
-  try {
-    const item = localStorage.getItem(key)
-    return item ? JSON.parse(item) : null
-  } catch {
-    return null
-  }
+  try { return JSON.parse(localStorage.getItem(key) || 'null') as T | null } catch { return null }
 }
-function save(key: string, value: any) {
-  try {
-    localStorage.setItem(key, JSON.stringify(value))
-  } catch (e) {
-    console.warn('Failed to save to localStorage:', e)
-  }
+function save(key: string, val: unknown) { localStorage.setItem(key, JSON.stringify(val)) }
+function fmt(n: number) {
+  // Custom formatter for Guyana Dollars (GY$)
+  const formatted = new Intl.NumberFormat('en-GY', { 
+    minimumFractionDigits: 2, 
+    maximumFractionDigits: 2 
+  }).format(n || 0)
+  return `GY$${formatted}`
 }
-function fmt(n: number): string { return `GY$${(n || 0).toFixed(2)}` }
 
 const TAX_RATE = 0.16 // 16% VAT
 const LOW_STOCK_THRESHOLD = 5
