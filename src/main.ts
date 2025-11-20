@@ -15,7 +15,8 @@ const STORAGE_KEYS = {
   cart: 'ws.cart',
   cartMode: 'ws.cartMode',
   currentView: 'ws.currentView',
-  inventoryView: 'ws.inventoryView',
+  expenseView: 'ws.expenseView',
+  expenseTab: 'ws.expenseTab',
   selectedInventoryCategory: 'ws.selectedInventoryCategory',
   customCategories: 'ws.customCategories',
 } as const
@@ -156,6 +157,12 @@ const itemImageData = qs<HTMLInputElement>('#itemImageData')
 // Orders & Settings
 const ordersContainer = qs<HTMLDivElement>('#ordersContainer')
 const settingsContainer = qs<HTMLDivElement>('#settingsContainer')
+
+// Expense tabs
+const expenseTabs = qsa<HTMLButtonElement>('.expense-tab')
+const sellableView = qs<HTMLDivElement>('#sellableView')
+const operationalView = qs<HTMLDivElement>('#operationalView')
+const expenseTabContents = qsa<HTMLDivElement>('.expense-tab-content')
 
 // Category modals
 const renameCategoryDialog = qs<HTMLDialogElement>('#renameCategoryDialog')
@@ -304,15 +311,18 @@ tabs.forEach((t) =>
       inventorySearch.style.display = 'none'
       headerBackBtn.style.display = 'none'
       addItemFab.style.display = 'none'
-    } else if (id === 'inventoryView') {
+    } else if (id === 'expenseView') {
       cashierSearch.style.display = 'none'
-      // Search bar visibility controlled by inventory sub-view
-      const savedInventoryView = load<string>(STORAGE_KEYS.inventoryView)
-      if (savedInventoryView === 'items') {
+      // Search bar visibility controlled by expense sub-view
+      const savedExpenseView = load<string>(STORAGE_KEYS.expenseView)
+      if (savedExpenseView === 'items') {
         addItemFab.style.display = 'flex'
       } else {
         addItemFab.style.display = 'none'
       }
+      // Restore expense tab
+      const savedExpenseTab = load<string>(STORAGE_KEYS.expenseTab) || 'sellable'
+      switchExpenseTab(savedExpenseTab)
     } else {
       cashierSearch.style.display = 'none'
       inventorySearch.style.display = 'none'
@@ -320,7 +330,7 @@ tabs.forEach((t) =>
       addItemFab.style.display = 'none'
     }
     
-    if (id === 'inventoryView') {
+    if (id === 'expenseView') {
       showInventoryCategories()
       renderInventory()
     }
@@ -329,6 +339,34 @@ tabs.forEach((t) =>
     if (id === 'settingsView') renderSettings()
   })
 )
+
+// Expense tab switching
+function switchExpenseTab(tabName: 'sellable' | 'operational') {
+  expenseTabs.forEach(tab => {
+    if (tab.dataset.expenseTab === tabName) {
+      tab.classList.add('active')
+    } else {
+      tab.classList.remove('active')
+    }
+  })
+  
+  expenseTabContents.forEach(content => {
+    if (content.id === `${tabName}View`) {
+      content.classList.add('active')
+    } else {
+      content.classList.remove('active')
+    }
+  })
+  
+  save(STORAGE_KEYS.expenseTab, tabName)
+}
+
+expenseTabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    const tabName = tab.dataset.expenseTab as 'sellable' | 'operational'
+    switchExpenseTab(tabName)
+  })
+})
 
 // Restore last view on load
 let savedView = load<string>(STORAGE_KEYS.currentView)
@@ -347,13 +385,15 @@ if (savedView) {
     
     if (savedView === 'cashierView') {
       cashierSearch.style.display = 'block'
-    } else if (savedView === 'inventoryView') {
-      const savedInventoryView = load<string>(STORAGE_KEYS.inventoryView)
+    } else if (savedView === 'expenseView' || savedView === 'inventoryView') {
+      const savedExpenseView = load<string>(STORAGE_KEYS.expenseView) || load<string>('ws.inventoryView')
       const savedCategory = load<string>(STORAGE_KEYS.selectedInventoryCategory)
+      const savedExpenseTab = load<string>(STORAGE_KEYS.expenseTab) || 'sellable'
+      switchExpenseTab(savedExpenseTab)
       
-      if (savedInventoryView === 'manage') {
+      if (savedExpenseView === 'manage') {
         showManageCategories()
-      } else if (savedInventoryView === 'items') {
+      } else if (savedExpenseView === 'items') {
         if (savedCategory) {
           selectedInventoryCategory = savedCategory
         }
@@ -434,14 +474,15 @@ headerBackBtn.addEventListener('click', () => {
   if (headerBackBtn.dataset.reorder === 'true') {
     headerBackBtn.dataset.reorder = 'false'
     tabs.forEach((x) => x.classList.remove('active'))
-    const inventoryTab = Array.from(tabs).find(t => t.dataset.target === 'inventoryView')
-    if (inventoryTab) {
-      inventoryTab.classList.add('active')
+    const expenseTab = Array.from(tabs).find(t => t.dataset.target === 'expenseView')
+    if (expenseTab) {
+      expenseTab.classList.add('active')
     }
     views.forEach((v) => v.classList.remove('active'))
-    qs<HTMLElement>('#inventoryView').classList.add('active')
-    headerTitle.textContent = inventoryTab?.textContent?.trim() ?? 'Inventory'
-    save(STORAGE_KEYS.currentView, 'inventoryView')
+    qs<HTMLElement>('#expenseView').classList.add('active')
+    headerTitle.textContent = expenseTab?.textContent?.trim() ?? 'Expense'
+    save(STORAGE_KEYS.currentView, 'expenseView')
+    switchExpenseTab('sellable')
     showInventoryCategories()
     renderInventory()
     inventorySearch.style.display = 'none'
@@ -451,8 +492,8 @@ headerBackBtn.addEventListener('click', () => {
     return
   }
 
-  const savedInventoryView = load<string>(STORAGE_KEYS.inventoryView)
-  if (savedInventoryView === 'manage' || savedInventoryView === 'items') {
+  const savedExpenseView = load<string>(STORAGE_KEYS.expenseView) || load<string>('ws.inventoryView')
+  if (savedExpenseView === 'manage' || savedExpenseView === 'items') {
     showInventoryCategories()
   }
 })
@@ -884,7 +925,7 @@ function showInventoryItems() {
   inventoryCategories.style.display = 'none'
   inventoryItemsView.style.display = 'block'
   manageCategoriesView.style.display = 'none'
-  save(STORAGE_KEYS.inventoryView, 'items')
+  save(STORAGE_KEYS.expenseView, 'items')
   save(STORAGE_KEYS.selectedInventoryCategory, selectedInventoryCategory)
   headerBackBtn.style.display = 'block'
   headerBackBtn.dataset.reorder = 'false'
@@ -899,19 +940,19 @@ function showInventoryCategories() {
   inventoryItemsView.style.display = 'none'
   manageCategoriesView.style.display = 'none'
   inventoryCategories.style.display = 'grid'
-  save(STORAGE_KEYS.inventoryView, 'categories')
+  save(STORAGE_KEYS.expenseView, 'categories')
   headerBackBtn.style.display = 'none'
   headerBackBtn.dataset.reorder = 'false'
   inventorySearch.style.display = 'none'
   addItemFab.style.display = 'none'
-  headerTitle.textContent = 'Inventory'
+  headerTitle.textContent = 'Expense'
 }
 
 function showManageCategories() {
   inventoryCategories.style.display = 'none'
   inventoryItemsView.style.display = 'none'
   manageCategoriesView.style.display = 'block'
-  save(STORAGE_KEYS.inventoryView, 'manage')
+  save(STORAGE_KEYS.expenseView, 'manage')
   headerBackBtn.style.display = 'block'
   headerBackBtn.dataset.reorder = 'false'
   inventorySearch.style.display = 'none'

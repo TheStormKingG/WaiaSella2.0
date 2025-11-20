@@ -58,27 +58,49 @@
         </div>
       </section>
 
-      <!-- Inventory View -->
-      <section id="inventoryView" class="view">
-        <div id="inventoryCategories" style="padding: 8px 12px;">
-          <!-- Categories will be rendered here as app buttons -->
+      <!-- Expense View -->
+      <section id="expenseView" class="view">
+        <div class="expense-tabs">
+          <button class="expense-tab active" data-expense-tab="sellable">
+            <span>Sellable</span>
+          </button>
+          <button class="expense-tab" data-expense-tab="operational">
+            <span>Operational</span>
+          </button>
         </div>
-        <div id="inventoryItemsView" style="display: none;">
-          <ul id="inventoryList" class="inventory-list" style="padding: 8px 12px;"></ul>
-        </div>
-        <div id="manageCategoriesView" style="display: none;">
-          <div style="padding: 12px;">
-            <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
-              <button id="addCategoryBtn" type="button" class="btn primary">+ Add Category</button>
+        
+        <!-- Sellable Tab Content (current inventory) -->
+        <div id="sellableView" class="expense-tab-content active">
+          <div id="inventoryCategories" style="padding: 8px 12px;">
+            <!-- Categories will be rendered here as app buttons -->
+          </div>
+          <div id="inventoryItemsView" style="display: none;">
+            <ul id="inventoryList" class="inventory-list" style="padding: 8px 12px;"></ul>
+          </div>
+          <div id="manageCategoriesView" style="display: none;">
+            <div style="padding: 12px;">
+              <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
+                <button id="addCategoryBtn" type="button" class="btn primary">+ Add Category</button>
+              </div>
+              <ul id="categoryManageList" class="category-manage-list"></ul>
             </div>
-            <ul id="categoryManageList" class="category-manage-list"></ul>
+          </div>
+          <button id="addItemFab" class="fab" title="Add Item" aria-label="Add Item">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+              <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+            </svg>
+          </button>
+        </div>
+        
+        <!-- Operational Tab Content -->
+        <div id="operationalView" class="expense-tab-content">
+          <div style="padding: 16px;">
+            <div class="card">
+              <h3 style="margin: 0 0 12px 0;">Operational Expenses</h3>
+              <p style="color: var(--muted); margin: 0;">Operational expenses will be managed here.</p>
+            </div>
           </div>
         </div>
-        <button id="addItemFab" class="fab" title="Add Item" aria-label="Add Item">
-          <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
-            <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
-          </svg>
-        </button>
       </section>
 
       <!-- Orders View -->
@@ -134,7 +156,7 @@
             <p>Update store details, contact information, and receipt footer.</p>
           </div>
           <div class="card settings-card">
-            <h3>Inventory Defaults</h3>
+            <h3>Expense Defaults</h3>
             <p>Configure default low stock threshold, tax rate, and categories.</p>
           </div>
           <div class="card settings-card">
@@ -150,9 +172,9 @@
         <span class="icon">🛒</span>
         <span>Cashier</span>
       </button>
-      <button class="tab" data-target="inventoryView">
+      <button class="tab" data-target="expenseView">
         <span class="icon">📦</span>
-        <span>Inventory</span>
+        <span>Expense</span>
       </button>
       <button class="tab" data-target="ordersView">
         <span class="icon">🧾</span>
