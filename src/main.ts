@@ -872,21 +872,22 @@ reportTabs.forEach(tab => {
   })
 })
 
-// Settings tabs
-const settingsTabs = qsa<HTMLButtonElement>('.expense-tab[data-settings-tab]')
-const storeProfileView = qs<HTMLDivElement>('#storeProfileView')
-const usersView = qs<HTMLDivElement>('#usersView')
-const settingsTabContents = qsa<HTMLDivElement>('#storeProfileView, #usersView')
-const storeProfileContainer = qs<HTMLDivElement>('#storeProfileContainer')
-const usersContainer = qs<HTMLDivElement>('#usersContainer')
-const addUserBtn = qs<HTMLButtonElement>('#addUserBtn')
-const usersList = qs<HTMLDivElement>('#usersList')
+// Settings tabs - declared early but initialized later
+let settingsTabs: NodeListOf<HTMLButtonElement> | HTMLButtonElement[] = [] as any
+let storeProfileView: HTMLDivElement | null = null
+let usersView: HTMLDivElement | null = null
+let settingsTabContents: HTMLDivElement[] = [] as any
+let storeProfileContainer: HTMLDivElement | null = null
+let usersContainer: HTMLDivElement | null = null
+let addUserBtn: HTMLButtonElement | null = null
+let usersList: HTMLDivElement | null = null
 
 // Settings tab switching
 function switchSettingsTab(tabName: 'storeProfile' | 'users') {
-  if (settingsTabs.length === 0 || settingsTabContents.length === 0) return
+  const tabs = Array.isArray(settingsTabs) ? settingsTabs : Array.from(settingsTabs)
+  if (tabs.length === 0 || settingsTabContents.length === 0) return
   
-  settingsTabs.forEach(tab => {
+  tabs.forEach(tab => {
     if (tab.dataset.settingsTab === tabName) {
       tab.classList.add('active')
     } else {
@@ -910,13 +911,27 @@ function switchSettingsTab(tabName: 'storeProfile' | 'users') {
   }
 }
 
-if (settingsTabs.length > 0) {
-  settingsTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      const tabName = tab.dataset.settingsTab as 'storeProfile' | 'users'
-      switchSettingsTab(tabName)
+// Initialize settings tab elements after DOM is ready
+function initSettingsTabs() {
+  settingsTabs = qsa<HTMLButtonElement>('.expense-tab[data-settings-tab]')
+  storeProfileView = qs<HTMLDivElement>('#storeProfileView')
+  usersView = qs<HTMLDivElement>('#usersView')
+  settingsTabContents = qsa<HTMLDivElement>('#storeProfileView, #usersView')
+  storeProfileContainer = qs<HTMLDivElement>('#storeProfileContainer')
+  usersContainer = qs<HTMLDivElement>('#usersContainer')
+  addUserBtn = qs<HTMLButtonElement>('#addUserBtn')
+  usersList = qs<HTMLDivElement>('#usersList')
+  
+  // Attach event listeners after elements are initialized
+  const tabs = Array.isArray(settingsTabs) ? settingsTabs : Array.from(settingsTabs)
+  if (tabs.length > 0) {
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const tabName = tab.dataset.settingsTab as 'storeProfile' | 'users'
+        switchSettingsTab(tabName)
+      })
     })
-  })
+  }
 }
 
 // Operational Expenses event listeners
@@ -1009,6 +1024,14 @@ if (savedView) {
 } else {
   // Default to cashier view
   cashierSearch.style.display = 'block'
+}
+
+// Initialize settings tabs when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initSettingsTabs)
+} else {
+  // DOM already loaded
+  initSettingsTabs()
 }
 
 // Cashier interactions
