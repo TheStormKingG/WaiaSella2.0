@@ -376,6 +376,43 @@
         </div>
       </dialog>
 
+      <!-- Add User Modal -->
+      <dialog id="userDialog" class="dialog">
+        <div class="dialog-header">
+          <h2 id="userDialogTitle">Add User</h2>
+          <button id="closeUserDialog" class="dialog-close" type="button">×</button>
+        </div>
+        <form id="userForm" class="dialog-form">
+          <input type="hidden" id="userId" name="id">
+          <div class="dialog-body">
+            <div class="form-group">
+              <label for="userRole">Role <span style="color: #ef4444;">*</span></label>
+              <select id="userRole" name="role" required>
+                <option value="">Select a role</option>
+                <option value="business">Business</option>
+                <option value="individual">Individual</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="userName">Name <span style="color: #ef4444;">*</span></label>
+              <input type="text" id="userName" name="name" placeholder="Full name" required>
+            </div>
+            <div class="form-group">
+              <label for="userEmail">Email <span style="color: #ef4444;">*</span></label>
+              <input type="email" id="userEmail" name="email" placeholder="user@example.com" required>
+            </div>
+            <div class="form-group">
+              <label for="userPassword">Password <span style="color: #ef4444;">*</span></label>
+              <input type="password" id="userPassword" name="password" placeholder="Minimum 6 characters" required minlength="6">
+            </div>
+          </div>
+          <div class="dialog-actions">
+            <button type="button" id="cancelUserBtn" class="btn">Cancel</button>
+            <button type="submit" class="btn primary">Save</button>
+          </div>
+        </form>
+      </dialog>
+
       <!-- Customer Name Modal -->
       <dialog id="customerNameDialog" class="dialog">
         <div class="dialog-body">

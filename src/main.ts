@@ -238,6 +238,13 @@ const customerNameForm = qs<HTMLFormElement>('#customerNameForm')
 const customerNameInput = qs<HTMLInputElement>('#customerNameInput')
 const cancelCustomerNameBtn = qs<HTMLButtonElement>('#cancelCustomerNameBtn')
 
+// User Dialog
+const userDialog = qs<HTMLDialogElement>('#userDialog')
+const userForm = qs<HTMLFormElement>('#userForm')
+const userDialogTitle = qs<HTMLHeadingElement>('#userDialogTitle')
+const closeUserDialogBtn = qs<HTMLButtonElement>('#closeUserDialog')
+const cancelUserBtn = qs<HTMLButtonElement>('#cancelUserBtn')
+
 // Individual User Views
 const storesContainer = qs<HTMLDivElement>('#storesContainer')
 const individualOrdersContainer = qs<HTMLDivElement>('#individualOrdersContainer')
@@ -441,12 +448,12 @@ function initializeAdminAccounts() {
   
   // Create adminb (Business admin) if it doesn't exist
   if (!users['adminb']) {
-    users['adminb'] = { password: '123456', userType: 'business' }
+    users['adminb'] = { password: '123456', userType: 'business', name: 'Admin Business' }
   }
   
   // Create admini (Individual admin) if it doesn't exist
   if (!users['admini']) {
-    users['admini'] = { password: '123456', userType: 'individual' }
+    users['admini'] = { password: '123456', userType: 'individual', name: 'Admin Individual' }
   }
   
   // Save the updated users
@@ -1996,7 +2003,7 @@ function renderSettings() {
 function renderUsers() {
   if (!usersList) return
   
-  const users = load<Record<string, { password: string; userType: 'business' | 'individual' }>>('ws.users') ?? {}
+  const users = load<Record<string, { password: string; userType: 'business' | 'individual'; name?: string }>>('ws.users') ?? {}
   const userEntries = Object.entries(users)
   
   if (userEntries.length === 0) {
@@ -2012,9 +2019,11 @@ function renderUsers() {
     })
     
     const userInfo = h('div')
+    const displayName = userData.name || email
     userInfo.append(
-      h('div', { style: 'font-weight: 600; font-size: 16px; color: var(--ink); margin-bottom: 4px;' }, email),
-      h('div', { style: 'font-size: 14px; color: var(--muted);' }, `Type: ${userData.userType === 'business' ? 'Business' : 'Individual'}`)
+      h('div', { style: 'font-weight: 600; font-size: 16px; color: var(--ink); margin-bottom: 4px;' }, displayName),
+      h('div', { style: 'font-size: 14px; color: var(--muted); margin-bottom: 2px;' }, email),
+      h('div', { style: 'font-size: 14px; color: var(--muted);' }, `Role: ${userData.userType === 'business' ? 'Business' : 'Individual'}`)
     )
     
     const actions = h('div', { style: 'display: flex; gap: 8px;' })
@@ -2023,7 +2032,7 @@ function renderUsers() {
         class: 'btn',
         style: 'background: #ef4444; color: white; border-color: #ef4444;',
         onclick: () => {
-          if (confirm(`Delete user "${email}"?`)) {
+          if (confirm(`Delete user "${displayName}" (${email})?`)) {
             delete users[email]
             save('ws.users', users)
             renderUsers()
@@ -2038,6 +2047,57 @@ function renderUsers() {
     userCard.append(userInfo, actions)
     usersList.appendChild(userCard)
   })
+}
+
+function openUserDialog() {
+  if (!userDialog || !userForm || !userDialogTitle) return
+  
+  userDialogTitle.textContent = 'Add User'
+  userForm.reset()
+  ;(userForm.elements.namedItem('id') as HTMLInputElement).value = ''
+  ;(userForm.elements.namedItem('role') as HTMLSelectElement).value = ''
+  
+  userDialog.showModal()
+}
+
+function saveUserFromDialog(ev: SubmitEvent) {
+  ev.preventDefault()
+  if (!userForm) return
+  
+  const data = Object.fromEntries(new FormData(userForm) as any) as Record<string, string>
+  const email = (data.email as string).trim().toLowerCase()
+  const name = (data.name as string).trim()
+  const password = data.password as string
+  const role = data.role as 'business' | 'individual'
+  
+  if (!email || !password || !role) {
+    alert('Please fill in all required fields.')
+    return
+  }
+  
+  if (password.length < 6) {
+    alert('Password must be at least 6 characters long.')
+    return
+  }
+  
+  const users = load<Record<string, { password: string; userType: 'business' | 'individual'; name?: string }>>('ws.users') ?? {}
+  
+  // Check if user already exists
+  if (users[email]) {
+    alert('A user with this email already exists.')
+    return
+  }
+  
+  // Save new user
+  users[email] = {
+    password: password,
+    userType: role,
+    name: name
+  }
+  
+  save('ws.users', users)
+  userDialog?.close()
+  renderUsers()
 }
 
 // Sellable Table
