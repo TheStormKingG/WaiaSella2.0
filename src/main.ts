@@ -1820,10 +1820,22 @@ function openOrderDetails(order: Transaction) {
   totalsHtml += `<div style="display: flex; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);"><span style="font-size: 18px; font-weight: 700; color: var(--ink);">Total:</span><span style="font-size: 18px; font-weight: 700; color: var(--primary);">${fmt(order.total)}</span></div>`
   totalsHtml += '</div>'
   
+  // Build order info HTML with customer name and cashier name
+  let infoHtml = '<div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border);">'
+  infoHtml += `<div style="margin-bottom: 8px; color: var(--muted); font-size: 14px;">Date: ${date.toLocaleString()}</div>`
+  
+  if (order.customerName) {
+    infoHtml += `<div style="margin-bottom: 8px; color: var(--ink); font-size: 14px; font-weight: 500;">Customer: ${order.customerName}</div>`
+  }
+  
+  if (order.cashierName) {
+    infoHtml += `<div style="margin-bottom: 8px; color: var(--ink); font-size: 14px; font-weight: 500;">Cashier: ${order.cashierName}</div>`
+  }
+  
+  infoHtml += '</div>'
+  
   orderDetailsContent.innerHTML = `
-    <div style="margin-bottom: 16px; color: var(--muted); font-size: 14px;">
-      Date: ${date.toLocaleString()}
-    </div>
+    ${infoHtml}
     ${itemsHtml}
     ${totalsHtml}
   `
