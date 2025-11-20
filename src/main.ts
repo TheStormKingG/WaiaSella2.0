@@ -17,6 +17,7 @@ const STORAGE_KEYS = {
   currentView: 'ws.currentView',
   expenseView: 'ws.expenseView',
   expenseTab: 'ws.expenseTab',
+  reportTab: 'ws.reportTab',
   selectedInventoryCategory: 'ws.selectedInventoryCategory',
   customCategories: 'ws.customCategories',
   expenses: 'ws.expenses',
@@ -187,6 +188,14 @@ const sellableCategoryFilter = qs<HTMLSelectElement>('#sellableCategoryFilter')
 const clearSellableFiltersBtn = qs<HTMLButtonElement>('#clearSellableFilters')
 const sellableTableBody = qs<HTMLTableSectionElement>('#sellableTableBody')
 const sellableEmpty = qs<HTMLDivElement>('#sellableEmpty')
+
+// Report tabs
+const reportTabs = qsa<HTMLButtonElement>('.expense-tab[data-report-tab]')
+const generalReportView = qs<HTMLDivElement>('#generalReportView')
+const incomeReportView = qs<HTMLDivElement>('#incomeReportView')
+const balanceReportView = qs<HTMLDivElement>('#balanceReportView')
+const cashflowReportView = qs<HTMLDivElement>('#cashflowReportView')
+const reportTabContents = qsa<HTMLDivElement>('#generalReportView, #incomeReportView, #balanceReportView, #cashflowReportView')
 
 // Operational Expenses
 const addExpenseBtn = qs<HTMLButtonElement>('#addExpenseBtn')
@@ -422,6 +431,34 @@ expenseTabs.forEach(tab => {
   })
 })
 
+// Report tab switching
+function switchReportTab(tabName: 'general' | 'income' | 'balance' | 'cashflow') {
+  reportTabs.forEach(tab => {
+    if (tab.dataset.reportTab === tabName) {
+      tab.classList.add('active')
+    } else {
+      tab.classList.remove('active')
+    }
+  })
+  
+  reportTabContents.forEach(content => {
+    if (content.id === `${tabName}ReportView`) {
+      content.classList.add('active')
+    } else {
+      content.classList.remove('active')
+    }
+  })
+  
+  save(STORAGE_KEYS.reportTab, tabName)
+}
+
+reportTabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    const tabName = tab.dataset.reportTab as 'general' | 'income' | 'balance' | 'cashflow'
+    switchReportTab(tabName)
+  })
+})
+
 // Operational Expenses event listeners
 if (addExpenseBtn) addExpenseBtn.addEventListener('click', () => openExpenseDialog())
 if (expenseForm) expenseForm.addEventListener('submit', saveExpenseFromDialog)
@@ -472,6 +509,8 @@ if (savedView) {
       }
     } else if (savedView === 'reportsView') {
       renderReports()
+      const savedReportTab = load<string>(STORAGE_KEYS.reportTab) || 'general'
+      switchReportTab(savedReportTab)
     } else if (savedView === 'ordersView') {
       renderOrders()
     } else if (savedView === 'settingsView') {

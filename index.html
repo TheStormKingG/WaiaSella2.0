@@ -277,29 +277,71 @@
 
       <!-- Reports View -->
       <section id="reportsView" class="view">
-        <h2 class="section-title">Reports</h2>
-        <div class="cards-2col">
-          <div class="card stat">
-            <div class="stat-label">Total Sales</div>
-            <div id="totalSales" class="stat-value">$0.00</div>
+        <div class="expense-tabs">
+          <button class="expense-tab active" data-report-tab="general">
+            <span>General</span>
+          </button>
+          <button class="expense-tab" data-report-tab="income">
+            <span>Income Statement</span>
+          </button>
+          <button class="expense-tab" data-report-tab="balance">
+            <span>Balance Sheet</span>
+          </button>
+          <button class="expense-tab" data-report-tab="cashflow">
+            <span>Cashflow</span>
+          </button>
+        </div>
+        
+        <!-- General Tab Content -->
+        <div id="generalReportView" class="expense-tab-content active">
+          <h2 class="section-title">General Reports</h2>
+          <div class="cards-2col">
+            <div class="card stat">
+              <div class="stat-label">Total Sales</div>
+              <div id="totalSales" class="stat-value">$0.00</div>
+            </div>
+            <div class="card stat">
+              <div class="stat-label">Total Profit</div>
+              <div id="totalProfit" class="stat-value">$0.00</div>
+            </div>
+            <div class="card stat">
+              <div class="stat-label">Transactions</div>
+              <div id="totalTransactions" class="stat-value">0</div>
+            </div>
+            <div class="card stat">
+              <div class="stat-label">Low Stock Items</div>
+              <div id="lowStockCount" class="stat-value">0</div>
+            </div>
           </div>
-          <div class="card stat">
-            <div class="stat-label">Total Profit</div>
-            <div id="totalProfit" class="stat-value">$0.00</div>
-          </div>
-          <div class="card stat">
-            <div class="stat-label">Transactions</div>
-            <div id="totalTransactions" class="stat-value">0</div>
-          </div>
-          <div class="card stat">
-            <div class="stat-label">Low Stock Items</div>
-            <div id="lowStockCount" class="stat-value">0</div>
+
+          <div class="card">
+            <div class="card-title">Top Selling Items</div>
+            <ul id="topSelling" class="top-selling"></ul>
           </div>
         </div>
-
-        <div class="card">
-          <div class="card-title">Top Selling Items</div>
-          <ul id="topSelling" class="top-selling"></ul>
+        
+        <!-- Income Statement Tab Content -->
+        <div id="incomeReportView" class="expense-tab-content">
+          <h2 class="section-title">Income Statement</h2>
+          <div class="card">
+            <p style="color: var(--muted);">Income Statement report will be displayed here.</p>
+          </div>
+        </div>
+        
+        <!-- Balance Sheet Tab Content -->
+        <div id="balanceReportView" class="expense-tab-content">
+          <h2 class="section-title">Balance Sheet</h2>
+          <div class="card">
+            <p style="color: var(--muted);">Balance Sheet report will be displayed here.</p>
+          </div>
+        </div>
+        
+        <!-- Cashflow Tab Content -->
+        <div id="cashflowReportView" class="expense-tab-content">
+          <h2 class="section-title">Cashflow</h2>
+          <div class="card">
+            <p style="color: var(--muted);">Cashflow report will be displayed here.</p>
+          </div>
         </div>
       </section>
 
@@ -330,6 +372,10 @@
     </main>
 
     <nav class="tabbar">
+      <button class="tab" data-target="ordersView">
+        <span class="icon">🧾</span>
+        <span>Orders</span>
+      </button>
       <button class="tab active" data-target="cashierView">
         <span class="icon">🛒</span>
         <span>Cashier</span>
@@ -337,10 +383,6 @@
       <button class="tab" data-target="expenseView">
         <span class="icon">📦</span>
         <span>Expense</span>
-      </button>
-      <button class="tab" data-target="ordersView">
-        <span class="icon">🧾</span>
-        <span>Orders</span>
       </button>
       <button class="tab" data-target="reportsView">
         <span class="icon">📊</span>
