@@ -20,7 +20,6 @@ const STORAGE_KEYS = {
   selectedInventoryCategory: 'ws.selectedInventoryCategory',
   customCategories: 'ws.customCategories',
   expenses: 'ws.expenses',
-  expenseCategories: 'ws.expenseCategories',
 } as const
 
 type Expense = {
@@ -102,7 +101,6 @@ save(STORAGE_KEYS.customCategories, customCategories)
 
 // Operational Expenses
 let expenses: Expense[] = load<Expense[]>(STORAGE_KEYS.expenses) ?? []
-let expenseCategories: string[] = load<string[]>(STORAGE_KEYS.expenseCategories) ?? []
 
 // Elements
 const tabs = qsa<HTMLButtonElement>('.tab')
@@ -323,7 +321,6 @@ renderCart()
 renderOrders()
 renderSettings()
 populateCategoryDatalist()
-populateExpenseCategoryDatalist()
 renderExpenses()
 
 // Tab switching
@@ -1367,7 +1364,7 @@ function openExpenseDialog(expense?: Expense) {
     ;(expenseForm.elements.namedItem('id') as HTMLInputElement).value = expense.id
     ;(expenseForm.elements.namedItem('date') as HTMLInputElement).value = expense.date
     ;(expenseForm.elements.namedItem('description') as HTMLInputElement).value = expense.description
-    ;(expenseForm.elements.namedItem('category') as HTMLInputElement).value = expense.category || ''
+    ;(expenseForm.elements.namedItem('category') as HTMLSelectElement).value = expense.category || ''
     ;(expenseForm.elements.namedItem('amount') as HTMLInputElement).value = expense.amount.toString()
     ;(expenseForm.elements.namedItem('notes') as HTMLTextAreaElement).value = expense.notes || ''
   } else {
@@ -1375,6 +1372,7 @@ function openExpenseDialog(expense?: Expense) {
     expenseForm.reset()
     ;(expenseForm.elements.namedItem('date') as HTMLInputElement).value = new Date().toISOString().split('T')[0]
     ;(expenseForm.elements.namedItem('id') as HTMLInputElement).value = ''
+    ;(expenseForm.elements.namedItem('category') as HTMLSelectElement).value = ''
   }
   
   expenseDialog.showModal()
@@ -1394,13 +1392,6 @@ function saveExpenseFromDialog(ev: SubmitEvent) {
     category: data.category?.trim() || undefined,
     amount: parseFloat(data.amount) || 0,
     notes: data.notes?.trim() || undefined,
-  }
-  
-  // Update categories list
-  if (payload.category && !expenseCategories.includes(payload.category)) {
-    expenseCategories.push(payload.category)
-    save(STORAGE_KEYS.expenseCategories, expenseCategories)
-    populateExpenseCategoryDatalist()
   }
   
   if (existingExpense) {
@@ -1432,15 +1423,6 @@ function deleteExpense(expenseId: string) {
   }
 }
 
-function populateExpenseCategoryDatalist() {
-  const categoryList = qs<HTMLDataListElement>('#expenseCategoryList')
-  if (!categoryList) return
-  
-  categoryList.innerHTML = ''
-  expenseCategories.forEach(category => {
-    categoryList.appendChild(h('option', { value: category }))
-  })
-}
 
 function clearExpenseFilters() {
   if (expenseSearch) expenseSearch.value = ''
@@ -1760,7 +1742,6 @@ function persist() {
   save(STORAGE_KEYS.soldTally, soldTally)
   save(STORAGE_KEYS.customCategories, customCategories)
   save(STORAGE_KEYS.expenses, expenses)
-  save(STORAGE_KEYS.expenseCategories, expenseCategories)
 }
 function seed(items: Item[]) { save(STORAGE_KEYS.inventory, items); return items }
 
