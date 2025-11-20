@@ -110,15 +110,15 @@ type Transaction = {
 // Lazy initialization function to avoid temporal dead zone issues
 function getSeedItems(): Item[] {
   return [
-    { id: id(), name: 'Redbull', price: 2.5, cost: 1.2, stock: 15, category: 'Drinks', image: pic(1010) },
-    { id: id(), name: 'Shampoo', price: 5.0, cost: 2.5, stock: 25, category: 'Personal Care', image: pic(1020) },
-    { id: id(), name: 'Powder Milk', price: 8.75, cost: 5.2, stock: 8, category: 'Groceries', image: pic(1030) },
-    { id: id(), name: 'Doritos', price: 1.25, cost: 0.6, stock: 50, category: 'Snacks', image: pic(1040) },
-    { id: id(), name: 'Olive Oil', price: 12.0, cost: 8.5, stock: 12, category: 'Groceries', image: pic(1050) },
-    { id: id(), name: 'Water Bottle', price: 1.0, cost: 0.2, stock: 100, category: 'Drinks', image: pic(1060) },
-    { id: id(), name: 'Green Tea', price: 3.5, cost: 1.0, stock: 30, category: 'Drinks', image: pic(1070) },
-    { id: id(), name: 'Apples', price: 0.75, cost: 0.2, stock: 40, category: 'Produce', image: pic(1080) },
-  ]
+  { id: id(), name: 'Redbull', price: 2.5, cost: 1.2, stock: 15, category: 'Drinks', image: pic(1010) },
+  { id: id(), name: 'Shampoo', price: 5.0, cost: 2.5, stock: 25, category: 'Personal Care', image: pic(1020) },
+  { id: id(), name: 'Powder Milk', price: 8.75, cost: 5.2, stock: 8, category: 'Groceries', image: pic(1030) },
+  { id: id(), name: 'Doritos', price: 1.25, cost: 0.6, stock: 50, category: 'Snacks', image: pic(1040) },
+  { id: id(), name: 'Olive Oil', price: 12.0, cost: 8.5, stock: 12, category: 'Groceries', image: pic(1050) },
+  { id: id(), name: 'Water Bottle', price: 1.0, cost: 0.2, stock: 100, category: 'Drinks', image: pic(1060) },
+  { id: id(), name: 'Green Tea', price: 3.5, cost: 1.0, stock: 30, category: 'Drinks', image: pic(1070) },
+  { id: id(), name: 'Apples', price: 0.75, cost: 0.2, stock: 40, category: 'Produce', image: pic(1080) },
+]
 }
 
 // Initialize Supabase client
@@ -133,15 +133,11 @@ if (supabase) {
   console.warn('⚠ Supabase not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env file')
 }
 
-// App State - Initialize lazily to avoid initialization order issues
-let inventory: Item[] | null = null
-function getInventory(): Item[] {
-  if (inventory === null) {
-    const loaded = load<Item[]>(STORAGE_KEYS.inventory)
-    inventory = loaded ?? seed(getSeedItems())
-  }
-  return inventory
-}
+// App State - Initialize after all functions are defined
+let inventory: Item[] = (() => {
+  const loaded = load<Item[]>(STORAGE_KEYS.inventory)
+  return loaded ?? seed(getSeedItems())
+})()
 let transactions: Transaction[] = (load<Transaction[]>(STORAGE_KEYS.transactions) ?? []).map((tx) => ({
   ...tx,
   mode: (tx as Transaction).mode ?? 'sale',
@@ -758,7 +754,7 @@ tabs.forEach((t) =>
     const targetView = qs<HTMLElement>('#' + id)
     if (targetView && headerTitle) {
       targetView.classList.add('active')
-      headerTitle.textContent = t.textContent?.trim() ?? ''
+    headerTitle.textContent = t.textContent?.trim() ?? ''
       save(STORAGE_KEYS.currentView, id)
       if (headerBackBtn) headerBackBtn.dataset.reorder = 'false'
       
