@@ -2050,6 +2050,9 @@ function renderOrders() {
 function openOrderDetails(order: Transaction) {
   if (!orderDetailsDialog || !orderDetailsTitle || !orderDetailsContent) return
   
+  // Store current order for button handlers
+  currentOrderView = order
+  
   const date = new Date(order.date)
   orderDetailsTitle.textContent = `Order #${order.id}`
   
