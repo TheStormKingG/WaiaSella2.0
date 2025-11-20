@@ -19,7 +19,18 @@ const STORAGE_KEYS = {
   expenseTab: 'ws.expenseTab',
   selectedInventoryCategory: 'ws.selectedInventoryCategory',
   customCategories: 'ws.customCategories',
+  expenses: 'ws.expenses',
+  expenseCategories: 'ws.expenseCategories',
 } as const
+
+type Expense = {
+  id: string
+  date: string
+  description: string
+  category?: string
+  amount: number
+  notes?: string
+}
 
 type Item = {
   id: string
@@ -88,6 +99,10 @@ let cartMode: 'sale' | 'order' = (load<string>(STORAGE_KEYS.cartMode) === 'order
 let customCategories: string[] = load<string[]>(STORAGE_KEYS.customCategories) ?? []
 customCategories = unique([...customCategories, 'Other'])
 save(STORAGE_KEYS.customCategories, customCategories)
+
+// Operational Expenses
+let expenses: Expense[] = load<Expense[]>(STORAGE_KEYS.expenses) ?? []
+let expenseCategories: string[] = load<string[]>(STORAGE_KEYS.expenseCategories) ?? []
 
 // Elements
 const tabs = qsa<HTMLButtonElement>('.tab')
@@ -163,6 +178,22 @@ const expenseTabs = qsa<HTMLButtonElement>('.expense-tab')
 const sellableView = qs<HTMLDivElement>('#sellableView')
 const operationalView = qs<HTMLDivElement>('#operationalView')
 const expenseTabContents = qsa<HTMLDivElement>('.expense-tab-content')
+
+// Operational Expenses
+const addExpenseBtn = qs<HTMLButtonElement>('#addExpenseBtn')
+const expenseDialog = qs<HTMLDialogElement>('#expenseDialog')
+const expenseForm = qs<HTMLFormElement>('#expenseForm')
+const expenseDialogTitle = qs<HTMLHeadingElement>('#expenseDialogTitle')
+const expenseSearch = qs<HTMLInputElement>('#expenseSearch')
+const expenseStartDate = qs<HTMLInputElement>('#expenseStartDate')
+const expenseEndDate = qs<HTMLInputElement>('#expenseEndDate')
+const clearExpenseFiltersBtn = qs<HTMLButtonElement>('#clearExpenseFilters')
+const expensesTableBody = qs<HTMLTableSectionElement>('#expensesTableBody')
+const expensesTableFooter = qs<HTMLTableSectionElement>('#expensesTableFooter')
+const expensesTotal = qs<HTMLTableCellElement>('#expensesTotal')
+const expensesEmpty = qs<HTMLDivElement>('#expensesEmpty')
+const closeExpenseDialogBtn = qs<HTMLButtonElement>('#closeExpenseDialog')
+const cancelExpenseBtn = qs<HTMLButtonElement>('#cancelExpenseBtn')
 
 // Category modals
 const renameCategoryDialog = qs<HTMLDialogElement>('#renameCategoryDialog')
@@ -292,6 +323,8 @@ renderCart()
 renderOrders()
 renderSettings()
 populateCategoryDatalist()
+populateExpenseCategoryDatalist()
+renderExpenses()
 
 // Tab switching
 tabs.forEach((t) =>
@@ -337,6 +370,12 @@ tabs.forEach((t) =>
     if (id === 'ordersView') renderOrders()
     if (id === 'reportsView') renderReports()
     if (id === 'settingsView') renderSettings()
+    if (id === 'expenseView') {
+      const savedExpenseTab = load<string>(STORAGE_KEYS.expenseTab) || 'sellable'
+      if (savedExpenseTab === 'operational') {
+        renderExpenses()
+      }
+    }
   })
 )
 
@@ -365,8 +404,21 @@ expenseTabs.forEach(tab => {
   tab.addEventListener('click', () => {
     const tabName = tab.dataset.expenseTab as 'sellable' | 'operational'
     switchExpenseTab(tabName)
+    if (tabName === 'operational') {
+      renderExpenses()
+    }
   })
 })
+
+// Operational Expenses event listeners
+if (addExpenseBtn) addExpenseBtn.addEventListener('click', () => openExpenseDialog())
+if (expenseForm) expenseForm.addEventListener('submit', saveExpenseFromDialog)
+if (closeExpenseDialogBtn) closeExpenseDialogBtn.addEventListener('click', () => expenseDialog?.close())
+if (cancelExpenseBtn) cancelExpenseBtn.addEventListener('click', () => expenseDialog?.close())
+if (expenseSearch) expenseSearch.addEventListener('input', renderExpenses)
+if (expenseStartDate) expenseStartDate.addEventListener('change', renderExpenses)
+if (expenseEndDate) expenseEndDate.addEventListener('change', renderExpenses)
+if (clearExpenseFiltersBtn) clearExpenseFiltersBtn.addEventListener('click', clearExpenseFilters)
 
 // Restore last view on load
 let savedView = load<string>(STORAGE_KEYS.currentView)
@@ -391,17 +443,21 @@ if (savedView) {
       const savedExpenseTab = load<string>(STORAGE_KEYS.expenseTab) || 'sellable'
       switchExpenseTab(savedExpenseTab)
       
-      if (savedExpenseView === 'manage') {
-        showManageCategories()
-      } else if (savedExpenseView === 'items') {
-        if (savedCategory) {
-          selectedInventoryCategory = savedCategory
-        }
-        showInventoryItems()
+      if (savedExpenseTab === 'operational') {
+        renderExpenses()
       } else {
-        showInventoryCategories()
+        if (savedExpenseView === 'manage') {
+          showManageCategories()
+        } else if (savedExpenseView === 'items') {
+          if (savedCategory) {
+            selectedInventoryCategory = savedCategory
+          }
+          showInventoryItems()
+        } else {
+          showInventoryCategories()
+        }
+        renderInventory()
       }
-      renderInventory()
     } else if (savedView === 'reportsView') {
       renderReports()
     } else if (savedView === 'ordersView') {
@@ -1219,6 +1275,180 @@ function renderSettings() {
   if (!settingsContainer) return
 }
 
+// Operational Expenses
+function renderExpenses() {
+  if (!expensesTableBody || !expensesEmpty || !expensesTotal || !expensesTableFooter) return
+  
+  // Get filter values
+  const searchTerm = expenseSearch?.value.toLowerCase() || ''
+  const startDate = expenseStartDate?.value || ''
+  const endDate = expenseEndDate?.value || ''
+  
+  // Filter expenses
+  let filteredExpenses = expenses.filter(expense => {
+    // Search filter
+    if (searchTerm) {
+      const matchesSearch = 
+        expense.description.toLowerCase().includes(searchTerm) ||
+        expense.category?.toLowerCase().includes(searchTerm) ||
+        expense.notes?.toLowerCase().includes(searchTerm)
+      if (!matchesSearch) return false
+    }
+    
+    // Date range filter
+    if (startDate && expense.date < startDate) return false
+    if (endDate && expense.date > endDate) return false
+    
+    return true
+  })
+  
+  // Sort by date (newest first)
+  filteredExpenses.sort((a, b) => b.date.localeCompare(a.date))
+  
+  // Clear table
+  expensesTableBody.innerHTML = ''
+  
+  if (filteredExpenses.length === 0) {
+    expensesEmpty.style.display = 'block'
+    expensesTableFooter.style.display = 'none'
+  } else {
+    expensesEmpty.style.display = 'none'
+    expensesTableFooter.style.display = 'table-row-group'
+    
+    // Render expenses
+    let total = 0
+    filteredExpenses.forEach(expense => {
+      total += expense.amount
+      
+      const row = h('tr')
+      const date = new Date(expense.date)
+      
+      row.innerHTML = `
+        <td>${date.toLocaleDateString()}</td>
+        <td>${expense.description}</td>
+        <td>${expense.category || '-'}</td>
+        <td style="font-weight: 600;">${fmt(expense.amount)}</td>
+        <td>
+          <div class="expense-actions">
+            <button class="btn-edit" data-expense-id="${expense.id}">Edit</button>
+            <button class="btn-delete" data-expense-id="${expense.id}">Delete</button>
+          </div>
+        </td>
+      `
+      
+      expensesTableBody.appendChild(row)
+    })
+    
+    // Update total
+    expensesTotal.textContent = fmt(total)
+    
+    // Add event listeners for edit/delete buttons
+    expensesTableBody.querySelectorAll('.btn-edit').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = (e.target as HTMLButtonElement).dataset.expenseId
+        if (id) openExpenseDialog(expenses.find(e => e.id === id))
+      })
+    })
+    
+    expensesTableBody.querySelectorAll('.btn-delete').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = (e.target as HTMLButtonElement).dataset.expenseId
+        if (id) deleteExpense(id)
+      })
+    })
+  }
+}
+
+function openExpenseDialog(expense?: Expense) {
+  if (!expenseDialog || !expenseForm || !expenseDialogTitle) return
+  
+  if (expense) {
+    expenseDialogTitle.textContent = 'Edit Expense'
+    ;(expenseForm.elements.namedItem('id') as HTMLInputElement).value = expense.id
+    ;(expenseForm.elements.namedItem('date') as HTMLInputElement).value = expense.date
+    ;(expenseForm.elements.namedItem('description') as HTMLInputElement).value = expense.description
+    ;(expenseForm.elements.namedItem('category') as HTMLInputElement).value = expense.category || ''
+    ;(expenseForm.elements.namedItem('amount') as HTMLInputElement).value = expense.amount.toString()
+    ;(expenseForm.elements.namedItem('notes') as HTMLTextAreaElement).value = expense.notes || ''
+  } else {
+    expenseDialogTitle.textContent = 'Add Expense'
+    expenseForm.reset()
+    ;(expenseForm.elements.namedItem('date') as HTMLInputElement).value = new Date().toISOString().split('T')[0]
+    ;(expenseForm.elements.namedItem('id') as HTMLInputElement).value = ''
+  }
+  
+  expenseDialog.showModal()
+}
+
+function saveExpenseFromDialog(ev: SubmitEvent) {
+  ev.preventDefault()
+  if (!expenseForm) return
+  
+  const data = Object.fromEntries(new FormData(expenseForm) as any) as Record<string, string>
+  const existingExpense = expenses.find((e) => e.id === (data.id || ''))
+  
+  const payload: Expense = {
+    id: data.id || id(),
+    date: data.date,
+    description: data.description.trim(),
+    category: data.category?.trim() || undefined,
+    amount: parseFloat(data.amount) || 0,
+    notes: data.notes?.trim() || undefined,
+  }
+  
+  // Update categories list
+  if (payload.category && !expenseCategories.includes(payload.category)) {
+    expenseCategories.push(payload.category)
+    save(STORAGE_KEYS.expenseCategories, expenseCategories)
+    populateExpenseCategoryDatalist()
+  }
+  
+  if (existingExpense) {
+    const index = expenses.findIndex(e => e.id === existingExpense.id)
+    expenses[index] = payload
+  } else {
+    expenses.unshift(payload)
+  }
+  
+  save(STORAGE_KEYS.expenses, expenses)
+  persist()
+  expenseDialog?.close()
+  renderExpenses()
+  
+  console.log(`${existingExpense ? 'Updated' : 'Added'} expense: ${payload.description}`)
+}
+
+function deleteExpense(expenseId: string) {
+  const expense = expenses.find(e => e.id === expenseId)
+  if (!expense) return
+  
+  if (confirm(`Delete expense "${expense.description}"?\n\nThis action cannot be undone.`)) {
+    expenses = expenses.filter(e => e.id !== expenseId)
+    save(STORAGE_KEYS.expenses, expenses)
+    persist()
+    renderExpenses()
+    
+    console.log(`🗑️  Deleted expense: ${expense.description}`)
+  }
+}
+
+function populateExpenseCategoryDatalist() {
+  const categoryList = qs<HTMLDataListElement>('#expenseCategoryList')
+  if (!categoryList) return
+  
+  categoryList.innerHTML = ''
+  expenseCategories.forEach(category => {
+    categoryList.appendChild(h('option', { value: category }))
+  })
+}
+
+function clearExpenseFilters() {
+  if (expenseSearch) expenseSearch.value = ''
+  if (expenseStartDate) expenseStartDate.value = ''
+  if (expenseEndDate) expenseEndDate.value = ''
+  renderExpenses()
+}
+
 function renderInventory() {
   if (selectedInventoryCategory === null && inventoryItemsView.style.display === 'none') {
     renderInventoryCategories()
@@ -1529,6 +1759,8 @@ function persist() {
   save(STORAGE_KEYS.transactions, transactions)
   save(STORAGE_KEYS.soldTally, soldTally)
   save(STORAGE_KEYS.customCategories, customCategories)
+  save(STORAGE_KEYS.expenses, expenses)
+  save(STORAGE_KEYS.expenseCategories, expenseCategories)
 }
 function seed(items: Item[]) { save(STORAGE_KEYS.inventory, items); return items }
 

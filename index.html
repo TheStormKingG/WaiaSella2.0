@@ -95,12 +95,99 @@
         <!-- Operational Tab Content -->
         <div id="operationalView" class="expense-tab-content">
           <div style="padding: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <h3 style="margin: 0;">Operational Expenses</h3>
+              <button id="addExpenseBtn" type="button" class="btn primary">+ Add Expense</button>
+            </div>
+            
+            <!-- Filters and Search -->
+            <div class="card" style="margin-bottom: 16px;">
+              <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;">
+                <div style="flex: 1; min-width: 200px;">
+                  <label style="display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px;">Search</label>
+                  <input id="expenseSearch" type="text" class="expense-filter-input" placeholder="Search expenses...">
+                </div>
+                <div style="min-width: 150px;">
+                  <label style="display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px;">Start Date</label>
+                  <input id="expenseStartDate" type="date" class="expense-filter-input">
+                </div>
+                <div style="min-width: 150px;">
+                  <label style="display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px;">End Date</label>
+                  <input id="expenseEndDate" type="date" class="expense-filter-input">
+                </div>
+                <button id="clearExpenseFilters" type="button" class="btn" style="white-space: nowrap;">Clear</button>
+              </div>
+            </div>
+            
+            <!-- Expenses Table -->
             <div class="card">
-              <h3 style="margin: 0 0 12px 0;">Operational Expenses</h3>
-              <p style="color: var(--muted); margin: 0;">Operational expenses will be managed here.</p>
+              <div style="overflow-x: auto;">
+                <table id="expensesTable" class="expenses-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Description</th>
+                      <th>Category</th>
+                      <th>Amount</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="expensesTableBody">
+                    <!-- Expenses will be rendered here -->
+                  </tbody>
+                  <tfoot id="expensesTableFooter" style="display: none;">
+                    <tr>
+                      <td colspan="3" style="text-align: right; font-weight: 600;">Total:</td>
+                      <td id="expensesTotal" style="font-weight: 700;">GY$0.00</td>
+                      <td></td>
+                    </tr>
+                  </tfoot>
+                </table>
+                <div id="expensesEmpty" class="expenses-empty">
+                  <p>No expenses found. Click "Add Expense" to create your first expense.</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+        
+        <!-- Add/Edit Expense Dialog -->
+        <dialog id="expenseDialog" class="dialog">
+          <div class="dialog-header">
+            <h2 id="expenseDialogTitle">Add Expense</h2>
+            <button id="closeExpenseDialog" class="dialog-close" type="button">×</button>
+          </div>
+          <form id="expenseForm" class="dialog-form">
+            <input type="hidden" id="expenseId" name="id">
+            <div class="dialog-body">
+              <div class="form-group">
+                <label for="expenseDate">Date <span style="color: #ef4444;">*</span></label>
+                <input type="date" id="expenseDate" name="date" required>
+              </div>
+              <div class="form-group">
+                <label for="expenseDescription">Description <span style="color: #ef4444;">*</span></label>
+                <input type="text" id="expenseDescription" name="description" placeholder="e.g., Office supplies, Utilities" required>
+              </div>
+              <div class="form-group">
+                <label for="expenseCategory">Category</label>
+                <input type="text" id="expenseCategory" name="category" list="expenseCategoryList" placeholder="e.g., Office, Utilities, Rent">
+                <datalist id="expenseCategoryList"></datalist>
+              </div>
+              <div class="form-group">
+                <label for="expenseAmount">Amount (GY$) <span style="color: #ef4444;">*</span></label>
+                <input type="number" id="expenseAmount" name="amount" step="0.01" min="0" placeholder="0.00" required>
+              </div>
+              <div class="form-group">
+                <label for="expenseNotes">Notes</label>
+                <textarea id="expenseNotes" name="notes" rows="3" placeholder="Additional notes..."></textarea>
+              </div>
+            </div>
+            <div class="dialog-actions">
+              <button type="button" id="cancelExpenseBtn" class="btn">Cancel</button>
+              <button type="submit" class="btn primary">Save</button>
+            </div>
+          </form>
+        </dialog>
       </section>
 
       <!-- Orders View -->

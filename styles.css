@@ -371,6 +371,176 @@ body {
   display: block;
 }
 
+/* Operational Expenses */
+.expense-filter-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  background: var(--card);
+  color: var(--ink);
+}
+.expense-filter-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.expenses-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.expenses-table thead {
+  background: #f9fafb;
+  border-bottom: 2px solid var(--border);
+}
+.expenses-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.expenses-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--ink);
+}
+.expenses-table tbody tr:hover {
+  background: #f9fafb;
+}
+.expenses-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.expenses-table .expense-actions {
+  display: flex;
+  gap: 8px;
+}
+.expenses-table .expense-actions button {
+  padding: 4px 8px;
+  font-size: 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.expenses-table .expense-actions .btn-edit {
+  background: #eff6ff;
+  color: var(--primary);
+}
+.expenses-table .expense-actions .btn-edit:hover {
+  background: #dbeafe;
+}
+.expenses-table .expense-actions .btn-delete {
+  background: #fef2f2;
+  color: #ef4444;
+}
+.expenses-table .expense-actions .btn-delete:hover {
+  background: #fee2e2;
+}
+
+.expenses-empty {
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--muted);
+}
+.expenses-empty p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.dialog-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+.dialog-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--muted);
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+.dialog-close:hover {
+  background: #f3f4f6;
+  color: var(--ink);
+}
+
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+  min-width: 320px;
+  max-width: 500px;
+}
+
+.dialog-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: calc(90vh - 140px);
+  overflow-y: auto;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.form-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.form-group input,
+.form-group textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--card);
+  color: var(--ink);
+  transition: all 0.2s ease;
+}
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  margin: 0;
+}
+
 .section-title { margin: 8px 0 12px; }
 .cards-2col { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 12px; }
 .card { background: var(--card); border-radius: 12px; padding: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.04); }
