@@ -2083,24 +2083,24 @@ function openOrderDetails(order: Transaction) {
   
   infoHtml += '</div>'
   
-  // Items table - takes remaining space, compact design
-  let itemsHtml = '<div style="flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden;"><h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; flex-shrink: 0;">Items</h3>'
-  itemsHtml += '<div style="flex: 1; min-height: 0; overflow-y: auto;"><table style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 14px;">'
+  // Items table - spans full width and height of available space
+  let itemsHtml = '<div style="flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; width: 100%;"><h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; flex-shrink: 0;">Items</h3>'
+  itemsHtml += '<div style="flex: 1; min-height: 0; overflow-y: auto; width: 100%; display: flex; flex-direction: column;"><table style="width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; font-size: 14px; display: table;">'
   itemsHtml += '<colgroup><col style="width: auto;"><col style="width: 70px;"><col style="width: 120px;"><col style="width: 120px;"></colgroup>'
   itemsHtml += '<thead><tr style="border-bottom: 2px solid var(--border); background: var(--card); position: sticky; top: 0; z-index: 1;">'
   itemsHtml += '<th style="text-align: left; padding: 8px 12px; font-weight: 600; color: var(--ink); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Item</th>'
   itemsHtml += '<th style="text-align: right; padding: 8px 12px; font-weight: 600; color: var(--ink); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Qty</th>'
   itemsHtml += '<th style="text-align: right; padding: 8px 12px; font-weight: 600; color: var(--ink); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Price</th>'
   itemsHtml += '<th style="text-align: right; padding: 8px 12px; font-weight: 600; color: var(--ink); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Total</th>'
-  itemsHtml += '</tr></thead><tbody>'
+  itemsHtml += '</tr></thead><tbody style="display: table-row-group;">'
   
   order.items.forEach((item) => {
     const itemTotal = item.qty * item.price
-    itemsHtml += '<tr style="border-bottom: 1px solid var(--border);">'
-    itemsHtml += `<td style="padding: 10px 12px; color: var(--ink); word-wrap: break-word; overflow-wrap: break-word;">${item.name}</td>`
-    itemsHtml += `<td style="text-align: right; padding: 10px 12px; color: var(--ink);">${item.qty}</td>`
-    itemsHtml += `<td style="text-align: right; padding: 10px 12px; color: var(--ink);">${fmt(item.price)}</td>`
-    itemsHtml += `<td style="text-align: right; padding: 10px 12px; font-weight: 600; color: var(--ink);">${fmt(itemTotal)}</td>`
+    itemsHtml += '<tr style="border-bottom: 1px solid var(--border); display: table-row;">'
+    itemsHtml += `<td style="padding: 10px 12px; color: var(--ink); word-wrap: break-word; overflow-wrap: break-word; display: table-cell;">${item.name}</td>`
+    itemsHtml += `<td style="text-align: right; padding: 10px 12px; color: var(--ink); display: table-cell;">${item.qty}</td>`
+    itemsHtml += `<td style="text-align: right; padding: 10px 12px; color: var(--ink); display: table-cell;">${fmt(item.price)}</td>`
+    itemsHtml += `<td style="text-align: right; padding: 10px 12px; font-weight: 600; color: var(--ink); display: table-cell;">${fmt(itemTotal)}</td>`
     itemsHtml += '</tr>'
   })
   

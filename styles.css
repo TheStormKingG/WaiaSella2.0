@@ -998,6 +998,19 @@ body {
   overflow: hidden;
 }
 
+#orderDetailsDialog .dialog-body > * {
+  width: 100%;
+}
+
+#orderDetailsDialog .dialog-body table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+#orderDetailsDialog .dialog-body tbody {
+  display: table-row-group;
+}
+
 #orderDetailsDialog .dialog-actions {
   padding: 12px 20px;
   flex-shrink: 0;
