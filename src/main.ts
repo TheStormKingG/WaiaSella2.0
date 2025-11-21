@@ -628,38 +628,38 @@ function updateTabsForUserType() {
   const individualTabs = qsa<HTMLButtonElement>('.individual-tab')
   
   if (userType === 'business') {
-    // Show business tabs, hide individual tabs
-    businessTabs.forEach(tab => tab.style.display = 'flex')
+    // Hide individual tabs
     individualTabs.forEach(tab => tab.style.display = 'none')
     
     // Apply role-based access control for business users
-    // Admin users always see all tabs
     if (currentUserRole === 'admin') {
-      // Admin can see all tabs - keep them all visible
-      businessTabs.forEach(tab => tab.style.display = 'flex')
-    } else if (currentUserRole) {
-      // For non-admin roles, apply restrictions
+      // Admin can see ALL business tabs - Orders, Cashier, Expense, Reports
+      businessTabs.forEach(tab => {
+        tab.style.display = 'flex'
+      })
+    } else if (currentUserRole === 'cashier') {
+      // Cashier can see only Cashier and Orders
       businessTabs.forEach(tab => {
         const targetView = tab.dataset.target
-        if (currentUserRole === 'cashier') {
-          // Cashier can see only Cashier and Orders
-          if (targetView === 'cashierView' || targetView === 'ordersView') {
-            tab.style.display = 'flex'
-          } else {
-            tab.style.display = 'none'
-          }
-        } else if (currentUserRole === 'observer') {
-          // Observer can see only Orders
-          if (targetView === 'ordersView') {
-            tab.style.display = 'flex'
-          } else {
-            tab.style.display = 'none'
-          }
-        } else {
-          // Default: show all if role is not set
+        if (targetView === 'cashierView' || targetView === 'ordersView') {
           tab.style.display = 'flex'
+        } else {
+          tab.style.display = 'none'
         }
       })
+    } else if (currentUserRole === 'observer') {
+      // Observer can see only Orders
+      businessTabs.forEach(tab => {
+        const targetView = tab.dataset.target
+        if (targetView === 'ordersView') {
+          tab.style.display = 'flex'
+        } else {
+          tab.style.display = 'none'
+        }
+      })
+    } else {
+      // Default: if role is not set or null, show all business tabs
+      businessTabs.forEach(tab => tab.style.display = 'flex')
     }
     
     // Center tabs if user is observer or cashier (fewer visible tabs)
