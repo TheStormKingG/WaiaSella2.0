@@ -389,8 +389,17 @@ let storeProfileContainer: HTMLDivElement | null = null
 let usersContainer: HTMLDivElement | null = null
 let profileContainer: HTMLDivElement | null = null
 let profileForm: HTMLFormElement | null = null
+let profilePicPreview: HTMLImageElement | null = null
+let profilePicPlaceholder: HTMLDivElement | null = null
+let profilePicUpload: HTMLInputElement | null = null
+let profilePicUploadBtn: HTMLButtonElement | null = null
+let profilePicData: string = ''
 let profileName: HTMLInputElement | null = null
 let profileEmail: HTMLInputElement | null = null
+let profileAddress: HTMLInputElement | null = null
+let profileTelephone: HTMLInputElement | null = null
+let profileGender: HTMLSelectElement | null = null
+let profileAge: HTMLInputElement | null = null
 let profilePassword: HTMLInputElement | null = null
 let cancelProfileBtn: HTMLButtonElement | null = null
 let addUserBtn: HTMLButtonElement | null = null
@@ -2391,13 +2400,39 @@ function renderSettings() {
 function loadProfile() {
   if (!profileName || !profileEmail || !profilePassword) return
   
-  const users = load<Record<string, { password: string; userType: 'business' | 'individual'; name?: string; role?: 'admin' | 'cashier' | 'observer' }>>('ws.users') ?? {}
+  const users = load<Record<string, { 
+    password: string
+    userType: 'business' | 'individual'
+    name?: string
+    role?: 'admin' | 'cashier' | 'observer'
+    profilePic?: string
+    address?: string
+    telephone?: string
+    gender?: string
+    age?: number
+  }>>('ws.users') ?? {}
   const user = currentUser ? users[currentUser] : null
   
   if (user) {
     profileName.value = user.name || ''
     profileEmail.value = currentUser
+    if (profileAddress) profileAddress.value = user.address || ''
+    if (profileTelephone) profileTelephone.value = user.telephone || ''
+    if (profileGender) profileGender.value = user.gender || ''
+    if (profileAge) profileAge.value = user.age ? user.age.toString() : ''
     profilePassword.value = ''
+    profilePicData = ''
+    
+    // Load profile picture
+    if (user.profilePic && profilePicPreview && profilePicPlaceholder) {
+      profilePicPreview.src = user.profilePic
+      profilePicPreview.style.display = 'block'
+      profilePicPlaceholder.style.display = 'none'
+      profilePicData = user.profilePic
+    } else if (profilePicPreview && profilePicPlaceholder) {
+      profilePicPreview.style.display = 'none'
+      profilePicPlaceholder.style.display = 'flex'
+    }
   }
 }
 
@@ -2406,10 +2441,21 @@ function saveProfile() {
   if (!profileForm || !profileName || !profileEmail || !profilePassword) return
   
   const name = profileName.value.trim()
+  const email = profileEmail.value.trim()
+  const address = profileAddress?.value.trim() || ''
+  const telephone = profileTelephone?.value.trim() || ''
+  const gender = profileGender?.value || ''
+  const age = profileAge?.value ? parseInt(profileAge.value) : undefined
   const password = profilePassword.value
   
   if (!currentUser) {
     alert('Error: No user logged in.')
+    return
+  }
+  
+  // Validate email format
+  if (!email || !email.includes('@')) {
+    alert('Please enter a valid email address.')
     return
   }
   
@@ -2418,20 +2464,65 @@ function saveProfile() {
     return
   }
   
-  const users = load<Record<string, { password: string; userType: 'business' | 'individual'; name?: string; role?: 'admin' | 'cashier' | 'observer' }>>('ws.users') ?? {}
+  // Validate age if provided
+  if (age !== undefined && (age < 1 || age > 150)) {
+    alert('Please enter a valid age (1-150).')
+    return
+  }
+  
+  const users = load<Record<string, { 
+    password: string
+    userType: 'business' | 'individual'
+    name?: string
+    role?: 'admin' | 'cashier' | 'observer'
+    profilePic?: string
+    address?: string
+    telephone?: string
+    gender?: string
+    age?: number
+  }>>('ws.users') ?? {}
   
   if (!users[currentUser]) {
     alert('Error: User not found.')
     return
   }
   
-  // Update user profile - only name and password, preserve userType
-  users[currentUser] = {
-    ...users[currentUser],
-    name: name || undefined,
-    password: password && password.length >= 6 ? password : users[currentUser].password,
-    // Preserve userType - individual users stay individual
-    userType: 'individual'
+  // If email changed, check if new email is already taken
+  if (email !== currentUser) {
+    if (users[email]) {
+      alert('This email is already registered. Please use a different email.')
+      return
+    }
+    
+    // Move user to new email key
+    users[email] = {
+      ...users[currentUser],
+      name: name || undefined,
+      email: email,
+      password: password && password.length >= 6 ? password : users[currentUser].password,
+      profilePic: profilePicData || users[currentUser].profilePic,
+      address: address || undefined,
+      telephone: telephone || undefined,
+      gender: gender || undefined,
+      age: age,
+      userType: 'individual'
+    }
+    delete users[currentUser]
+    currentUser = email
+    save(STORAGE_KEYS.currentUser, currentUser)
+  } else {
+    // Update existing user
+    users[currentUser] = {
+      ...users[currentUser],
+      name: name || undefined,
+      password: password && password.length >= 6 ? password : users[currentUser].password,
+      profilePic: profilePicData || users[currentUser].profilePic,
+      address: address || undefined,
+      telephone: telephone || undefined,
+      gender: gender || undefined,
+      age: age,
+      userType: 'individual'
+    }
   }
   
   save('ws.users', users)
