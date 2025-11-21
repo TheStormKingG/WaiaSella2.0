@@ -1060,9 +1060,16 @@ function initSettingsTabs() {
   settingsTabs = qsa<HTMLButtonElement>('.expense-tab[data-settings-tab]')
   storeProfileView = qs<HTMLDivElement>('#storeProfileView')
   usersView = qs<HTMLDivElement>('#usersView')
-  settingsTabContents = qsa<HTMLDivElement>('#storeProfileView, #usersView')
+  profileView = qs<HTMLDivElement>('#profileView')
+  settingsTabContents = qsa<HTMLDivElement>('#storeProfileView, #usersView, #profileView')
   storeProfileContainer = qs<HTMLDivElement>('#storeProfileContainer')
   usersContainer = qs<HTMLDivElement>('#usersContainer')
+  profileContainer = qs<HTMLDivElement>('#profileContainer')
+  profileForm = qs<HTMLFormElement>('#profileForm')
+  profileName = qs<HTMLInputElement>('#profileName')
+  profileEmail = qs<HTMLInputElement>('#profileEmail')
+  profilePassword = qs<HTMLInputElement>('#profilePassword')
+  cancelProfileBtn = qs<HTMLButtonElement>('#cancelProfileBtn')
   addUserBtn = qs<HTMLButtonElement>('#addUserBtn')
   usersList = qs<HTMLDivElement>('#usersList')
   
@@ -1071,12 +1078,22 @@ function initSettingsTabs() {
   if (tabs.length > 0) {
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
-        const tabName = tab.dataset.settingsTab as 'storeProfile' | 'users'
+        const tabName = tab.dataset.settingsTab as 'storeProfile' | 'users' | 'profile'
         switchSettingsTab(tabName)
       })
     })
   }
   
+  // Profile form submit handler
+  profileForm?.addEventListener('submit', (e) => {
+    e.preventDefault()
+    saveProfile()
+  })
+  
+  // Cancel profile button
+  cancelProfileBtn?.addEventListener('click', () => {
+    loadProfile()
+  })
 }
 
 // Operational Expenses event listeners
