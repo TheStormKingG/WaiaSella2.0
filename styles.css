@@ -945,6 +945,7 @@ body {
 
 /* Dialog */
 .dialog { border: none; border-radius: 12px; padding: 0; max-height: 90vh; overflow: auto; }
+.dialog:not([open]) { display: none; }
 .dialog::backdrop { background: rgba(0,0,0,.3); }
 .dialog-body { min-width: 320px; max-width: 500px; display: flex; flex-direction: column; max-height: 90vh; overflow-y: auto; position: relative; }
 
