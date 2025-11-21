@@ -366,17 +366,19 @@
       </section>
 
       <!-- Order Details Modal -->
-      <dialog id="orderDetailsDialog" class="dialog">
-        <div class="dialog-header">
-          <h2 id="orderDetailsTitle" style="margin: 0; font-size: 24px;">Order Details</h2>
-          <button id="closeOrderDetailsXBtn" class="dialog-close" type="button">×</button>
-        </div>
-        <div class="dialog-body">
-          <div id="orderDetailsContent"></div>
-        </div>
-        <div class="dialog-actions">
-          <button id="cancelOrderBtn" class="btn" type="button" style="background: #ef4444; border-color: #ef4444; color: white;">Cancel</button>
-          <button id="deliveredOrderBtn" class="btn primary" type="button" style="background: #22c55e; border-color: #22c55e; color: white;">Delivered</button>
+      <dialog id="orderDetailsDialog" class="order-details-modal">
+        <div class="order-modal-container">
+          <div class="order-modal-header">
+            <h2 id="orderDetailsTitle" class="order-modal-title">Order #waia6</h2>
+            <button id="closeOrderDetailsXBtn" class="order-modal-close" type="button">×</button>
+          </div>
+          <div class="order-modal-body">
+            <div id="orderDetailsContent"></div>
+          </div>
+          <div class="order-modal-footer">
+            <button id="cancelOrderBtn" class="order-btn-cancel" type="button">Cancel</button>
+            <button id="deliveredOrderBtn" class="order-btn-delivered" type="button">Delivered</button>
+          </div>
         </div>
       </dialog>
 

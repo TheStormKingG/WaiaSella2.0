@@ -949,116 +949,117 @@ body {
 .dialog::backdrop { background: rgba(0,0,0,.3); }
 .dialog-body { min-width: 320px; max-width: 500px; display: flex; flex-direction: column; max-height: 90vh; overflow-y: auto; position: relative; }
 
-/* Order Details Dialog - Optimized to fit all content without scrolling */
-#orderDetailsDialog {
-  width: min(90vw, 1200px);
-  max-width: 95vw;
-  height: 85vh;
-  max-height: 85vh;
+/* Order Details Modal - Rebuilt from scratch */
+.order-details-modal {
+  border: none;
+  border-radius: 12px;
+  padding: 0;
+  max-width: 90vw;
+  width: 600px;
+  max-height: 90vh;
   margin: auto;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  background: white;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-/* Ensure dialog is hidden by default */
-#orderDetailsDialog:not([open]) {
+.order-details-modal:not([open]) {
   display: none;
 }
 
-#orderDetailsDialog .dialog-header {
-  padding: 12px 20px;
-  flex-shrink: 0;
-  border-bottom: 1px solid var(--border);
-  min-height: 48px;
+.order-details-modal::backdrop {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.order-modal-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 90vh;
+}
+
+.order-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
 }
 
-#orderDetailsDialog .dialog-header h2 {
-  font-size: 20px;
+.order-modal-title {
   margin: 0;
+  font-size: 20px;
   font-weight: 700;
+  color: var(--ink);
 }
 
-#orderDetailsDialog .dialog-close {
-  font-size: 24px;
+.order-modal-close {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
   width: 32px;
   height: 32px;
-  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--muted);
+  padding: 0;
+  transition: all 0.2s ease;
 }
 
-#orderDetailsDialog .dialog-body {
-  padding: 16px 20px;
-  width: 100%;
-  box-sizing: border-box;
+.order-modal-close:hover {
+  background: #f3f4f6;
+  color: var(--ink);
+}
+
+.order-modal-body {
+  padding: 20px 24px;
   flex: 1;
-  min-height: 0;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  overflow: hidden;
+  gap: 20px;
 }
 
-#orderDetailsDialog .dialog-body table {
-  width: calc(100% - 0px);
-  margin-right: 0;
-}
-
-#orderDetailsDialog .dialog-body > * {
-  width: 100%;
-  box-sizing: border-box;
-}
-
-#orderDetailsDialog #orderDetailsContent {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  overflow: hidden;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-#orderDetailsDialog .dialog-body table {
-  width: 100%;
-  table-layout: fixed;
-  border-collapse: collapse;
-}
-
-#orderDetailsDialog .dialog-body tbody {
-  display: table-row-group;
-}
-
-#orderDetailsDialog .dialog-body tbody tr {
-  display: table-row;
-}
-
-#orderDetailsDialog .dialog-body tbody td {
-  display: table-cell;
-}
-
-#orderDetailsDialog .dialog-actions {
-  padding: 12px 20px;
-  flex-shrink: 0;
+.order-modal-footer {
+  padding: 16px 24px;
   border-top: 1px solid var(--border);
   display: flex;
   gap: 12px;
   justify-content: flex-end;
-  min-height: 56px;
-  align-items: center;
 }
 
-#orderDetailsDialog .dialog-actions button {
-  font-size: 16px;
+.order-btn-cancel {
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 8px;
   padding: 10px 24px;
-  white-space: nowrap;
-  min-height: 40px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.order-btn-cancel:hover {
+  background: #dc2626;
+}
+
+.order-btn-delivered {
+  background: #22c55e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.order-btn-delivered:hover {
+  background: #16a34a;
 }
 
 /* Loading Spinner */
