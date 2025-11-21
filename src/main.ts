@@ -383,9 +383,16 @@ const logoutBtnHeader = qs<HTMLButtonElement>('#logoutBtn')
 let settingsTabs: NodeListOf<HTMLButtonElement> | HTMLButtonElement[] = [] as any
 let storeProfileView: HTMLDivElement | null = null
 let usersView: HTMLDivElement | null = null
+let profileView: HTMLDivElement | null = null
 let settingsTabContents: HTMLDivElement[] = [] as any
 let storeProfileContainer: HTMLDivElement | null = null
 let usersContainer: HTMLDivElement | null = null
+let profileContainer: HTMLDivElement | null = null
+let profileForm: HTMLFormElement | null = null
+let profileName: HTMLInputElement | null = null
+let profileEmail: HTMLInputElement | null = null
+let profilePassword: HTMLInputElement | null = null
+let cancelProfileBtn: HTMLButtonElement | null = null
 let addUserBtn: HTMLButtonElement | null = null
 let usersList: HTMLDivElement | null = null
 
@@ -2310,9 +2317,95 @@ confirmDeliverOrderBtn?.addEventListener('click', () => {
 })
 
 function renderSettings() {
-  // Restore saved settings tab or default to storeProfile
-  const savedTab = load<string>(STORAGE_KEYS.settingsTab) || 'storeProfile'
-  switchSettingsTab(savedTab as 'storeProfile' | 'users')
+  // Show/hide settings tabs based on user type
+  const businessSettingsTabs = qsa<HTMLButtonElement>('.business-settings-tab')
+  const individualSettingsTabs = qsa<HTMLButtonElement>('.individual-settings-tab')
+  
+  if (userType === 'business') {
+    // Show business tabs (Store Profile, Users), hide individual tabs
+    businessSettingsTabs.forEach(tab => tab.style.display = 'flex')
+    individualSettingsTabs.forEach(tab => tab.style.display = 'none')
+    
+    // Hide users tab if not admin
+    const usersTab = businessSettingsTabs.find(tab => tab.dataset.settingsTab === 'users')
+    if (usersTab) {
+      if (currentUserRole === 'admin') {
+        usersTab.style.display = 'flex'
+        if (addUserBtn) addUserBtn.style.display = 'block'
+      } else {
+        usersTab.style.display = 'none'
+        if (addUserBtn) addUserBtn.style.display = 'none'
+      }
+    }
+    
+    // Default to storeProfile for business users
+    const savedTab = load<string>(STORAGE_KEYS.settingsTab) || 'storeProfile'
+    const validTab = savedTab === 'users' && currentUserRole !== 'admin' ? 'storeProfile' : savedTab
+    switchSettingsTab(validTab as 'storeProfile' | 'users')
+  } else {
+    // Show individual tabs (Profile), hide business tabs
+    businessSettingsTabs.forEach(tab => tab.style.display = 'none')
+    individualSettingsTabs.forEach(tab => tab.style.display = 'flex')
+    
+    // Default to profile for individual users
+    switchSettingsTab('profile')
+  }
+}
+
+// Load individual user profile
+function loadProfile() {
+  if (!profileName || !profileEmail || !profilePassword) return
+  
+  const users = load<Record<string, { password: string; userType: 'business' | 'individual'; name?: string; role?: 'admin' | 'cashier' | 'observer' }>>('ws.users') ?? {}
+  const user = currentUser ? users[currentUser] : null
+  
+  if (user) {
+    profileName.value = user.name || ''
+    profileEmail.value = currentUser
+    profilePassword.value = ''
+  }
+}
+
+// Save individual user profile
+function saveProfile() {
+  if (!profileForm || !profileName || !profileEmail || !profilePassword) return
+  
+  const name = profileName.value.trim()
+  const password = profilePassword.value
+  
+  if (!currentUser) {
+    alert('Error: No user logged in.')
+    return
+  }
+  
+  if (password && password.length < 6) {
+    alert('Password must be at least 6 characters long.')
+    return
+  }
+  
+  const users = load<Record<string, { password: string; userType: 'business' | 'individual'; name?: string; role?: 'admin' | 'cashier' | 'observer' }>>('ws.users') ?? {}
+  
+  if (!users[currentUser]) {
+    alert('Error: User not found.')
+    return
+  }
+  
+  // Update user profile - only name and password, preserve userType
+  users[currentUser] = {
+    ...users[currentUser],
+    name: name || undefined,
+    password: password && password.length >= 6 ? password : users[currentUser].password,
+    // Preserve userType - individual users stay individual
+    userType: 'individual'
+  }
+  
+  save('ws.users', users)
+  
+  // Update displayed name in header
+  updateUserInfo()
+  
+  alert('Profile updated successfully!')
+  loadProfile() // Reload to clear password field
 }
 
 function renderUsers() {

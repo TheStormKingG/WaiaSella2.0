@@ -559,15 +559,20 @@
       <!-- Settings View -->
       <section id="settingsView" class="view">
         <div class="expense-tabs">
-          <button class="expense-tab active" data-settings-tab="storeProfile">
+          <!-- Business user tabs -->
+          <button class="expense-tab active business-settings-tab" data-settings-tab="storeProfile" style="display: none;">
             <span>Store Profile</span>
           </button>
-          <button class="expense-tab" data-settings-tab="users">
+          <button class="expense-tab business-settings-tab" data-settings-tab="users" style="display: none;">
             <span>Users</span>
+          </button>
+          <!-- Individual user tab -->
+          <button class="expense-tab active individual-settings-tab" data-settings-tab="profile" style="display: none;">
+            <span>Profile</span>
           </button>
         </div>
         
-        <!-- Store Profile Tab Content -->
+        <!-- Store Profile Tab Content (Business only) -->
         <div id="storeProfileView" class="expense-tab-content active">
           <h2 class="section-title">Store Profile</h2>
           <div id="storeProfileContainer" class="card" style="padding: 20px;">
@@ -592,7 +597,7 @@
           </div>
         </div>
         
-        <!-- Users Tab Content -->
+        <!-- Users Tab Content (Business admin only) -->
         <div id="usersView" class="expense-tab-content">
           <h2 class="section-title">Users</h2>
           <div id="usersContainer" class="card" style="padding: 20px;">
@@ -602,6 +607,31 @@
             <div id="usersList" style="display: flex; flex-direction: column; gap: 12px;">
               <p style="color: var(--muted);">User management will appear here.</p>
             </div>
+          </div>
+        </div>
+        
+        <!-- Profile Tab Content (Individual users only) -->
+        <div id="profileView" class="expense-tab-content">
+          <h2 class="section-title">My Profile</h2>
+          <div id="profileContainer" class="card" style="padding: 20px; max-width: 600px; margin: 0 auto;">
+            <form id="profileForm" style="display: flex; flex-direction: column; gap: 16px;">
+              <div class="form-group">
+                <label for="profileName">Name</label>
+                <input type="text" id="profileName" name="name" placeholder="Enter your name">
+              </div>
+              <div class="form-group">
+                <label for="profileEmail">Email</label>
+                <input type="email" id="profileEmail" name="email" readonly style="background: #f3f4f6; color: #6b7280;">
+              </div>
+              <div class="form-group">
+                <label for="profilePassword">Change Password (leave blank to keep current)</label>
+                <input type="password" id="profilePassword" name="password" placeholder="Enter new password (min 6 characters)">
+              </div>
+              <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px;">
+                <button type="button" id="cancelProfileBtn" class="btn">Cancel</button>
+                <button type="submit" class="btn primary">Save Changes</button>
+              </div>
+            </form>
           </div>
         </div>
       </section>
