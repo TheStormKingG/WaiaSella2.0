@@ -428,17 +428,18 @@ body {
 
 /* Center visible tabs for observers and cashiers (fewer visible tabs) */
 .tabbar.centered-tabs {
-  display: flex;
+  display: flex !important;
   justify-content: center;
   align-items: center;
-  gap: 2px;
+  gap: 8px;
   padding: 6px;
 }
 
 .tabbar.centered-tabs .tab {
-  flex: 0 1 auto;
-  min-width: 100px;
-  max-width: 150px;
+  flex: 0 0 auto;
+  min-width: 120px;
+  max-width: 180px;
+  width: auto;
 }
 .tab { 
   border: none; 
