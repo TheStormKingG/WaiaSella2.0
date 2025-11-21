@@ -2083,10 +2083,10 @@ function openOrderDetails(order: Transaction) {
   
   infoHtml += '</div>'
   
-  // Items table - spans full width and height of available space
+  // Items table - spans full width and height of available space with evenly distributed columns
   let itemsHtml = '<div style="flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; width: 100%; box-sizing: border-box;"><h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; flex-shrink: 0;">Items</h3>'
   itemsHtml += '<div style="flex: 1; min-height: 0; overflow-y: auto; width: 100%; box-sizing: border-box; display: block;"><table style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 14px;">'
-  itemsHtml += '<colgroup><col style="width: auto;"><col style="width: 80px;"><col style="width: 130px;"><col style="width: 130px;"></colgroup>'
+  itemsHtml += '<colgroup><col style="width: 50%;"><col style="width: 16.67%;"><col style="width: 16.67%;"><col style="width: 16.67%;"></colgroup>'
   itemsHtml += '<thead><tr style="border-bottom: 2px solid var(--border); background: var(--card); position: sticky; top: 0; z-index: 10;">'
   itemsHtml += '<th style="text-align: left; padding: 10px 12px; font-weight: 600; color: var(--ink); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Item</th>'
   itemsHtml += '<th style="text-align: right; padding: 10px 12px; font-weight: 600; color: var(--ink); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Qty</th>'
