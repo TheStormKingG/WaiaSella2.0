@@ -429,6 +429,7 @@ body {
 /* Center visible tabs for observers and cashiers (fewer visible tabs) */
 .tabbar.centered-tabs {
   display: flex !important;
+  grid-template-columns: none !important;
   justify-content: center;
   align-items: center;
   gap: 8px;
@@ -437,9 +438,14 @@ body {
 
 .tabbar.centered-tabs .tab {
   flex: 0 0 auto;
-  min-width: 120px;
-  max-width: 180px;
+  min-width: 100px;
+  max-width: 200px;
   width: auto;
+}
+
+/* Hide tabs that should not be visible when centered */
+.tabbar.centered-tabs .tab[style*="display: none"] {
+  display: none !important;
 }
 .tab { 
   border: none; 
