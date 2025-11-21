@@ -2106,13 +2106,13 @@ function openOrderDetails(order: Transaction) {
   
   itemsHtml += '</tbody></table></div></div>'
   
-  // Totals section - compact, fixed at bottom
-  let totalsHtml = '<div style="border-top: 2px solid var(--border); padding-top: 12px; flex-shrink: 0; display: flex; flex-direction: column; gap: 6px; font-size: 14px;">'
-  totalsHtml += `<div style="display: flex; justify-content: space-between;"><span style="color: var(--muted);">Subtotal:</span><span style="font-weight: 600; color: var(--ink);">${fmt(order.subtotal)}</span></div>`
+  // Totals section - compact, fixed at bottom, aligned with table and buttons
+  let totalsHtml = '<div style="border-top: 2px solid var(--border); padding-top: 12px; flex-shrink: 0; display: flex; flex-direction: column; gap: 6px; font-size: 14px; width: 100%; box-sizing: border-box;">'
+  totalsHtml += `<div style="display: flex; justify-content: space-between; padding-right: 0;"><span style="color: var(--muted);">Subtotal:</span><span style="font-weight: 600; color: var(--ink);">${fmt(order.subtotal)}</span></div>`
   if (order.tax > 0) {
-    totalsHtml += `<div style="display: flex; justify-content: space-between;"><span style="color: var(--muted);">Tax:</span><span style="font-weight: 600; color: var(--ink);">${fmt(order.tax)}</span></div>`
+    totalsHtml += `<div style="display: flex; justify-content: space-between; padding-right: 0;"><span style="color: var(--muted);">Tax:</span><span style="font-weight: 600; color: var(--ink);">${fmt(order.tax)}</span></div>`
   }
-  totalsHtml += `<div style="display: flex; justify-content: space-between; margin-top: 4px; padding-top: 8px; border-top: 1px solid var(--border);"><span style="font-size: 18px; font-weight: 700; color: var(--ink);">Total:</span><span style="font-size: 18px; font-weight: 700; color: var(--primary);">${fmt(order.total)}</span></div>`
+  totalsHtml += `<div style="display: flex; justify-content: space-between; margin-top: 4px; padding-top: 8px; border-top: 1px solid var(--border); padding-right: 0;"><span style="font-size: 18px; font-weight: 700; color: var(--ink);">Total:</span><span style="font-size: 18px; font-weight: 700; color: var(--primary);">${fmt(order.total)}</span></div>`
   totalsHtml += '</div>'
   
   orderDetailsContent.innerHTML = `
