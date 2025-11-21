@@ -1003,6 +1003,17 @@ body {
   box-sizing: border-box;
 }
 
+#orderDetailsDialog #orderDetailsContent {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 #orderDetailsDialog .dialog-body table {
   width: 100%;
   table-layout: fixed;
