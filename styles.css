@@ -425,6 +425,21 @@ body {
   position: fixed; left: 0; right: 0; bottom: 0; height: 60px; background: white; border-top: 1px solid var(--border);
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; padding: 6px; z-index: 10;
 }
+
+/* Center visible tabs for observers and cashiers (fewer visible tabs) */
+.tabbar.centered-tabs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  padding: 6px;
+}
+
+.tabbar.centered-tabs .tab {
+  flex: 0 1 auto;
+  min-width: 100px;
+  max-width: 150px;
+}
 .tab { 
   border: none; 
   background: transparent; 

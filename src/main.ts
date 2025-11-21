@@ -660,6 +660,16 @@ function updateTabsForUserType() {
       })
     }
     
+    // Center tabs if user is observer or cashier (fewer visible tabs)
+    const visibleTabsCount = Array.from(businessTabs).filter(t => window.getComputedStyle(t).display !== 'none').length
+    if (appTabbar) {
+      if ((currentUserRole === 'observer' || currentUserRole === 'cashier') && visibleTabsCount < 4) {
+        appTabbar.classList.add('centered-tabs')
+      } else {
+        appTabbar.classList.remove('centered-tabs')
+      }
+    }
+    
     // Set first visible business tab as active if no active tab
     const visibleTabs = Array.from(businessTabs).filter(t => window.getComputedStyle(t).display !== 'none')
     const activeTab = visibleTabs.find(t => t.classList.contains('active'))
