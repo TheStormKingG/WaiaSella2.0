@@ -2318,11 +2318,13 @@ function renderSettings() {
 function renderUsers() {
   if (!usersList) return
   
-  const users = load<Record<string, { password: string; userType: 'business' | 'individual'; name?: string }>>('ws.users') ?? {}
-  const userEntries = Object.entries(users)
+  // Only show business users in user management (roles only apply to business users)
+  // Individual users are created via signup and are not managed here
+  const allUsers = load<Record<string, { password: string; userType: 'business' | 'individual'; name?: string; role?: 'admin' | 'cashier' | 'observer' }>>('ws.users') ?? {}
+  const userEntries = Object.entries(allUsers).filter(([email, userData]) => userData.userType === 'business')
   
   if (userEntries.length === 0) {
-    usersList.innerHTML = '<p style="color: var(--muted); margin: 0;">No users found. Add a user to get started.</p>'
+    usersList.innerHTML = '<p style="color: var(--muted); margin: 0;">No business users found. Add a user to get started.</p>'
     return
   }
   
@@ -2338,7 +2340,7 @@ function renderUsers() {
     userInfo.append(
       h('div', { style: 'font-weight: 600; font-size: 16px; color: var(--ink); margin-bottom: 4px;' }, displayName),
       h('div', { style: 'font-size: 14px; color: var(--muted); margin-bottom: 2px;' }, email),
-      h('div', { style: 'font-size: 14px; color: var(--muted);' }, `Role: ${userData.userType === 'business' ? 'Business' : 'Individual'}`)
+      h('div', { style: 'font-size: 14px; color: var(--muted);' }, `Role: ${userData.role || 'No role assigned'}`)
     )
     
     const actions = h('div', { style: 'display: flex; gap: 8px;' })
