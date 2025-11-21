@@ -2068,60 +2068,62 @@ function openOrderDetails(order: Transaction) {
   const date = new Date(order.date)
   orderDetailsTitle.textContent = `Order #${order.id}`
   
-  // Build order details HTML - Optimized to fit without scrolling, efficient space usage
-  // Order info section - horizontal compact layout
-  let infoHtml = '<div style="display: flex; flex-wrap: wrap; gap: 16px 24px; padding: 8px 0; border-bottom: 1px solid var(--border); flex-shrink: 0; font-size: 14px;">'
-  infoHtml += `<div style="color: var(--muted);"><strong style="color: var(--ink);">Date:</strong> ${date.toLocaleString()}</div>`
+  // Build clean order details HTML matching the image
+  let html = ''
   
+  // Order info section
+  html += '<div class="order-info-section">'
+  html += `<div class="order-info-item"><span class="order-info-label">Date:</span> ${date.toLocaleString()}</div>`
   if (order.customerName) {
-    infoHtml += `<div style="color: var(--ink);"><strong>Customer:</strong> ${order.customerName}</div>`
+    html += `<div class="order-info-item"><span class="order-info-label">Customer:</span> ${order.customerName}</div>`
   }
-  
   if (order.cashierName) {
-    infoHtml += `<div style="color: var(--ink);"><strong>Cashier:</strong> ${order.cashierName}</div>`
+    html += `<div class="order-info-item"><span class="order-info-label">Cashier:</span> ${order.cashierName}</div>`
   }
+  html += '</div>'
   
-  infoHtml += '</div>'
-  
-  // Items table - spans full width and height of available space, Total column aligns with button edge
-  let itemsHtml = '<div style="flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; width: 100%; box-sizing: border-box;"><h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; flex-shrink: 0;">Items</h3>'
-  itemsHtml += '<div style="flex: 1; min-height: 0; overflow-y: auto; width: 100%; box-sizing: border-box; display: block;"><table style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 14px; margin-right: 0;">'
-  itemsHtml += '<colgroup><col style="width: auto;"><col style="width: 15%;"><col style="width: 20%;"><col style="width: 25%;"></colgroup>'
-  itemsHtml += '<thead><tr style="border-bottom: 2px solid var(--border); background: var(--card); position: sticky; top: 0; z-index: 10;">'
-  itemsHtml += '<th style="text-align: left; padding: 10px 12px; font-weight: 600; color: var(--ink); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Item</th>'
-  itemsHtml += '<th style="text-align: right; padding: 10px 12px; font-weight: 600; color: var(--ink); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Qty</th>'
-  itemsHtml += '<th style="text-align: right; padding: 10px 12px; font-weight: 600; color: var(--ink); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Price</th>'
-  itemsHtml += '<th style="text-align: right; padding: 10px 12px; font-weight: 600; color: var(--ink); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Total</th>'
-  itemsHtml += '</tr></thead><tbody>'
+  // Items section
+  html += '<div class="order-items-section">'
+  html += '<h3 class="order-items-title">Items</h3>'
+  html += '<table class="order-items-table">'
+  html += '<thead>'
+  html += '<tr>'
+  html += '<th class="order-table-header order-col-item">ITEM</th>'
+  html += '<th class="order-table-header order-col-qty">QTY</th>'
+  html += '<th class="order-table-header order-col-price">PRICE</th>'
+  html += '<th class="order-table-header order-col-total">TOTAL</th>'
+  html += '</tr>'
+  html += '</thead>'
+  html += '<tbody>'
   
   order.items.forEach((item) => {
     const itemTotal = item.qty * item.price
-    itemsHtml += '<tr style="border-bottom: 1px solid var(--border);">'
-    itemsHtml += `<td style="padding: 12px; color: var(--ink); word-wrap: break-word; overflow-wrap: break-word;">${item.name}</td>`
-    itemsHtml += `<td style="text-align: right; padding: 12px; color: var(--ink);">${item.qty}</td>`
-    itemsHtml += `<td style="text-align: right; padding: 12px; color: var(--ink);">${fmt(item.price)}</td>`
-    itemsHtml += `<td style="text-align: right; padding: 12px; font-weight: 600; color: var(--ink);">${fmt(itemTotal)}</td>`
-    itemsHtml += '</tr>'
+    html += '<tr class="order-table-row">'
+    html += `<td class="order-table-cell order-col-item">${item.name}</td>`
+    html += `<td class="order-table-cell order-col-qty">${item.qty}</td>`
+    html += `<td class="order-table-cell order-col-price">${fmt(item.price)}</td>`
+    html += `<td class="order-table-cell order-col-total">${fmt(itemTotal)}</td>`
+    html += '</tr>'
   })
   
-  itemsHtml += '</tbody></table></div></div>'
+  html += '</tbody>'
+  html += '</table>'
+  html += '</div>'
   
-  // Totals section - compact, fixed at bottom, aligned with table and buttons
-  let totalsHtml = '<div style="border-top: 2px solid var(--border); padding-top: 12px; flex-shrink: 0; display: flex; flex-direction: column; gap: 6px; font-size: 14px; width: 100%; box-sizing: border-box;">'
-  totalsHtml += `<div style="display: flex; justify-content: space-between; padding-right: 0;"><span style="color: var(--muted);">Subtotal:</span><span style="font-weight: 600; color: var(--ink);">${fmt(order.subtotal)}</span></div>`
+  // Totals section
+  html += '<div class="order-totals-section">'
+  html += `<div class="order-total-row"><span>Subtotal:</span><span>${fmt(order.subtotal)}</span></div>`
   if (order.tax > 0) {
-    totalsHtml += `<div style="display: flex; justify-content: space-between; padding-right: 0;"><span style="color: var(--muted);">Tax:</span><span style="font-weight: 600; color: var(--ink);">${fmt(order.tax)}</span></div>`
+    html += `<div class="order-total-row"><span>Tax:</span><span>${fmt(order.tax)}</span></div>`
   }
-  totalsHtml += `<div style="display: flex; justify-content: space-between; margin-top: 4px; padding-top: 8px; border-top: 1px solid var(--border); padding-right: 0;"><span style="font-size: 18px; font-weight: 700; color: var(--ink);">Total:</span><span style="font-size: 18px; font-weight: 700; color: var(--primary);">${fmt(order.total)}</span></div>`
-  totalsHtml += '</div>'
+  html += `<div class="order-total-row order-total-final"><span>Total:</span><span class="order-total-amount">${fmt(order.total)}</span></div>`
+  html += '</div>'
   
-  orderDetailsContent.innerHTML = `
-    ${infoHtml}
-    ${itemsHtml}
-    ${totalsHtml}
-  `
+  orderDetailsContent.innerHTML = html
   
-  orderDetailsDialog.showModal()
+  if (orderDetailsDialog) {
+    orderDetailsDialog.showModal()
+  }
 }
 
 // Handle order actions
