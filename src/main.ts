@@ -1172,7 +1172,7 @@ if (savedView) {
 }
 
 // Settings tab switching function - must be after variable declarations
-function switchSettingsTab(tabName: 'storeProfile' | 'users') {
+function switchSettingsTab(tabName: 'storeProfile' | 'users' | 'profile') {
   const tabs = Array.isArray(settingsTabs) ? settingsTabs : Array.from(settingsTabs)
   if (tabs.length === 0 || settingsTabContents.length === 0) return
   
@@ -1185,7 +1185,12 @@ function switchSettingsTab(tabName: 'storeProfile' | 'users') {
   })
   
   settingsTabContents.forEach(content => {
-    if (content.id === `${tabName}View`) {
+    const contentTabName = content.id === 'storeProfileView' ? 'storeProfile' 
+      : content.id === 'usersView' ? 'users'
+      : content.id === 'profileView' ? 'profile'
+      : null
+    
+    if (contentTabName === tabName) {
       content.classList.add('active')
     } else {
       content.classList.remove('active')
@@ -1197,6 +1202,8 @@ function switchSettingsTab(tabName: 'storeProfile' | 'users') {
   // Render content based on tab
   if (tabName === 'users') {
     renderUsers()
+  } else if (tabName === 'profile') {
+    loadProfile()
   }
 }
 
