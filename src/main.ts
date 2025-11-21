@@ -2071,14 +2071,14 @@ function openOrderDetails(order: Transaction) {
   // Build clean order details HTML matching the image
   let html = ''
   
-  // Order info section
+  // Order info section - horizontal layout matching image
   html += '<div class="order-info-section">'
-  html += `<div class="order-info-item"><span class="order-info-label">Date:</span> ${date.toLocaleString()}</div>`
+  html += `<div class="order-info-item"><span class="order-info-label">Date:</span><span>${date.toLocaleString()}</span></div>`
   if (order.customerName) {
-    html += `<div class="order-info-item"><span class="order-info-label">Customer:</span> ${order.customerName}</div>`
+    html += `<div class="order-info-item"><span class="order-info-label">Customer:</span><span>${order.customerName}</span></div>`
   }
   if (order.cashierName) {
-    html += `<div class="order-info-item"><span class="order-info-label">Cashier:</span> ${order.cashierName}</div>`
+    html += `<div class="order-info-item"><span class="order-info-label">Cashier:</span><span>${order.cashierName}</span></div>`
   }
   html += '</div>'
   
