@@ -960,6 +960,11 @@ body {
   overflow: hidden;
 }
 
+/* Ensure dialog is hidden by default */
+#orderDetailsDialog:not([open]) {
+  display: none;
+}
+
 #orderDetailsDialog .dialog-header {
   padding: 12px 20px;
   flex-shrink: 0;
