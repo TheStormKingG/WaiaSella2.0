@@ -1004,6 +1004,11 @@ body {
   overflow: hidden;
 }
 
+#orderDetailsDialog .dialog-body table {
+  width: calc(100% - 0px);
+  margin-right: 0;
+}
+
 #orderDetailsDialog .dialog-body > * {
   width: 100%;
   box-sizing: border-box;
