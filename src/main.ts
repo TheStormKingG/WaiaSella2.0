@@ -2068,47 +2068,47 @@ function openOrderDetails(order: Transaction) {
   const date = new Date(order.date)
   orderDetailsTitle.textContent = `Order #${order.id}`
   
-  // Build order details HTML
-  let itemsHtml = '<div style="margin-bottom: 20px;"><h3 style="margin: 0 0 12px 0; font-size: 18px;">Items</h3>'
+  // Build order details HTML - 2x bigger text sizes
+  let itemsHtml = '<div style="margin-bottom: 40px;"><h3 style="margin: 0 0 24px 0; font-size: 36px;">Items</h3>'
   itemsHtml += '<table style="width: 100%; border-collapse: collapse;">'
-  itemsHtml += '<thead><tr style="border-bottom: 2px solid var(--border);">'
-  itemsHtml += '<th style="text-align: left; padding: 8px 0; font-weight: 600; color: var(--ink);">Item</th>'
-  itemsHtml += '<th style="text-align: right; padding: 8px 0; font-weight: 600; color: var(--ink);">Qty</th>'
-  itemsHtml += '<th style="text-align: right; padding: 8px 0; font-weight: 600; color: var(--ink);">Price</th>'
-  itemsHtml += '<th style="text-align: right; padding: 8px 0; font-weight: 600; color: var(--ink);">Total</th>'
+  itemsHtml += '<thead><tr style="border-bottom: 4px solid var(--border);">'
+  itemsHtml += '<th style="text-align: left; padding: 16px 0; font-weight: 600; color: var(--ink); font-size: 28px;">Item</th>'
+  itemsHtml += '<th style="text-align: right; padding: 16px 0; font-weight: 600; color: var(--ink); font-size: 28px;">Qty</th>'
+  itemsHtml += '<th style="text-align: right; padding: 16px 0; font-weight: 600; color: var(--ink); font-size: 28px;">Price</th>'
+  itemsHtml += '<th style="text-align: right; padding: 16px 0; font-weight: 600; color: var(--ink); font-size: 28px;">Total</th>'
   itemsHtml += '</tr></thead><tbody>'
   
   order.items.forEach((item) => {
     const itemTotal = item.qty * item.price
-    itemsHtml += '<tr style="border-bottom: 1px solid var(--border);">'
-    itemsHtml += `<td style="padding: 10px 0; color: var(--ink);">${item.name}</td>`
-    itemsHtml += `<td style="text-align: right; padding: 10px 0; color: var(--ink);">${item.qty}</td>`
-    itemsHtml += `<td style="text-align: right; padding: 10px 0; color: var(--ink);">${fmt(item.price)}</td>`
-    itemsHtml += `<td style="text-align: right; padding: 10px 0; font-weight: 600; color: var(--ink);">${fmt(itemTotal)}</td>`
+    itemsHtml += '<tr style="border-bottom: 2px solid var(--border);">'
+    itemsHtml += `<td style="padding: 20px 0; color: var(--ink); font-size: 28px;">${item.name}</td>`
+    itemsHtml += `<td style="text-align: right; padding: 20px 0; color: var(--ink); font-size: 28px;">${item.qty}</td>`
+    itemsHtml += `<td style="text-align: right; padding: 20px 0; color: var(--ink); font-size: 28px;">${fmt(item.price)}</td>`
+    itemsHtml += `<td style="text-align: right; padding: 20px 0; font-weight: 600; color: var(--ink); font-size: 28px;">${fmt(itemTotal)}</td>`
     itemsHtml += '</tr>'
   })
   
   itemsHtml += '</tbody></table></div>'
   
-  // Add totals
-  let totalsHtml = '<div style="border-top: 2px solid var(--border); padding-top: 16px; margin-top: 16px;">'
-  totalsHtml += `<div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span style="color: var(--muted);">Subtotal:</span><span style="font-weight: 600;">${fmt(order.subtotal)}</span></div>`
+  // Add totals - 2x bigger text sizes
+  let totalsHtml = '<div style="border-top: 4px solid var(--border); padding-top: 32px; margin-top: 32px;">'
+  totalsHtml += `<div style="display: flex; justify-content: space-between; margin-bottom: 16px;"><span style="color: var(--muted); font-size: 28px;">Subtotal:</span><span style="font-weight: 600; font-size: 28px;">${fmt(order.subtotal)}</span></div>`
   if (order.tax > 0) {
-    totalsHtml += `<div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span style="color: var(--muted);">Tax:</span><span style="font-weight: 600;">${fmt(order.tax)}</span></div>`
+    totalsHtml += `<div style="display: flex; justify-content: space-between; margin-bottom: 16px;"><span style="color: var(--muted); font-size: 28px;">Tax:</span><span style="font-weight: 600; font-size: 28px;">${fmt(order.tax)}</span></div>`
   }
-  totalsHtml += `<div style="display: flex; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);"><span style="font-size: 18px; font-weight: 700; color: var(--ink);">Total:</span><span style="font-size: 18px; font-weight: 700; color: var(--primary);">${fmt(order.total)}</span></div>`
+  totalsHtml += `<div style="display: flex; justify-content: space-between; margin-top: 24px; padding-top: 24px; border-top: 2px solid var(--border);"><span style="font-size: 36px; font-weight: 700; color: var(--ink);">Total:</span><span style="font-size: 36px; font-weight: 700; color: var(--primary);">${fmt(order.total)}</span></div>`
   totalsHtml += '</div>'
   
-  // Build order info HTML with customer name and cashier name
-  let infoHtml = '<div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border);">'
-  infoHtml += `<div style="margin-bottom: 8px; color: var(--muted); font-size: 14px;">Date: ${date.toLocaleString()}</div>`
+  // Build order info HTML with customer name and cashier name - 2x bigger text sizes
+  let infoHtml = '<div style="margin-bottom: 32px; padding-bottom: 32px; border-bottom: 2px solid var(--border);">'
+  infoHtml += `<div style="margin-bottom: 16px; color: var(--muted); font-size: 28px;">Date: ${date.toLocaleString()}</div>`
   
   if (order.customerName) {
-    infoHtml += `<div style="margin-bottom: 8px; color: var(--ink); font-size: 14px; font-weight: 500;">Customer: ${order.customerName}</div>`
+    infoHtml += `<div style="margin-bottom: 16px; color: var(--ink); font-size: 28px; font-weight: 500;">Customer: ${order.customerName}</div>`
   }
   
   if (order.cashierName) {
-    infoHtml += `<div style="margin-bottom: 8px; color: var(--ink); font-size: 14px; font-weight: 500;">Cashier: ${order.cashierName}</div>`
+    infoHtml += `<div style="margin-bottom: 16px; color: var(--ink); font-size: 28px; font-weight: 500;">Cashier: ${order.cashierName}</div>`
   }
   
   infoHtml += '</div>'
