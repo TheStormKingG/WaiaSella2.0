@@ -2068,47 +2068,47 @@ function openOrderDetails(order: Transaction) {
   const date = new Date(order.date)
   orderDetailsTitle.textContent = `Order #${order.id}`
   
-  // Build order details HTML - 2x bigger text sizes
-  let itemsHtml = '<div style="margin-bottom: 40px;"><h3 style="margin: 0 0 24px 0; font-size: 36px;">Items</h3>'
+  // Build order details HTML - 2x bigger text sizes, responsive
+  let itemsHtml = '<div style="margin-bottom: clamp(20px, 2.5vw, 40px);"><h3 style="margin: 0 0 clamp(12px, 1.5vw, 24px) 0; font-size: clamp(18px, 2.25vw, 36px);">Items</h3>'
   itemsHtml += '<table style="width: 100%; border-collapse: collapse;">'
-  itemsHtml += '<thead><tr style="border-bottom: 4px solid var(--border);">'
-  itemsHtml += '<th style="text-align: left; padding: 16px 0; font-weight: 600; color: var(--ink); font-size: 28px;">Item</th>'
-  itemsHtml += '<th style="text-align: right; padding: 16px 0; font-weight: 600; color: var(--ink); font-size: 28px;">Qty</th>'
-  itemsHtml += '<th style="text-align: right; padding: 16px 0; font-weight: 600; color: var(--ink); font-size: 28px;">Price</th>'
-  itemsHtml += '<th style="text-align: right; padding: 16px 0; font-weight: 600; color: var(--ink); font-size: 28px;">Total</th>'
+  itemsHtml += '<thead><tr style="border-bottom: clamp(2px, 0.25vw, 4px) solid var(--border);">'
+  itemsHtml += '<th style="text-align: left; padding: clamp(8px, 1vw, 16px) 0; font-weight: 600; color: var(--ink); font-size: clamp(14px, 1.75vw, 28px);">Item</th>'
+  itemsHtml += '<th style="text-align: right; padding: clamp(8px, 1vw, 16px) 0; font-weight: 600; color: var(--ink); font-size: clamp(14px, 1.75vw, 28px);">Qty</th>'
+  itemsHtml += '<th style="text-align: right; padding: clamp(8px, 1vw, 16px) 0; font-weight: 600; color: var(--ink); font-size: clamp(14px, 1.75vw, 28px);">Price</th>'
+  itemsHtml += '<th style="text-align: right; padding: clamp(8px, 1vw, 16px) 0; font-weight: 600; color: var(--ink); font-size: clamp(14px, 1.75vw, 28px);">Total</th>'
   itemsHtml += '</tr></thead><tbody>'
   
   order.items.forEach((item) => {
     const itemTotal = item.qty * item.price
-    itemsHtml += '<tr style="border-bottom: 2px solid var(--border);">'
-    itemsHtml += `<td style="padding: 20px 0; color: var(--ink); font-size: 28px;">${item.name}</td>`
-    itemsHtml += `<td style="text-align: right; padding: 20px 0; color: var(--ink); font-size: 28px;">${item.qty}</td>`
-    itemsHtml += `<td style="text-align: right; padding: 20px 0; color: var(--ink); font-size: 28px;">${fmt(item.price)}</td>`
-    itemsHtml += `<td style="text-align: right; padding: 20px 0; font-weight: 600; color: var(--ink); font-size: 28px;">${fmt(itemTotal)}</td>`
+    itemsHtml += '<tr style="border-bottom: clamp(1px, 0.125vw, 2px) solid var(--border);">'
+    itemsHtml += `<td style="padding: clamp(10px, 1.25vw, 20px) 0; color: var(--ink); font-size: clamp(14px, 1.75vw, 28px);">${item.name}</td>`
+    itemsHtml += `<td style="text-align: right; padding: clamp(10px, 1.25vw, 20px) 0; color: var(--ink); font-size: clamp(14px, 1.75vw, 28px);">${item.qty}</td>`
+    itemsHtml += `<td style="text-align: right; padding: clamp(10px, 1.25vw, 20px) 0; color: var(--ink); font-size: clamp(14px, 1.75vw, 28px);">${fmt(item.price)}</td>`
+    itemsHtml += `<td style="text-align: right; padding: clamp(10px, 1.25vw, 20px) 0; font-weight: 600; color: var(--ink); font-size: clamp(14px, 1.75vw, 28px);">${fmt(itemTotal)}</td>`
     itemsHtml += '</tr>'
   })
   
   itemsHtml += '</tbody></table></div>'
   
-  // Add totals - 2x bigger text sizes
-  let totalsHtml = '<div style="border-top: 4px solid var(--border); padding-top: 32px; margin-top: 32px;">'
-  totalsHtml += `<div style="display: flex; justify-content: space-between; margin-bottom: 16px;"><span style="color: var(--muted); font-size: 28px;">Subtotal:</span><span style="font-weight: 600; font-size: 28px;">${fmt(order.subtotal)}</span></div>`
+  // Add totals - 2x bigger text sizes, responsive
+  let totalsHtml = '<div style="border-top: clamp(2px, 0.25vw, 4px) solid var(--border); padding-top: clamp(16px, 2vw, 32px); margin-top: clamp(16px, 2vw, 32px);">'
+  totalsHtml += `<div style="display: flex; justify-content: space-between; margin-bottom: clamp(8px, 1vw, 16px);"><span style="color: var(--muted); font-size: clamp(14px, 1.75vw, 28px);">Subtotal:</span><span style="font-weight: 600; font-size: clamp(14px, 1.75vw, 28px);">${fmt(order.subtotal)}</span></div>`
   if (order.tax > 0) {
-    totalsHtml += `<div style="display: flex; justify-content: space-between; margin-bottom: 16px;"><span style="color: var(--muted); font-size: 28px;">Tax:</span><span style="font-weight: 600; font-size: 28px;">${fmt(order.tax)}</span></div>`
+    totalsHtml += `<div style="display: flex; justify-content: space-between; margin-bottom: clamp(8px, 1vw, 16px);"><span style="color: var(--muted); font-size: clamp(14px, 1.75vw, 28px);">Tax:</span><span style="font-weight: 600; font-size: clamp(14px, 1.75vw, 28px);">${fmt(order.tax)}</span></div>`
   }
-  totalsHtml += `<div style="display: flex; justify-content: space-between; margin-top: 24px; padding-top: 24px; border-top: 2px solid var(--border);"><span style="font-size: 36px; font-weight: 700; color: var(--ink);">Total:</span><span style="font-size: 36px; font-weight: 700; color: var(--primary);">${fmt(order.total)}</span></div>`
+  totalsHtml += `<div style="display: flex; justify-content: space-between; margin-top: clamp(12px, 1.5vw, 24px); padding-top: clamp(12px, 1.5vw, 24px); border-top: clamp(1px, 0.125vw, 2px) solid var(--border);"><span style="font-size: clamp(18px, 2.25vw, 36px); font-weight: 700; color: var(--ink);">Total:</span><span style="font-size: clamp(18px, 2.25vw, 36px); font-weight: 700; color: var(--primary);">${fmt(order.total)}</span></div>`
   totalsHtml += '</div>'
   
-  // Build order info HTML with customer name and cashier name - 2x bigger text sizes
-  let infoHtml = '<div style="margin-bottom: 32px; padding-bottom: 32px; border-bottom: 2px solid var(--border);">'
-  infoHtml += `<div style="margin-bottom: 16px; color: var(--muted); font-size: 28px;">Date: ${date.toLocaleString()}</div>`
+  // Build order info HTML with customer name and cashier name - 2x bigger text sizes, responsive
+  let infoHtml = '<div style="margin-bottom: clamp(16px, 2vw, 32px); padding-bottom: clamp(16px, 2vw, 32px); border-bottom: clamp(1px, 0.125vw, 2px) solid var(--border);">'
+  infoHtml += `<div style="margin-bottom: clamp(8px, 1vw, 16px); color: var(--muted); font-size: clamp(14px, 1.75vw, 28px);">Date: ${date.toLocaleString()}</div>`
   
   if (order.customerName) {
-    infoHtml += `<div style="margin-bottom: 16px; color: var(--ink); font-size: 28px; font-weight: 500;">Customer: ${order.customerName}</div>`
+    infoHtml += `<div style="margin-bottom: clamp(8px, 1vw, 16px); color: var(--ink); font-size: clamp(14px, 1.75vw, 28px); font-weight: 500;">Customer: ${order.customerName}</div>`
   }
   
   if (order.cashierName) {
-    infoHtml += `<div style="margin-bottom: 16px; color: var(--ink); font-size: 28px; font-weight: 500;">Cashier: ${order.cashierName}</div>`
+    infoHtml += `<div style="margin-bottom: clamp(8px, 1vw, 16px); color: var(--ink); font-size: clamp(14px, 1.75vw, 28px); font-weight: 500;">Cashier: ${order.cashierName}</div>`
   }
   
   infoHtml += '</div>'
