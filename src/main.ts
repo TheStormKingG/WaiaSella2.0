@@ -2342,13 +2342,13 @@ confirmDeliverOrderBtn?.addEventListener('click', () => {
 
 function renderSettings() {
   // Show/hide settings tabs based on user type
+  const businessSettingsTabsContainer = qs<HTMLDivElement>('.business-settings-tabs')
   const businessSettingsTabs = qsa<HTMLButtonElement>('.business-settings-tab')
-  const individualSettingsTabs = qsa<HTMLButtonElement>('.individual-settings-tab')
   
   if (userType === 'business') {
-    // Show business tabs (Store Profile, Users), hide individual tabs
+    // Show business tabs container and tabs
+    if (businessSettingsTabsContainer) businessSettingsTabsContainer.style.display = 'flex'
     businessSettingsTabs.forEach(tab => tab.style.display = 'flex')
-    individualSettingsTabs.forEach(tab => tab.style.display = 'none')
     
     // Hide users tab if not admin
     const usersTab = businessSettingsTabs.find(tab => tab.dataset.settingsTab === 'users')
@@ -2362,17 +2362,28 @@ function renderSettings() {
       }
     }
     
+    // Show business views, hide profile view
+    if (storeProfileView) storeProfileView.style.display = 'block'
+    if (usersView) usersView.style.display = 'none'
+    if (profileView) profileView.style.display = 'none'
+    
     // Default to storeProfile for business users
     const savedTab = load<string>(STORAGE_KEYS.settingsTab) || 'storeProfile'
     const validTab = savedTab === 'users' && currentUserRole !== 'admin' ? 'storeProfile' : savedTab
     switchSettingsTab(validTab as 'storeProfile' | 'users' | 'profile')
   } else {
-    // Show individual tabs (Profile), hide business tabs
+    // Hide business tabs container for individual users
+    if (businessSettingsTabsContainer) businessSettingsTabsContainer.style.display = 'none'
     businessSettingsTabs.forEach(tab => tab.style.display = 'none')
-    individualSettingsTabs.forEach(tab => tab.style.display = 'flex')
     
-    // Default to profile for individual users
-    switchSettingsTab('profile')
+    // Hide business views, show profile view directly (no tabs)
+    if (storeProfileView) storeProfileView.style.display = 'none'
+    if (usersView) usersView.style.display = 'none'
+    if (profileView) {
+      profileView.style.display = 'block'
+      profileView.classList.add('active')
+      loadProfile()
+    }
   }
 }
 

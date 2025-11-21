@@ -558,17 +558,13 @@
 
       <!-- Settings View -->
       <section id="settingsView" class="view">
-        <div class="expense-tabs">
+        <div class="expense-tabs business-settings-tabs">
           <!-- Business user tabs -->
-          <button class="expense-tab active business-settings-tab" data-settings-tab="storeProfile" style="display: none;">
+          <button class="expense-tab active business-settings-tab" data-settings-tab="storeProfile">
             <span>Store Profile</span>
           </button>
-          <button class="expense-tab business-settings-tab" data-settings-tab="users" style="display: none;">
+          <button class="expense-tab business-settings-tab" data-settings-tab="users">
             <span>Users</span>
-          </button>
-          <!-- Individual user tab -->
-          <button class="expense-tab active individual-settings-tab" data-settings-tab="profile" style="display: none;">
-            <span>Profile</span>
           </button>
         </div>
         
@@ -612,7 +608,6 @@
         
         <!-- Profile Tab Content (Individual users only) -->
         <div id="profileView" class="expense-tab-content">
-          <h2 class="section-title">My Profile</h2>
           <div id="profileContainer" class="card" style="padding: 20px; max-width: 600px; margin: 0 auto;">
             <form id="profileForm" style="display: flex; flex-direction: column; gap: 16px;">
               <div class="form-group">
