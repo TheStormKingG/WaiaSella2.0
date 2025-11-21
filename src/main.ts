@@ -2213,7 +2213,6 @@ function confirmCancelOrder() {
 closeOrderDetailsXBtn?.addEventListener('click', () => {
   if (orderDetailsDialog) {
     orderDetailsDialog.close()
-    orderDetailsDialog.style.display = 'none'
     currentOrderView = null
   }
 })
@@ -2222,17 +2221,13 @@ closeOrderDetailsXBtn?.addEventListener('click', () => {
 orderDetailsDialog?.addEventListener('click', (e) => {
   if (e.target === orderDetailsDialog) {
     orderDetailsDialog.close()
-    orderDetailsDialog.style.display = 'none'
     currentOrderView = null
   }
 })
 
-// Ensure modal is hidden when closed
+// Reset current order view when modal closes
 orderDetailsDialog?.addEventListener('close', () => {
-  if (orderDetailsDialog) {
-    orderDetailsDialog.style.display = 'none'
-    currentOrderView = null
-  }
+  currentOrderView = null
 })
 
 cancelOrderBtn?.addEventListener('click', () => {
