@@ -1015,12 +1015,13 @@ body {
 }
 
 .order-modal-body {
-  padding: 20px 24px;
+  padding: 24px;
   flex: 1;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 32px;
+  min-height: 0;
 }
 
 .order-modal-footer {
