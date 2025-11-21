@@ -948,42 +948,59 @@ body {
 .dialog::backdrop { background: rgba(0,0,0,.3); }
 .dialog-body { min-width: 320px; max-width: 500px; display: flex; flex-direction: column; max-height: 90vh; overflow-y: auto; position: relative; }
 
-/* Order Details Dialog - 3x bigger size, 2x bigger text, responsive */
+/* Order Details Dialog - Optimized to fit all content without scrolling */
 #orderDetailsDialog {
-  width: min(90vw, 1500px);
+  width: min(90vw, 1400px);
   max-width: 95vw;
-  min-height: min(80vh, 900px);
+  height: 90vh;
   max-height: 90vh;
   margin: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 #orderDetailsDialog .dialog-header {
-  padding: clamp(24px, 3vw, 48px) clamp(30px, 4vw, 60px);
+  padding: clamp(12px, 1.5vw, 20px) clamp(16px, 2vw, 30px);
+  flex-shrink: 0;
+  border-bottom: 2px solid var(--border);
 }
 
 #orderDetailsDialog .dialog-header h2 {
-  font-size: clamp(24px, 3vw, 48px);
+  font-size: clamp(18px, 2.25vw, 28px);
+  margin: 0;
 }
 
 #orderDetailsDialog .dialog-close {
-  font-size: clamp(24px, 3vw, 48px);
-  width: clamp(32px, 4vw, 64px);
-  height: clamp(32px, 4vw, 64px);
+  font-size: clamp(20px, 2.5vw, 32px);
+  width: clamp(28px, 3.5vw, 44px);
+  height: clamp(28px, 3.5vw, 44px);
 }
 
 #orderDetailsDialog .dialog-body {
-  padding: clamp(30px, 4vw, 60px);
+  padding: clamp(16px, 2vw, 24px) clamp(20px, 2.5vw, 32px);
   width: 100%;
   box-sizing: border-box;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 1.5vw, 20px);
 }
 
 #orderDetailsDialog .dialog-actions {
-  padding: clamp(24px, 3vw, 48px) clamp(30px, 4vw, 60px);
+  padding: clamp(12px, 1.5vw, 20px) clamp(16px, 2vw, 30px);
+  flex-shrink: 0;
+  border-top: 2px solid var(--border);
+  display: flex;
+  gap: clamp(8px, 1vw, 16px);
+  justify-content: flex-end;
 }
 
 #orderDetailsDialog .dialog-actions button {
-  font-size: clamp(14px, 2vw, 28px);
-  padding: clamp(12px, 1.5vw, 24px) clamp(24px, 3vw, 48px);
+  font-size: clamp(14px, 1.75vw, 20px);
+  padding: clamp(8px, 1vw, 12px) clamp(16px, 2vw, 24px);
+  white-space: nowrap;
 }
 
 /* Loading Spinner */

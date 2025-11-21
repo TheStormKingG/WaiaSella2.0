@@ -2068,50 +2068,52 @@ function openOrderDetails(order: Transaction) {
   const date = new Date(order.date)
   orderDetailsTitle.textContent = `Order #${order.id}`
   
-  // Build order details HTML - 2x bigger text sizes, responsive
-  let itemsHtml = '<div style="margin-bottom: clamp(20px, 2.5vw, 40px);"><h3 style="margin: 0 0 clamp(12px, 1.5vw, 24px) 0; font-size: clamp(18px, 2.25vw, 36px);">Items</h3>'
-  itemsHtml += '<table style="width: 100%; border-collapse: collapse;">'
-  itemsHtml += '<thead><tr style="border-bottom: clamp(2px, 0.25vw, 4px) solid var(--border);">'
-  itemsHtml += '<th style="text-align: left; padding: clamp(8px, 1vw, 16px) 0; font-weight: 600; color: var(--ink); font-size: clamp(14px, 1.75vw, 28px);">Item</th>'
-  itemsHtml += '<th style="text-align: right; padding: clamp(8px, 1vw, 16px) 0; font-weight: 600; color: var(--ink); font-size: clamp(14px, 1.75vw, 28px);">Qty</th>'
-  itemsHtml += '<th style="text-align: right; padding: clamp(8px, 1vw, 16px) 0; font-weight: 600; color: var(--ink); font-size: clamp(14px, 1.75vw, 28px);">Price</th>'
-  itemsHtml += '<th style="text-align: right; padding: clamp(8px, 1vw, 16px) 0; font-weight: 600; color: var(--ink); font-size: clamp(14px, 1.75vw, 28px);">Total</th>'
+  // Build order details HTML - Optimized to fit without scrolling
+  // Order info section - compact
+  let infoHtml = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: clamp(8px, 1vw, 12px); padding-bottom: clamp(8px, 1vw, 12px); border-bottom: 1px solid var(--border); flex-shrink: 0;">'
+  infoHtml += `<div style="color: var(--muted); font-size: clamp(12px, 1.5vw, 16px);">Date: ${date.toLocaleString()}</div>`
+  
+  if (order.customerName) {
+    infoHtml += `<div style="color: var(--ink); font-size: clamp(12px, 1.5vw, 16px); font-weight: 500;">Customer: ${order.customerName}</div>`
+  }
+  
+  if (order.cashierName) {
+    infoHtml += `<div style="color: var(--ink); font-size: clamp(12px, 1.5vw, 16px); font-weight: 500;">Cashier: ${order.cashierName}</div>`
+  }
+  
+  infoHtml += '</div>'
+  
+  // Items table - optimized for space
+  let itemsHtml = '<div style="flex: 1; min-height: 0; display: flex; flex-direction: column;"><h3 style="margin: 0 0 clamp(8px, 1vw, 12px) 0; font-size: clamp(16px, 2vw, 20px); font-weight: 600;">Items</h3>'
+  itemsHtml += '<div style="flex: 1; overflow-y: auto; min-height: 0;"><table style="width: 100%; border-collapse: collapse; table-layout: fixed;">'
+  itemsHtml += '<colgroup><col style="width: 40%;"><col style="width: 15%;"><col style="width: 22.5%;"><col style="width: 22.5%;"></colgroup>'
+  itemsHtml += '<thead><tr style="border-bottom: 2px solid var(--border); position: sticky; top: 0; background: var(--card); z-index: 1;">'
+  itemsHtml += '<th style="text-align: left; padding: clamp(6px, 0.75vw, 10px) clamp(4px, 0.5vw, 8px); font-weight: 600; color: var(--ink); font-size: clamp(12px, 1.5vw, 16px);">Item</th>'
+  itemsHtml += '<th style="text-align: right; padding: clamp(6px, 0.75vw, 10px) clamp(4px, 0.5vw, 8px); font-weight: 600; color: var(--ink); font-size: clamp(12px, 1.5vw, 16px);">Qty</th>'
+  itemsHtml += '<th style="text-align: right; padding: clamp(6px, 0.75vw, 10px) clamp(4px, 0.5vw, 8px); font-weight: 600; color: var(--ink); font-size: clamp(12px, 1.5vw, 16px);">Price</th>'
+  itemsHtml += '<th style="text-align: right; padding: clamp(6px, 0.75vw, 10px) clamp(4px, 0.5vw, 8px); font-weight: 600; color: var(--ink); font-size: clamp(12px, 1.5vw, 16px);">Total</th>'
   itemsHtml += '</tr></thead><tbody>'
   
   order.items.forEach((item) => {
     const itemTotal = item.qty * item.price
-    itemsHtml += '<tr style="border-bottom: clamp(1px, 0.125vw, 2px) solid var(--border);">'
-    itemsHtml += `<td style="padding: clamp(10px, 1.25vw, 20px) 0; color: var(--ink); font-size: clamp(14px, 1.75vw, 28px);">${item.name}</td>`
-    itemsHtml += `<td style="text-align: right; padding: clamp(10px, 1.25vw, 20px) 0; color: var(--ink); font-size: clamp(14px, 1.75vw, 28px);">${item.qty}</td>`
-    itemsHtml += `<td style="text-align: right; padding: clamp(10px, 1.25vw, 20px) 0; color: var(--ink); font-size: clamp(14px, 1.75vw, 28px);">${fmt(item.price)}</td>`
-    itemsHtml += `<td style="text-align: right; padding: clamp(10px, 1.25vw, 20px) 0; font-weight: 600; color: var(--ink); font-size: clamp(14px, 1.75vw, 28px);">${fmt(itemTotal)}</td>`
+    itemsHtml += '<tr style="border-bottom: 1px solid var(--border);">'
+    itemsHtml += `<td style="padding: clamp(8px, 1vw, 12px) clamp(4px, 0.5vw, 8px); color: var(--ink); font-size: clamp(12px, 1.5vw, 16px); word-wrap: break-word; overflow-wrap: break-word;">${item.name}</td>`
+    itemsHtml += `<td style="text-align: right; padding: clamp(8px, 1vw, 12px) clamp(4px, 0.5vw, 8px); color: var(--ink); font-size: clamp(12px, 1.5vw, 16px);">${item.qty}</td>`
+    itemsHtml += `<td style="text-align: right; padding: clamp(8px, 1vw, 12px) clamp(4px, 0.5vw, 8px); color: var(--ink); font-size: clamp(12px, 1.5vw, 16px);">${fmt(item.price)}</td>`
+    itemsHtml += `<td style="text-align: right; padding: clamp(8px, 1vw, 12px) clamp(4px, 0.5vw, 8px); font-weight: 600; color: var(--ink); font-size: clamp(12px, 1.5vw, 16px);">${fmt(itemTotal)}</td>`
     itemsHtml += '</tr>'
   })
   
-  itemsHtml += '</tbody></table></div>'
+  itemsHtml += '</tbody></table></div></div>'
   
-  // Add totals - 2x bigger text sizes, responsive
-  let totalsHtml = '<div style="border-top: clamp(2px, 0.25vw, 4px) solid var(--border); padding-top: clamp(16px, 2vw, 32px); margin-top: clamp(16px, 2vw, 32px);">'
-  totalsHtml += `<div style="display: flex; justify-content: space-between; margin-bottom: clamp(8px, 1vw, 16px);"><span style="color: var(--muted); font-size: clamp(14px, 1.75vw, 28px);">Subtotal:</span><span style="font-weight: 600; font-size: clamp(14px, 1.75vw, 28px);">${fmt(order.subtotal)}</span></div>`
+  // Totals section - compact, always visible at bottom
+  let totalsHtml = '<div style="border-top: 2px solid var(--border); padding-top: clamp(8px, 1vw, 12px); flex-shrink: 0; display: flex; flex-direction: column; gap: clamp(4px, 0.5vw, 6px);">'
+  totalsHtml += `<div style="display: flex; justify-content: space-between;"><span style="color: var(--muted); font-size: clamp(13px, 1.6vw, 17px);">Subtotal:</span><span style="font-weight: 600; font-size: clamp(13px, 1.6vw, 17px);">${fmt(order.subtotal)}</span></div>`
   if (order.tax > 0) {
-    totalsHtml += `<div style="display: flex; justify-content: space-between; margin-bottom: clamp(8px, 1vw, 16px);"><span style="color: var(--muted); font-size: clamp(14px, 1.75vw, 28px);">Tax:</span><span style="font-weight: 600; font-size: clamp(14px, 1.75vw, 28px);">${fmt(order.tax)}</span></div>`
+    totalsHtml += `<div style="display: flex; justify-content: space-between;"><span style="color: var(--muted); font-size: clamp(13px, 1.6vw, 17px);">Tax:</span><span style="font-weight: 600; font-size: clamp(13px, 1.6vw, 17px);">${fmt(order.tax)}</span></div>`
   }
-  totalsHtml += `<div style="display: flex; justify-content: space-between; margin-top: clamp(12px, 1.5vw, 24px); padding-top: clamp(12px, 1.5vw, 24px); border-top: clamp(1px, 0.125vw, 2px) solid var(--border);"><span style="font-size: clamp(18px, 2.25vw, 36px); font-weight: 700; color: var(--ink);">Total:</span><span style="font-size: clamp(18px, 2.25vw, 36px); font-weight: 700; color: var(--primary);">${fmt(order.total)}</span></div>`
+  totalsHtml += `<div style="display: flex; justify-content: space-between; margin-top: clamp(4px, 0.5vw, 6px); padding-top: clamp(6px, 0.75vw, 10px); border-top: 1px solid var(--border);"><span style="font-size: clamp(16px, 2vw, 22px); font-weight: 700; color: var(--ink);">Total:</span><span style="font-size: clamp(16px, 2vw, 22px); font-weight: 700; color: var(--primary);">${fmt(order.total)}</span></div>`
   totalsHtml += '</div>'
-  
-  // Build order info HTML with customer name and cashier name - 2x bigger text sizes, responsive
-  let infoHtml = '<div style="margin-bottom: clamp(16px, 2vw, 32px); padding-bottom: clamp(16px, 2vw, 32px); border-bottom: clamp(1px, 0.125vw, 2px) solid var(--border);">'
-  infoHtml += `<div style="margin-bottom: clamp(8px, 1vw, 16px); color: var(--muted); font-size: clamp(14px, 1.75vw, 28px);">Date: ${date.toLocaleString()}</div>`
-  
-  if (order.customerName) {
-    infoHtml += `<div style="margin-bottom: clamp(8px, 1vw, 16px); color: var(--ink); font-size: clamp(14px, 1.75vw, 28px); font-weight: 500;">Customer: ${order.customerName}</div>`
-  }
-  
-  if (order.cashierName) {
-    infoHtml += `<div style="margin-bottom: clamp(8px, 1vw, 16px); color: var(--ink); font-size: clamp(14px, 1.75vw, 28px); font-weight: 500;">Cashier: ${order.cashierName}</div>`
-  }
-  
-  infoHtml += '</div>'
   
   orderDetailsContent.innerHTML = `
     ${infoHtml}
