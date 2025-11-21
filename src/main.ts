@@ -2075,18 +2075,15 @@ function openOrderDetails(order: Transaction) {
   itemsHtml += '<th style="text-align: left; padding: 8px 0; font-weight: 600; color: var(--ink);">Item</th>'
   itemsHtml += '<th style="text-align: right; padding: 8px 0; font-weight: 600; color: var(--ink);">Qty</th>'
   itemsHtml += '<th style="text-align: right; padding: 8px 0; font-weight: 600; color: var(--ink);">Price</th>'
-  itemsHtml += '<th style="text-align: right; padding: 8px 0; font-weight: 600; color: var(--ink);">Cost</th>'
   itemsHtml += '<th style="text-align: right; padding: 8px 0; font-weight: 600; color: var(--ink);">Total</th>'
   itemsHtml += '</tr></thead><tbody>'
   
   order.items.forEach((item) => {
     const itemTotal = item.qty * item.price
-    const itemCost = item.qty * item.cost
     itemsHtml += '<tr style="border-bottom: 1px solid var(--border);">'
     itemsHtml += `<td style="padding: 10px 0; color: var(--ink);">${item.name}</td>`
     itemsHtml += `<td style="text-align: right; padding: 10px 0; color: var(--ink);">${item.qty}</td>`
     itemsHtml += `<td style="text-align: right; padding: 10px 0; color: var(--ink);">${fmt(item.price)}</td>`
-    itemsHtml += `<td style="text-align: right; padding: 10px 0; color: var(--muted);">${fmt(item.cost)}</td>`
     itemsHtml += `<td style="text-align: right; padding: 10px 0; font-weight: 600; color: var(--ink);">${fmt(itemTotal)}</td>`
     itemsHtml += '</tr>'
   })
@@ -2094,13 +2091,11 @@ function openOrderDetails(order: Transaction) {
   itemsHtml += '</tbody></table></div>'
   
   // Add totals
-  const totalCost = order.items.reduce((sum, item) => sum + (item.qty * item.cost), 0)
   let totalsHtml = '<div style="border-top: 2px solid var(--border); padding-top: 16px; margin-top: 16px;">'
   totalsHtml += `<div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span style="color: var(--muted);">Subtotal:</span><span style="font-weight: 600;">${fmt(order.subtotal)}</span></div>`
   if (order.tax > 0) {
     totalsHtml += `<div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span style="color: var(--muted);">Tax:</span><span style="font-weight: 600;">${fmt(order.tax)}</span></div>`
   }
-  totalsHtml += `<div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span style="color: var(--muted);">Total Cost:</span><span style="font-weight: 600; color: var(--muted);">${fmt(totalCost)}</span></div>`
   totalsHtml += `<div style="display: flex; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);"><span style="font-size: 18px; font-weight: 700; color: var(--ink);">Total:</span><span style="font-size: 18px; font-weight: 700; color: var(--primary);">${fmt(order.total)}</span></div>`
   totalsHtml += '</div>'
   
