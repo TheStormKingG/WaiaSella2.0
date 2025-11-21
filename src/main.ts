@@ -633,13 +633,15 @@ function updateTabsForUserType() {
     individualTabs.forEach(tab => tab.style.display = 'none')
     
     // Apply role-based access control for business users
-    if (currentUserRole) {
+    // Admin users always see all tabs
+    if (currentUserRole === 'admin') {
+      // Admin can see all tabs - keep them all visible
+      businessTabs.forEach(tab => tab.style.display = 'flex')
+    } else if (currentUserRole) {
+      // For non-admin roles, apply restrictions
       businessTabs.forEach(tab => {
         const targetView = tab.dataset.target
-        if (currentUserRole === 'admin') {
-          // Admin can see all tabs
-          tab.style.display = 'flex'
-        } else if (currentUserRole === 'cashier') {
+        if (currentUserRole === 'cashier') {
           // Cashier can see only Cashier and Orders
           if (targetView === 'cashierView' || targetView === 'ordersView') {
             tab.style.display = 'flex'
