@@ -1000,15 +1000,25 @@ body {
 
 #orderDetailsDialog .dialog-body > * {
   width: 100%;
+  box-sizing: border-box;
 }
 
 #orderDetailsDialog .dialog-body table {
   width: 100%;
   table-layout: fixed;
+  border-collapse: collapse;
 }
 
 #orderDetailsDialog .dialog-body tbody {
   display: table-row-group;
+}
+
+#orderDetailsDialog .dialog-body tbody tr {
+  display: table-row;
+}
+
+#orderDetailsDialog .dialog-body tbody td {
+  display: table-cell;
 }
 
 #orderDetailsDialog .dialog-actions {
