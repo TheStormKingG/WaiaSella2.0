@@ -2348,7 +2348,7 @@ function renderSettings() {
     // Default to storeProfile for business users
     const savedTab = load<string>(STORAGE_KEYS.settingsTab) || 'storeProfile'
     const validTab = savedTab === 'users' && currentUserRole !== 'admin' ? 'storeProfile' : savedTab
-    switchSettingsTab(validTab as 'storeProfile' | 'users')
+    switchSettingsTab(validTab as 'storeProfile' | 'users' | 'profile')
   } else {
     // Show individual tabs (Profile), hide business tabs
     businessSettingsTabs.forEach(tab => tab.style.display = 'none')
