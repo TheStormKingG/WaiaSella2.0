@@ -987,9 +987,10 @@ body {
 
 .order-modal-title {
   margin: 0;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
   color: var(--ink);
+  letter-spacing: -0.3px;
 }
 
 .order-modal-close {
