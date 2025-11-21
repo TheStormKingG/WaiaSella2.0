@@ -950,35 +950,31 @@ body {
 
 /* Order Details Dialog - 3x bigger size, 2x bigger text */
 #orderDetailsDialog {
-  min-width: 960px;
-  max-width: 1500px;
+  min-width: 1500px;
+  max-width: 2400px;
   width: 90vw;
-  min-height: 600px;
+  min-height: 900px;
   max-height: 90vh;
-  transform: scale(3);
-  transform-origin: center center;
 }
 
 #orderDetailsDialog .dialog-header {
   padding: 48px 60px;
-  font-size: 54px;
 }
 
 #orderDetailsDialog .dialog-header h2 {
-  font-size: 54px;
+  font-size: 48px;
 }
 
 #orderDetailsDialog .dialog-close {
-  font-size: 72px;
-  width: 96px;
-  height: 96px;
+  font-size: 48px;
+  width: 64px;
+  height: 64px;
 }
 
 #orderDetailsDialog .dialog-body {
   padding: 60px;
-  font-size: 32px;
-  min-width: 960px;
-  max-width: 1500px;
+  min-width: 1500px;
+  max-width: 2400px;
 }
 
 #orderDetailsDialog .dialog-actions {
@@ -986,7 +982,7 @@ body {
 }
 
 #orderDetailsDialog .dialog-actions button {
-  font-size: 32px;
+  font-size: 28px;
   padding: 24px 48px;
 }
 
