@@ -578,8 +578,22 @@ function handleLogin(identifier: string, password: string) {
     isAuthenticated = true
     currentUser = userEmail
     userType = user.userType
-    // Get role if user is a business user
-    currentUserRole = user.userType === 'business' ? (user.role || 'cashier') : null
+    
+    // Roles only apply to business users (not individual users)
+    // Business users must have a role assigned by an admin (admin, cashier, or observer)
+    // If a business user doesn't have a role set, they can't login until an admin assigns one
+    if (user.userType === 'business') {
+      // Business users must have a role - if not set, deny login
+      if (!user.role) {
+        showAuthError('Your account needs a role assigned. Please contact an administrator.')
+        return false
+      }
+      currentUserRole = user.role
+    } else {
+      // Individual users have no roles
+      currentUserRole = null
+    }
+    
     save(STORAGE_KEYS.isAuthenticated, true)
     save(STORAGE_KEYS.currentUser, userEmail)
     save(STORAGE_KEYS.userType, userType)
@@ -603,24 +617,39 @@ function handleSignup(email: string, password: string, confirmPassword: string, 
     return false
   }
   
-  const users = load<Record<string, { password: string; userType: 'business' | 'individual' }>>('ws.users') ?? {}
+  const users = load<Record<string, { password: string; userType: 'business' | 'individual'; name?: string; role?: 'admin' | 'cashier' | 'observer' }>>('ws.users') ?? {}
   
   if (users[email]) {
     showAuthError('User already exists. Please login instead.')
     return false
   }
   
-  users[email] = { password, userType: accountType }
-  save('ws.users', users)
-  
-  isAuthenticated = true
-  currentUser = email
-  userType = accountType
-  save(STORAGE_KEYS.isAuthenticated, true)
-  save(STORAGE_KEYS.currentUser, email)
-  save(STORAGE_KEYS.userType, userType)
-  showApp()
-  return true
+  // Create user based on account type
+  if (accountType === 'business') {
+    // Business users are created WITHOUT a role during signup
+    // A business admin must assign a role (admin, cashier, observer) later via Settings > Users
+    users[email] = { password, userType: 'business' }
+    save('ws.users', users)
+    
+    // Business users without a role cannot login until an admin assigns one
+    showAuthError('Your business account has been created. Please contact an administrator to assign you a role (admin, cashier, or observer) before you can log in.')
+    return false
+  } else {
+    // Individual users have no roles and can log in immediately after signup
+    users[email] = { password, userType: 'individual' }
+    save('ws.users', users)
+    
+    isAuthenticated = true
+    currentUser = email
+    userType = accountType
+    currentUserRole = null // Individual users have no roles
+    save(STORAGE_KEYS.isAuthenticated, true)
+    save(STORAGE_KEYS.currentUser, email)
+    save(STORAGE_KEYS.userType, userType)
+    save(STORAGE_KEYS.currentUserRole, '')
+    showApp()
+    return true
+  }
 }
 
 function updateTabsForUserType() {
