@@ -3519,9 +3519,9 @@ function showReceipt(tx: Transaction, saved: boolean) {
   
   // Show toast notification
   if (saved) {
-    showToast('✅ Items saved to database')
+    showToast('Items saved to database', 'success')
   } else {
-    showToast('⚠️ Saved locally only. Check Supabase connection.')
+    showToast('Saved locally only. Check Supabase connection.', 'warning')
   }
   
   receiptDialog.showModal()
