@@ -81,31 +81,39 @@
       </div>
     </section>
 
-    <header class="app-header" style="display: none;">
+    <header class="app-header" style="display: none;" role="banner">
       <div class="header-left">
-        <h1>Cashier</h1>
-        <input id="cashierSearch" class="header-search" placeholder="Search products..." style="display: none;" />
-        <input id="inventorySearch" class="header-search" placeholder="Search inventory..." style="display: none;" />
-        <button id="headerBackBtn" class="header-back-btn" style="display: none;">← Back</button>
+        <h1 id="headerTitle">Cashier</h1>
+        <input id="cashierSearch" class="header-search" placeholder="Search products..." style="display: none;" 
+               aria-label="Search products" 
+               aria-describedby="search-hint" />
+        <input id="inventorySearch" class="header-search" placeholder="Search inventory..." style="display: none;" 
+               aria-label="Search inventory" />
+        <button id="headerBackBtn" class="header-back-btn" style="display: none;" 
+                aria-label="Go back">← Back</button>
       </div>
       <div class="header-right">
-        <div id="userInfo" class="user-info">
+        <div id="userInfo" class="user-info" role="status" aria-live="polite">
           <span id="userName" class="user-name"></span>
-          <span id="userTypeBadge" class="user-type-badge"></span>
+          <span id="userTypeBadge" class="user-type-badge" aria-label="User type"></span>
         </div>
-        <button id="headerSettingsBtn" class="header-settings-btn">
-          <span class="icon">⚙️</span>
+        <button id="headerSettingsBtn" class="header-settings-btn" 
+                aria-label="Open settings" 
+                aria-haspopup="true">
+          <span class="icon" aria-hidden="true">⚙️</span>
         </button>
-        <button id="logoutBtn" class="logout-btn">
-          <span class="icon">🚪</span>
+        <button id="logoutBtn" class="logout-btn" 
+                aria-label="Logout">
+          <span class="icon" aria-hidden="true">🚪</span>
           <span>Logout</span>
         </button>
       </div>
+      <div id="search-hint" class="sr-only">Press / or ⌘K to focus search</div>
     </header>
 
     <main id="app" class="app" style="display: none;">
       <!-- Cashier View -->
-      <section id="cashierView" class="view">
+      <section id="cashierView" class="view" role="main" aria-label="Cashier view">
         <div class="pos-layout">
           <!-- Left: Catalog Browser -->
           <div class="pos-catalog">
@@ -179,17 +187,19 @@
       <section id="expenseView" class="view">
         <div class="view-container">
           <!-- Segmented Control for Tabs -->
-          <div class="segmented-control" style="margin-bottom: var(--space-6);">
-            <button class="segmented-control-button active" data-expense-tab="sellable" id="sellableTabBtn">
+          <div class="segmented-control" style="margin-bottom: var(--space-6);" role="tablist" aria-label="Expense view tabs">
+            <button class="segmented-control-button active" data-expense-tab="sellable" id="sellableTabBtn"
+                    role="tab" aria-selected="true" aria-controls="sellableView">
               Sellable
             </button>
-            <button class="segmented-control-button" data-expense-tab="operational" id="operationalTabBtn">
+            <button class="segmented-control-button" data-expense-tab="operational" id="operationalTabBtn"
+                    role="tab" aria-selected="false" aria-controls="operationalView">
               Operational
             </button>
           </div>
           
           <!-- Sellable Tab Content (current inventory) -->
-          <div id="sellableView" class="expense-tab-content active">
+          <div id="sellableView" class="expense-tab-content active" role="tabpanel" aria-labelledby="sellableTabBtn">
             <!-- Header with Title and Action -->
             <div class="view-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-6);">
               <h1 class="view-title">Sellable Items</h1>
@@ -267,7 +277,7 @@
         </div>
         
         <!-- Operational Tab Content -->
-        <div id="operationalView" class="expense-tab-content">
+        <div id="operationalView" class="expense-tab-content" role="tabpanel" aria-labelledby="operationalTabBtn">
           <div style="padding: 16px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
               <h3 style="margin: 0;">Operational Expenses</h3>

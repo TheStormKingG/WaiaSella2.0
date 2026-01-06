@@ -870,6 +870,147 @@ logoutBtnHeader?.addEventListener('click', () => {
   handleLogout()
 })
 
+// ============================================================================
+// KEYBOARD SHORTCUTS & ACCESSIBILITY - Phase 4
+// ============================================================================
+
+// Keyboard shortcuts handler
+function setupKeyboardShortcuts() {
+  document.addEventListener('keydown', (e: KeyboardEvent) => {
+    // Don't trigger shortcuts when typing in inputs, textareas, or contenteditable
+    const target = e.target as HTMLElement
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+      // Allow Escape to close dialogs even when in inputs
+      if (e.key === 'Escape') {
+        const openDialog = document.querySelector('dialog[open]')
+        if (openDialog) {
+          (openDialog as HTMLDialogElement).close()
+          e.preventDefault()
+        }
+      }
+      return
+    }
+
+    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0
+    const modKey = isMac ? e.metaKey : e.ctrlKey
+
+    // ⌘K or Ctrl+K: Focus search (context-aware)
+    if ((e.key === 'k' || e.key === 'K') && modKey) {
+      e.preventDefault()
+      const currentView = load<string>(STORAGE_KEYS.currentView) || 'cashierView'
+      if (currentView === 'cashierView' && cashierSearch) {
+        cashierSearch.focus()
+        cashierSearch.select()
+      } else if (currentView === 'expenseView' && sellableSearch) {
+        sellableSearch.focus()
+        sellableSearch.select()
+      }
+      return
+    }
+
+    // / (slash): Quick focus search (when not in input)
+    if (e.key === '/' && !modKey && !e.shiftKey && !e.altKey) {
+      e.preventDefault()
+      const currentView = load<string>(STORAGE_KEYS.currentView) || 'cashierView'
+      if (currentView === 'cashierView' && cashierSearch) {
+        cashierSearch.focus()
+        cashierSearch.select()
+      } else if (currentView === 'expenseView' && sellableSearch) {
+        sellableSearch.focus()
+        sellableSearch.select()
+      }
+      return
+    }
+
+    // ⌘N or Ctrl+N: New Sale (clear cart and start fresh)
+    if ((e.key === 'n' || e.key === 'N') && modKey) {
+      e.preventDefault()
+      if (isAuthenticated && cart) {
+        cart = {}
+        save(STORAGE_KEYS.cart, cart)
+        renderCart()
+        // Show toast notification
+        showToast('Cart cleared. Ready for new sale.', 'success')
+      }
+      return
+    }
+
+    // ⌘↩ or Ctrl+Enter: Complete Sale/Order
+    if ((e.key === 'Enter') && modKey) {
+      e.preventDefault()
+      if (isAuthenticated && completeSaleBtn && !completeSaleBtn.disabled) {
+        completeSaleBtn.click()
+      }
+      return
+    }
+
+    // Escape: Close dialogs/modals
+    if (e.key === 'Escape') {
+      const openDialog = document.querySelector('dialog[open]')
+      if (openDialog) {
+        (openDialog as HTMLDialogElement).close()
+        e.preventDefault()
+      }
+      return
+    }
+
+    // Number keys 1-4: Quick navigation to tabs (when not in input)
+    if (e.key >= '1' && e.key <= '4' && !modKey && !e.shiftKey && !e.altKey) {
+      const tabIndex = parseInt(e.key) - 1
+      const visibleTabs = userType === 'business' 
+        ? Array.from(tabs).filter(t => t.classList.contains('business-tab'))
+        : Array.from(tabs).filter(t => t.classList.contains('individual-tab'))
+      
+      if (visibleTabs[tabIndex]) {
+        e.preventDefault()
+        visibleTabs[tabIndex].click()
+      }
+      return
+    }
+
+    // Arrow keys for navigation (when appropriate)
+    // Left/Right arrows in segmented controls
+    if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !modKey) {
+      const activeSegmentedControl = document.querySelector('.segmented-control-button.active')
+      if (activeSegmentedControl) {
+        const parent = activeSegmentedControl.parentElement
+        if (parent?.classList.contains('segmented-control')) {
+          e.preventDefault()
+          const buttons = Array.from(parent.querySelectorAll('.segmented-control-button')) as HTMLButtonElement[]
+          const currentIndex = buttons.indexOf(activeSegmentedControl as HTMLButtonElement)
+          let nextIndex = e.key === 'ArrowLeft' ? currentIndex - 1 : currentIndex + 1
+          if (nextIndex < 0) nextIndex = buttons.length - 1
+          if (nextIndex >= buttons.length) nextIndex = 0
+          buttons[nextIndex].click()
+        }
+      }
+    }
+  })
+}
+
+// Toast notification system
+function showToast(message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info') {
+  // Remove existing toasts
+  const existingToasts = document.querySelectorAll('.toast')
+  existingToasts.forEach(toast => toast.remove())
+
+  const toast = document.createElement('div')
+  toast.className = `toast toast-${type}`
+  toast.textContent = message
+  toast.setAttribute('role', 'alert')
+  toast.setAttribute('aria-live', 'polite')
+  document.body.appendChild(toast)
+
+  // Auto-remove after 3 seconds
+  setTimeout(() => {
+    toast.style.animation = 'toast-slide-up 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) reverse'
+    setTimeout(() => toast.remove(), 300)
+  }, 3000)
+}
+
+// Initialize keyboard shortcuts
+setupKeyboardShortcuts()
+
 // Check authentication on load
 if (isAuthenticated) {
   showApp()
@@ -1607,9 +1748,11 @@ function renderProducts() {
     
     const img = h('img', { 
       class: 'pos-product-image', 
-      alt: item.name, 
+      alt: `${item.name} - ${item.stock} in stock - ${fmt(item.price)}`, 
       src: item.image || pic(Number(item.id.slice(-3))),
-      loading: 'lazy'
+      loading: 'lazy',
+      decoding: 'async',
+      'aria-hidden': 'true'
     })
     
     const body = h('div', { class: 'pos-product-body' })
@@ -1844,14 +1987,27 @@ async function getCustomerName(): Promise<string | null> {
 
 async function completeSale() {
   const entries = Object.entries(cart)
-  if (!entries.length) return
+  if (!entries.length) {
+    showToast('Cart is empty. Add items before completing sale.', 'warning')
+    return
+  }
+  
+  // Disable button during processing
+  if (completeSaleBtn) {
+    completeSaleBtn.disabled = true
+    completeSaleBtn.textContent = 'Processing...'
+  }
   
   // If in order mode, prompt for customer name via modal
   let customerName: string | null = null
   if (cartMode === 'order') {
     customerName = await getCustomerName()
     if (customerName === null) {
-      // User cancelled
+      // User cancelled - re-enable button
+      if (completeSaleBtn) {
+        completeSaleBtn.disabled = false
+        updateCartModeUI()
+      }
       return
     }
   }
@@ -1916,6 +2072,17 @@ async function completeSale() {
   renderInventory()
   renderReorder()
   renderOrders()
+  
+  // Re-enable button
+  if (completeSaleBtn) {
+    completeSaleBtn.disabled = false
+    updateCartModeUI()
+  }
+  
+  // Show success toast
+  const modeText = cartMode === 'sale' ? 'Sale' : 'Order'
+  showToast(`${modeText} completed successfully!`, 'success')
+  
   showReceipt(tx, saved)
 }
 
