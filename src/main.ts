@@ -3456,8 +3456,12 @@ function renderReorder() {
   reorderContainer.appendChild(wrapper)
 }
 
-// Toast notification
-function showToast(message: string, duration = 1000) {
+// Legacy toast notification (for backward compatibility)
+function showToastLegacy(message: string, duration = 1000) {
+  // Use new toast system if available
+  showToast(message, 'info')
+  
+  // Fallback to legacy toast element if it exists
   if (toast) {
     toast.textContent = message
     toast.style.display = 'block'
