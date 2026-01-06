@@ -789,7 +789,9 @@ function showApp() {
   // Ensure Add User button has event listener
   const addUserBtn = qs<HTMLButtonElement>('#addUserBtn')
   if (addUserBtn && !addUserBtn.onclick) {
-    addUserBtn.addEventListener('click', () => openUserDialog())
+    if (addUserBtn) {
+      addUserBtn.addEventListener('click', () => openUserDialog())
+    }
   }
 }
 
@@ -1073,8 +1075,10 @@ function renderIndividualReports() {
 }
 
 // Tab switching
-tabs.forEach((t) =>
-  t.addEventListener('click', (e) => {
+if (tabs && tabs.length > 0) {
+  tabs.forEach((t) => {
+    if (!t) return
+    t.addEventListener('click', (e) => {
     e.preventDefault()
     e.stopPropagation()
     
@@ -1193,14 +1197,18 @@ const operationalTabBtn = qs<HTMLButtonElement>('#operationalTabBtn')
 if (sellableTabBtn) {
   sellableTabBtn.addEventListener('click', () => {
     switchExpenseTab('sellable')
-    renderSellableTable()
+    if (typeof renderSellableTable === 'function') {
+      renderSellableTable()
+    }
   })
 }
 
 if (operationalTabBtn) {
   operationalTabBtn.addEventListener('click', () => {
     switchExpenseTab('operational')
-    renderExpenses()
+    if (typeof renderExpenses === 'function') {
+      renderExpenses()
+    }
   })
 }
 
@@ -1214,8 +1222,9 @@ expenseTabs.forEach(tab => {
     } else if (tabName === 'sellable') {
       renderSellableTable()
     }
+    })
   })
-})
+}
 
 // Report tab switching
 function switchReportTab(tabName: 'general' | 'income' | 'balance' | 'cashflow') {
@@ -1430,89 +1439,127 @@ if (closeUserDialogBtn) closeUserDialogBtn.addEventListener('click', () => userD
 if (cancelUserBtn) cancelUserBtn.addEventListener('click', () => userDialog?.close())
 
 // Cashier interactions
-cashierSearch.addEventListener('input', renderProducts)
-categoryFilter.addEventListener('change', () => {
-  selectedCategory = categoryFilter.value
-  renderProducts()
-})
-completeSaleBtn.addEventListener('click', completeSale)
-cartToggle.addEventListener('click', () => {
-  cartPanel.classList.toggle('collapsed')
-})
-cartModeToggle.addEventListener('click', () => {
-  cartMode = cartMode === 'sale' ? 'order' : 'sale'
-  save(STORAGE_KEYS.cartMode, cartMode)
-  updateCartModeUI()
-})
-closeReceiptBtn.addEventListener('click', () => receiptDialog.close())
-whatsappReceiptBtn.addEventListener('click', shareReceiptWhatsApp)
-downloadReceiptBtn.addEventListener('click', downloadReceiptPDF)
+if (cashierSearch) {
+  cashierSearch.addEventListener('input', renderProducts)
+}
+if (categoryFilter) {
+  categoryFilter.addEventListener('change', () => {
+    selectedCategory = categoryFilter.value
+    renderProducts()
+  })
+}
+if (completeSaleBtn) {
+  completeSaleBtn.addEventListener('click', completeSale)
+}
+if (cartToggle && cartPanel) {
+  cartToggle.addEventListener('click', () => {
+    cartPanel.classList.toggle('collapsed')
+  })
+}
+if (cartModeToggle) {
+  cartModeToggle.addEventListener('click', () => {
+    cartMode = cartMode === 'sale' ? 'order' : 'sale'
+    save(STORAGE_KEYS.cartMode, cartMode)
+    updateCartModeUI()
+  })
+}
+if (closeReceiptBtn && receiptDialog) {
+  closeReceiptBtn.addEventListener('click', () => receiptDialog.close())
+}
+if (whatsappReceiptBtn) {
+  whatsappReceiptBtn.addEventListener('click', shareReceiptWhatsApp)
+}
+if (downloadReceiptBtn) {
+  downloadReceiptBtn.addEventListener('click', downloadReceiptPDF)
+}
 
 // Inventory interactions
-inventorySearch.addEventListener('input', () => {
-  if (inventoryItemsView.style.display !== 'none') {
-    renderInventoryItems()
-  }
-})
-addItemFab.addEventListener('click', () => openItemDialog())
-itemForm.addEventListener('submit', saveItemFromDialog)
-cancelItemBtn.addEventListener('click', () => itemDialog.close())
-deleteItemBtn.addEventListener('click', () => {
-  const itemId = (itemForm.elements.namedItem('id') as HTMLInputElement).value
-  if (!itemId) return
-  
-  const item = inventory.find(i => i.id === itemId)
-  if (!item) return
-  
-  if (confirm(`Delete "${item.name}"?\n\nThis action cannot be undone.`)) {
-    // Remove item from inventory
-    inventory = inventory.filter(i => i.id !== itemId)
-    persist()
-    itemDialog.close()
-    
-    // Refresh views
-    renderInventoryCategories()
-    renderInventory()
-    renderCategoryFilter()
-      renderProducts()
-    renderReports()
-    
-    console.log(`🗑️  Deleted item: ${item.name}`)
-  }
-})
-headerBackBtn.addEventListener('click', () => {
-  if (headerBackBtn.dataset.reorder === 'true') {
-    headerBackBtn.dataset.reorder = 'false'
-    tabs.forEach((x) => x.classList.remove('active'))
-    const expenseTab = Array.from(tabs).find(t => t.dataset.target === 'expenseView')
-    if (expenseTab) {
-      expenseTab.classList.add('active')
+if (inventorySearch) {
+  inventorySearch.addEventListener('input', () => {
+    if (inventoryItemsView && inventoryItemsView.style.display !== 'none') {
+      renderInventoryItems()
     }
-    views.forEach((v) => v.classList.remove('active'))
-    qs<HTMLElement>('#expenseView').classList.add('active')
-    headerTitle.textContent = expenseTab?.textContent?.trim() ?? 'Expense'
-    save(STORAGE_KEYS.currentView, 'expenseView')
-    switchExpenseTab('sellable')
-    showInventoryCategories()
-    renderInventory()
-    inventorySearch.style.display = 'none'
-    cashierSearch.style.display = 'none'
-    headerBackBtn.style.display = 'none'
-    addItemFab.style.display = 'none'
-    return
-  }
+  })
+}
+if (addItemFab) {
+  addItemFab.addEventListener('click', () => openItemDialog())
+}
+if (itemForm) {
+  itemForm.addEventListener('submit', saveItemFromDialog)
+}
+if (cancelItemBtn && itemDialog) {
+  cancelItemBtn.addEventListener('click', () => itemDialog.close())
+}
+if (deleteItemBtn && itemForm && itemDialog) {
+  deleteItemBtn.addEventListener('click', () => {
+    const itemId = (itemForm.elements.namedItem('id') as HTMLInputElement).value
+    if (!itemId) return
+    
+    const item = inventory.find(i => i.id === itemId)
+    if (!item) return
+    
+    if (confirm(`Delete "${item.name}"?\n\nThis action cannot be undone.`)) {
+      // Remove item from inventory
+      inventory = inventory.filter(i => i.id !== itemId)
+      persist()
+      itemDialog.close()
+      
+      // Refresh views
+      renderInventoryCategories()
+      renderInventory()
+      renderCategoryFilter()
+      renderProducts()
+      renderReports()
+      
+      console.log(`🗑️  Deleted item: ${item.name}`)
+    }
+  })
+}
+if (headerBackBtn) {
+  headerBackBtn.addEventListener('click', () => {
+    if (headerBackBtn.dataset.reorder === 'true') {
+      headerBackBtn.dataset.reorder = 'false'
+      tabs.forEach((x) => x.classList.remove('active'))
+      const expenseTab = Array.from(tabs).find(t => t.dataset.target === 'expenseView')
+      if (expenseTab) {
+        expenseTab.classList.add('active')
+      }
+      views.forEach((v) => v.classList.remove('active'))
+      const expenseView = qs<HTMLElement>('#expenseView')
+      if (expenseView) {
+        expenseView.classList.add('active')
+      }
+      if (headerTitle) {
+        headerTitle.textContent = expenseTab?.textContent?.trim() ?? 'Expense'
+      }
+      save(STORAGE_KEYS.currentView, 'expenseView')
+      switchExpenseTab('sellable')
+      showInventoryCategories()
+      renderInventory()
+      if (inventorySearch) inventorySearch.style.display = 'none'
+      if (cashierSearch) cashierSearch.style.display = 'none'
+      headerBackBtn.style.display = 'none'
+      if (addItemFab) addItemFab.style.display = 'none'
+      return
+    }
 
-  const savedExpenseView = load<string>(STORAGE_KEYS.expenseView) || load<string>('ws.inventoryView')
-  if (savedExpenseView === 'manage' || savedExpenseView === 'items') {
-    showInventoryCategories()
-  }
+    const savedExpenseView = load<string>(STORAGE_KEYS.expenseView) || load<string>('ws.inventoryView')
+    if (savedExpenseView === 'manage' || savedExpenseView === 'items') {
+      showInventoryCategories()
+    }
 })
-addCategoryBtn.addEventListener('click', openAddCategoryDialog)
-addCategoryForm.addEventListener('submit', (e) => {
-  e.preventDefault()
-  addCategory()
-})
-cancelAddCategoryBtn.addEventListener('click', () => addCategoryDialog.close())
+if (addCategoryBtn) {
+  addCategoryBtn.addEventListener('click', openAddCategoryDialog)
+}
+if (addCategoryForm) {
+  addCategoryForm.addEventListener('submit', (e) => {
+    e.preventDefault()
+    addCategory()
+  })
+}
+if (cancelAddCategoryBtn && addCategoryDialog) {
+  cancelAddCategoryBtn.addEventListener('click', () => addCategoryDialog.close())
+}
 
 // Image upload/capture
 function handleImageSelect(e: Event) {
