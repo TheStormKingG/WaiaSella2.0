@@ -1080,80 +1080,81 @@ if (tabs && tabs.length > 0) {
   tabs.forEach((t) => {
     if (!t) return
     t.addEventListener('click', (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    
-    // Only handle clicks on visible tabs
-    const computedStyle = window.getComputedStyle(t)
-    if (computedStyle.display === 'none') return
-    
-    tabs.forEach((x) => x.classList.remove('active'))
-    t.classList.add('active')
-    const id = t.dataset.target
-    if (!id) return
-    
-    views.forEach((v) => v.classList.remove('active'))
-    const targetView = qs<HTMLElement>('#' + id)
-    if (targetView && headerTitle) {
-      targetView.classList.add('active')
-    headerTitle.textContent = t.textContent?.trim() ?? ''
-      save(STORAGE_KEYS.currentView, id)
-      if (headerBackBtn) headerBackBtn.dataset.reorder = 'false'
-      
-      // Render individual views if needed
-      if (id === 'storesView') {
-        renderStores()
-      } else if (id === 'individualOrdersView') {
-        renderIndividualOrders()
-      } else if (id === 'historyView') {
-        renderHistory()
-      } else if (id === 'individualReportsView') {
-        renderIndividualReports()
-      }
-      
-      // Hide/show search bars and back button based on view
-      if (id === 'cashierView') {
-        cashierSearch.style.display = 'block'
-        inventorySearch.style.display = 'none'
-        headerBackBtn.style.display = 'none'
-        addItemFab.style.display = 'none'
-        renderProducts()
-        renderCart()
-      } else if (id === 'expenseView') {
-        cashierSearch.style.display = 'none'
-        // Search bar visibility controlled by expense sub-view
-        const savedExpenseView = load<string>(STORAGE_KEYS.expenseView)
-        if (savedExpenseView === 'items') {
-          addItemFab.style.display = 'flex'
+      e.preventDefault()
+      e.stopPropagation()
+
+      // Only handle clicks on visible tabs
+      const computedStyle = window.getComputedStyle(t)
+      if (computedStyle.display === 'none') return
+
+      tabs.forEach((x) => x.classList.remove('active'))
+      t.classList.add('active')
+      const id = t.dataset.target
+      if (!id) return
+
+      views.forEach((v) => v.classList.remove('active'))
+      const targetView = qs<HTMLElement>('#' + id)
+      if (targetView && headerTitle) {
+        targetView.classList.add('active')
+        headerTitle.textContent = t.textContent?.trim() ?? ''
+        save(STORAGE_KEYS.currentView, id)
+        if (headerBackBtn) headerBackBtn.dataset.reorder = 'false'
+
+        // Render individual views if needed
+        if (id === 'storesView') {
+          renderStores()
+        } else if (id === 'individualOrdersView') {
+          renderIndividualOrders()
+        } else if (id === 'historyView') {
+          renderHistory()
+        } else if (id === 'individualReportsView') {
+          renderIndividualReports()
+        }
+
+        // Hide/show search bars and back button based on view
+        if (id === 'cashierView') {
+          cashierSearch.style.display = 'block'
+          inventorySearch.style.display = 'none'
+          headerBackBtn.style.display = 'none'
+          addItemFab.style.display = 'none'
+          renderProducts()
+          renderCart()
+        } else if (id === 'expenseView') {
+          cashierSearch.style.display = 'none'
+          // Search bar visibility controlled by expense sub-view
+          const savedExpenseView = load<string>(STORAGE_KEYS.expenseView)
+          if (savedExpenseView === 'items') {
+            addItemFab.style.display = 'flex'
+          } else {
+            addItemFab.style.display = 'none'
+          }
+          // Restore expense tab
+          const savedExpenseTab = load<string>(STORAGE_KEYS.expenseTab) || 'sellable'
+          switchExpenseTab(savedExpenseTab)
         } else {
+          cashierSearch.style.display = 'none'
+          inventorySearch.style.display = 'none'
+          headerBackBtn.style.display = 'none'
           addItemFab.style.display = 'none'
         }
-        // Restore expense tab
-        const savedExpenseTab = load<string>(STORAGE_KEYS.expenseTab) || 'sellable'
-        switchExpenseTab(savedExpenseTab)
-      } else {
-        cashierSearch.style.display = 'none'
-        inventorySearch.style.display = 'none'
-        headerBackBtn.style.display = 'none'
-        addItemFab.style.display = 'none'
-      }
-      
-      if (id === 'expenseView') {
-        showInventoryCategories()
-        renderInventory()
-      }
-      if (id === 'ordersView') renderOrders()
-    if (id === 'reportsView') renderReports()
-      if (id === 'settingsView') renderSettings()
-      if (id === 'expenseView') {
-        const savedExpenseTab = load<string>(STORAGE_KEYS.expenseTab) || 'sellable'
-        if (savedExpenseTab === 'operational') {
-          renderExpenses()
+
+        if (id === 'expenseView') {
+          showInventoryCategories()
+          renderInventory()
+        }
+        if (id === 'ordersView') renderOrders()
+        if (id === 'reportsView') renderReports()
+        if (id === 'settingsView') renderSettings()
+        if (id === 'expenseView') {
+          const savedExpenseTab = load<string>(STORAGE_KEYS.expenseTab) || 'sellable'
+          if (savedExpenseTab === 'operational') {
+            renderExpenses()
+          }
         }
       }
-    }
+    })
   })
-)
+}
 
 // Expense tab switching
 function switchExpenseTab(tabName: 'sellable' | 'operational') {
@@ -3658,4 +3659,3 @@ function persist() {
   save(STORAGE_KEYS.customCategories, customCategories)
   save(STORAGE_KEYS.expenses, expenses)
 }
-
