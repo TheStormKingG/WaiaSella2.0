@@ -1045,6 +1045,25 @@ function switchExpenseTab(tabName: 'sellable' | 'operational') {
   save(STORAGE_KEYS.expenseTab, tabName)
 }
 
+// Event listeners for new segmented control buttons
+const sellableTabBtn = qs<HTMLButtonElement>('#sellableTabBtn')
+const operationalTabBtn = qs<HTMLButtonElement>('#operationalTabBtn')
+
+if (sellableTabBtn) {
+  sellableTabBtn.addEventListener('click', () => {
+    switchExpenseTab('sellable')
+    renderSellableTable()
+  })
+}
+
+if (operationalTabBtn) {
+  operationalTabBtn.addEventListener('click', () => {
+    switchExpenseTab('operational')
+    renderExpenses()
+  })
+}
+
+// Legacy expense tabs (for backward compatibility)
 expenseTabs.forEach(tab => {
   tab.addEventListener('click', () => {
     const tabName = tab.dataset.expenseTab as 'sellable' | 'operational'
