@@ -987,6 +987,7 @@ function setupKeyboardShortcuts() {
         }
       }
     }
+    })
   })
 }
 
