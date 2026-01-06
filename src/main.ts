@@ -1248,12 +1248,15 @@ function switchReportTab(tabName: 'general' | 'income' | 'balance' | 'cashflow')
   save(STORAGE_KEYS.reportTab, tabName)
 }
 
-reportTabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    const tabName = tab.dataset.reportTab as 'general' | 'income' | 'balance' | 'cashflow'
-    switchReportTab(tabName)
+if (reportTabs && reportTabs.length > 0) {
+  reportTabs.forEach(tab => {
+    if (!tab) return
+    tab.addEventListener('click', () => {
+      const tabName = tab.dataset.reportTab as 'general' | 'income' | 'balance' | 'cashflow'
+      switchReportTab(tabName)
+    })
   })
-})
+}
   
   // Initialize settings tab elements after DOM is ready
 function initSettingsTabs() {
