@@ -798,40 +798,84 @@ body {
 .logout-btn .icon {
   font-size: 16px;
 }
+/* ============================================================================
+   HEADER SEARCH BAR - Apple Design System
+   ============================================================================ */
 .header-search {
-  height: 40px;
-  padding: 0 12px;
-  border-radius: 8px;
-  border: none;
-  background: #f0f9ff;
-  color: var(--ink);
-  font-size: 14px;
+  min-height: 44px;
+  height: 44px;
+  padding: 0 var(--space-4);
+  padding-left: calc(var(--space-4) + 24px + var(--space-2));
+  border-radius: var(--radius-md);
+  border: 0.5px solid var(--separator-opaque);
+  background: var(--system-grouped-background);
+  color: var(--label);
+  font-size: var(--font-size-body);
+  font-family: inherit;
   flex: 1;
   max-width: 400px;
-  margin: 0 16px;
+  margin: 0 var(--space-4);
   min-width: 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+  position: relative;
+  -webkit-appearance: none;
+  appearance: none;
 }
+
 .header-search::placeholder { 
-  color: #6b7280; 
+  color: var(--label-tertiary); 
 }
+
+.header-search:focus {
+  outline: none;
+  border-color: var(--system-blue);
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1), var(--shadow-sm);
+}
+
+/* Search icon using background image */
+.header-search {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M7 12A5 5 0 1 0 7 2a5 5 0 0 0 0 10zM11.5 11.5l-2.5-2.5' stroke='%238E8E93' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left var(--space-4) center;
+  background-size: 16px 16px;
+}
+/* ============================================================================
+   HEADER BACK BUTTON - Apple Design System
+   ============================================================================ */
 .header-back-btn {
-  background: #f0f9ff;
+  background: var(--fill-tertiary);
   border: none;
-  border-radius: 8px;
-  padding: 0 16px;
-  height: 40px;
+  border-radius: var(--radius-md);
+  padding: 0 var(--space-4);
+  min-height: 44px;
+  height: 44px;
   cursor: pointer;
-  font-size: 14px;
-  color: var(--ink);
-  font-weight: 500;
-  transition: background 0.2s ease;
+  font-size: var(--font-size-body);
+  color: var(--label);
+  font-weight: var(--font-weight-semibold);
+  transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
   flex-shrink: 0;
   white-space: nowrap;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  -webkit-tap-highlight-color: transparent;
 }
+
 .header-back-btn:hover {
-  background: #e0f2fe;
+  background: var(--fill-secondary);
+}
+
+.header-back-btn:active {
+  transform: scale(0.97);
+}
+
+.header-back-btn:focus-visible {
+  outline: 2px solid var(--system-blue);
+  outline-offset: 2px;
 }
 
 .app { padding: 8px 12px 82px; }
@@ -1480,9 +1524,25 @@ body {
   transform: none;
 }
 
+/* ============================================================================
+   BOTTOM TAB BAR - Apple Design System
+   ============================================================================ */
 .tabbar {
-  position: fixed; left: 0; right: 0; bottom: 0; height: 60px; background: white; border-top: 1px solid var(--border);
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; padding: 6px; z-index: 10;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 60px;
+  background: var(--system-grouped-background);
+  border-top: 0.5px solid var(--separator);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-1);
+  padding: var(--space-2);
+  z-index: 100;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
 }
 
 /* Center visible tabs for observers and cashiers (fewer visible tabs) */
@@ -1491,8 +1551,8 @@ body {
   grid-template-columns: none !important;
   justify-content: center;
   align-items: center;
-  gap: 8px;
-  padding: 6px;
+  gap: var(--space-2);
+  padding: var(--space-2);
 }
 
 .tabbar.centered-tabs .tab {
@@ -1506,66 +1566,176 @@ body {
 .tabbar.centered-tabs .tab[style*="display: none"] {
   display: none !important;
 }
-.tab { 
-  border: none; 
-  background: transparent; 
-  border-radius: 10px; 
-  display: flex; 
-  flex-direction: column;
-  align-items: center; 
-  justify-content: center; 
-  gap: 4px; 
-  color: #6b7280; 
-  cursor: pointer; 
-  height: 100%;
-}
-.tab.active { color: var(--primary); background: #eff6ff; }
-.tab .icon { font-size: 22px; }
-.tab span:not(.icon) { font-size: 13px; font-weight: 500; }
 
+.tab {
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  color: var(--label-secondary);
+  cursor: pointer;
+  height: 100%;
+  min-height: 44px;
+  transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tab:hover:not(.active) {
+  background: var(--fill-quaternary);
+}
+
+.tab:active {
+  transform: scale(0.95);
+}
+
+.tab.active {
+  color: var(--system-blue);
+  background: var(--fill-tertiary);
+}
+
+.tab.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 3px;
+  background: var(--system-blue);
+  border-radius: 0 0 var(--radius-pill) var(--radius-pill);
+}
+
+.tab .icon {
+  font-size: 22px;
+  line-height: 1;
+  transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.tab.active .icon {
+  transform: scale(1.1);
+}
+
+.tab span:not(.icon) {
+  font-size: var(--font-size-caption1);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+}
+
+.tab.active span:not(.icon) {
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ============================================================================
+   ORDERS VIEW - Apple Design System
+   ============================================================================ */
+.view-container {
+  padding: var(--space-4);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.view-header {
+  margin-bottom: var(--space-6);
+}
+
+.view-title {
+  font-size: var(--font-size-title1);
+  font-weight: var(--font-weight-bold);
+  color: var(--label);
+  margin: 0;
+}
+
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Apple-style Order Card */
 .order-card {
-  background: var(--card);
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  background: var(--system-grouped-background);
+  border: 0.5px solid var(--separator);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .order-card:hover {
-  background: #f9fafb;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+  background: var(--fill-quaternary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.order-card:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.order-card:focus-visible {
+  outline: 2px solid var(--system-blue);
+  outline-offset: 2px;
+}
+
+.order-card-customer {
+  font-size: var(--font-size-title3);
+  font-weight: var(--font-weight-bold);
+  color: var(--label);
+  flex-shrink: 0;
+  min-width: 150px;
 }
 
 .order-meta {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
 }
 
 .order-id {
-  font-weight: 600;
-  font-size: 16px;
-  color: var(--ink);
+  font-weight: var(--font-weight-bold);
+  color: var(--label);
+  font-size: var(--font-size-headline);
 }
 
 .order-date {
-  font-size: 14px;
-  color: var(--muted);
+  font-size: var(--font-size-caption1);
+  color: var(--label-secondary);
+}
+
+.order-cashier {
+  font-size: var(--font-size-caption1);
+  color: var(--label-secondary);
+  margin-top: var(--space-1);
 }
 
 .order-summary {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 14px;
-  color: var(--muted);
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-1);
+  flex-shrink: 0;
 }
 
 .order-total {
-  font-weight: 700;
-  font-size: 18px;
-  color: var(--primary);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-title3);
+  color: var(--system-blue);
+}
+
+.order-item-count {
+  font-size: var(--font-size-caption1);
+  color: var(--label-secondary);
 }
 
 .expense-tabs {

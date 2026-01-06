@@ -2223,9 +2223,12 @@ function renderOrders() {
   const orders = transactions.filter((tx) => tx.mode === 'order')
   if (orders.length === 0) {
     ordersContainer.innerHTML = `
-      <p style="margin: 0; color: var(--muted);">
-        No orders recorded yet. Switch the cart to <strong>Order</strong> mode and complete to capture orders without checking out.
-      </p>
+      <div class="empty-state">
+        <div class="empty-state-title">No orders yet</div>
+        <div class="empty-state-description">
+          Switch the cart to <strong>Order</strong> mode and complete to capture customer orders.
+        </div>
+      </div>
     `
     return
   }
@@ -2234,43 +2237,48 @@ function renderOrders() {
   orders.forEach((order) => {
     const card = h('div', { 
       class: 'order-card',
-      style: 'cursor: pointer; transition: background 0.2s ease; display: flex; align-items: center; gap: 16px;',
+      role: 'button',
+      tabIndex: 0,
+      'aria-label': `View order ${order.id} details`,
       onclick: () => openOrderDetails(order)
     })
     
-    // Customer name on the left (big text, without "Customer" prefix)
+    card.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        openOrderDetails(order)
+      }
+    })
+    
+    // Customer name on the left
     if (order.customerName) {
-      const customerNameDiv = h('div', { 
-        style: 'font-size: 24px; font-weight: 700; color: var(--ink); flex-shrink: 0; min-width: 150px;'
-      }, order.customerName)
-      card.appendChild(customerNameDiv)
+      const customerDiv = h('div', { class: 'order-card-customer' }, order.customerName)
+      card.appendChild(customerDiv)
     }
     
     // Main content area
-    const contentDiv = h('div', { style: 'flex: 1; display: flex; justify-content: space-between; align-items: center;' })
-    const meta = h('div', { class: 'order-meta', style: 'flex: 1;' })
+    const meta = h('div', { class: 'order-meta' })
     const date = new Date(order.date)
-    const topRow = h('div', { style: 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;' })
-    topRow.append(
+    
+    meta.append(
       h('div', { class: 'order-id' }, `Order #${order.id}`),
       h('div', { class: 'order-date' }, date.toLocaleString())
     )
-    meta.appendChild(topRow)
     
     // Add cashier name if available
     if (order.cashierName) {
-      const cashierRow = h('div', { style: 'font-size: 13px; color: var(--muted); margin-top: 4px;' }, `Cashier: ${order.cashierName}`)
-      meta.appendChild(cashierRow)
+      const cashierDiv = h('div', { class: 'order-cashier' }, `Cashier: ${order.cashierName}`)
+      meta.appendChild(cashierDiv)
     }
     
     const summary = h('div', { class: 'order-summary' })
+    const itemCount = order.items.reduce((sum, item) => sum + item.qty, 0)
     summary.append(
-      h('div', null, `${order.items.length} item${order.items.length === 1 ? '' : 's'}`),
-      h('div', { class: 'order-total' }, fmt(order.total))
+      h('div', { class: 'order-total' }, fmt(order.total)),
+      h('div', { class: 'order-item-count' }, `${itemCount} item${itemCount !== 1 ? 's' : ''}`)
     )
     
-    contentDiv.append(meta, summary)
-    card.appendChild(contentDiv)
+    card.append(meta, summary)
     ordersContainer.appendChild(card)
   })
 }
