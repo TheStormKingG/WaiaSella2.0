@@ -106,43 +106,70 @@
     <main id="app" class="app" style="display: none;">
       <!-- Cashier View -->
       <section id="cashierView" class="view">
-        <div class="sales-layout">
-        <div class="sales-left">
-          <div class="search-filter-bar">
-            <select id="categoryFilter" class="category-dropdown">
-              <option value="All">All Categories</option>
-            </select>
+        <div class="pos-layout">
+          <!-- Left: Catalog Browser -->
+          <div class="pos-catalog">
+            <!-- Category Pills Navigation -->
+            <div class="category-pills-container">
+              <div id="categoryPills" class="category-pills">
+                <!-- Category pills will be rendered here -->
+              </div>
+            </div>
+            
+            <!-- Product Grid -->
+            <div id="productGrid" class="pos-product-grid"></div>
+            
+            <!-- Empty State -->
+            <div id="productGridEmpty" class="empty-state" style="display: none;">
+              <div class="empty-state-title">No products found</div>
+              <div class="empty-state-description">Try adjusting your search or category filter</div>
+            </div>
           </div>
-          <div id="productGrid" class="grid"></div>
-        </div>
-          <aside class="cart collapsed" id="cartPanel">
-            <div class="cart-header">
-              <div class="cart-title-group">
-                <span class="cart-title">Cart</span>
-                <span id="cartModeLabel" class="cart-mode-label">(Sale)</span>
-                <button id="cartModeToggle" class="cart-mode-toggle" type="button">Switch to Order</button>
+          
+          <!-- Right: Cart Panel -->
+          <aside class="pos-cart collapsed" id="cartPanel">
+            <div class="pos-cart-header">
+              <div class="pos-cart-header-top">
+                <div class="pos-cart-title-group">
+                  <h2 class="pos-cart-title">Cart</h2>
+                  <span id="cartModeLabel" class="pos-cart-mode-badge">Sale</span>
+                </div>
+                <button id="cartModeToggle" class="btn-system btn-secondary" type="button" aria-label="Switch cart mode">
+                  <span id="cartModeToggleText">Switch to Order</span>
+                </button>
               </div>
-              <div class="cart-header-summary">
-                <span id="cartHeaderCount" class="cart-header-count">0 items</span>
-                <span id="cartHeaderTotal" class="cart-header-total">GY$0</span>
+              <div class="pos-cart-header-summary">
+                <span id="cartHeaderCount" class="pos-cart-count">0 items</span>
+                <span id="cartHeaderTotal" class="pos-cart-total">GY$0</span>
               </div>
-              <button id="cartToggle" class="cart-toggle" type="button">▼</button>
+              <button id="cartToggle" class="pos-cart-toggle" type="button" aria-label="Toggle cart">▼</button>
             </div>
-            <div id="cartItems" class="cart-items empty">
+            
+            <div id="cartItems" class="pos-cart-items empty">
               <div class="empty-state">
-                <div class="empty-title">Your cart is empty.</div>
+                <div class="empty-state-title">Your cart is empty</div>
+                <div class="empty-state-description">Add items from the catalog to get started</div>
               </div>
             </div>
-            <div class="cart-footer">
-              <div class="row">
-                <span>VAT (16%)</span>
-                <span id="cartTax">$0.00</span>
+            
+            <div class="pos-cart-footer">
+              <div class="pos-cart-totals">
+                <div class="pos-cart-total-row">
+                  <span class="pos-cart-total-label">Subtotal</span>
+                  <span id="cartSubtotal" class="pos-cart-total-value">GY$0.00</span>
+                </div>
+                <div class="pos-cart-total-row">
+                  <span class="pos-cart-total-label">VAT (16%)</span>
+                  <span id="cartTax" class="pos-cart-total-value">GY$0.00</span>
+                </div>
+                <div class="pos-cart-total-row pos-cart-total-row-final">
+                  <span class="pos-cart-total-label">Total</span>
+                  <span id="cartTotal" class="pos-cart-total-value-final">GY$0.00</span>
+                </div>
               </div>
-              <div class="row">
-                <span>Total</span>
-                <span id="cartTotal">$0.00</span>
-              </div>
-              <button id="completeSaleBtn" class="btn primary" disabled>Complete Sale</button>
+              <button id="completeSaleBtn" class="btn-system btn-primary" disabled style="width: 100%; margin-top: var(--space-4);">
+                Complete Sale
+              </button>
             </div>
           </aside>
         </div>

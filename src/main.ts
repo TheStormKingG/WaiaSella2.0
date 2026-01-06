@@ -195,10 +195,13 @@ const headerTitle = qs<HTMLHeadingElement>('.app-header h1')
 
 // Cashier
 const categoryFilter = qs<HTMLSelectElement>('#categoryFilter')
+const categoryPills = qs<HTMLDivElement>('#categoryPills')
 const productGrid = qs<HTMLDivElement>('#productGrid')
+const productGridEmpty = qs<HTMLDivElement>('#productGridEmpty')
 const cashierSearch = qs<HTMLInputElement>('#cashierSearch') // Now in header
 const cartItemsEl = qs<HTMLDivElement>('#cartItems')
 const cartTaxEl = qs<HTMLSpanElement>('#cartTax')
+const cartSubtotalEl = qs<HTMLSpanElement>('#cartSubtotal')
 const cartTotalEl = qs<HTMLSpanElement>('#cartTotal')
 const completeSaleBtn = qs<HTMLButtonElement>('#completeSaleBtn')
 const cartPanel = qs<HTMLElement>('#cartPanel')
@@ -207,6 +210,7 @@ const cartHeaderCount = qs<HTMLSpanElement>('#cartHeaderCount')
 const cartHeaderTotal = qs<HTMLSpanElement>('#cartHeaderTotal')
 const cartModeLabel = qs<HTMLSpanElement>('#cartModeLabel')
 const cartModeToggle = qs<HTMLButtonElement>('#cartModeToggle')
+const cartModeToggleText = qs<HTMLSpanElement>('#cartModeToggleText')
 
 // Receipt
 const receiptDialog = qs<HTMLDialogElement>('#receiptDialog')
@@ -967,6 +971,8 @@ tabs.forEach((t) =>
         inventorySearch.style.display = 'none'
         headerBackBtn.style.display = 'none'
         addItemFab.style.display = 'none'
+        renderProducts()
+        renderCart()
       } else if (id === 'expenseView') {
         cashierSearch.style.display = 'none'
         // Search bar visibility controlled by expense sub-view
@@ -1156,6 +1162,8 @@ if (savedView) {
       
       if (targetId === 'cashierView') {
         cashierSearch.style.display = 'block'
+        renderProducts()
+        renderCart()
       } else if (targetId === 'expenseView' || targetId === 'inventoryView') {
         const savedExpenseView = load<string>(STORAGE_KEYS.expenseView) || load<string>('ws.inventoryView')
         const savedCategory = load<string>(STORAGE_KEYS.selectedInventoryCategory)
@@ -1371,13 +1379,40 @@ function getAllCategories(): string[] {
 
 function renderCategoryFilter() {
   const categories = ['All', ...getAllCategories()]
-  categoryFilter.innerHTML = ''
-  categories.forEach((c) => {
-    const option = h('option', { value: c })
-    option.textContent = c === 'All' ? 'All Categories' : c
-    if (c === selectedCategory) option.selected = true
-    categoryFilter.appendChild(option)
-  })
+  
+  // Update legacy dropdown (for backward compatibility)
+  if (categoryFilter) {
+    categoryFilter.innerHTML = ''
+    categories.forEach((c) => {
+      const option = h('option', { value: c })
+      option.textContent = c === 'All' ? 'All Categories' : c
+      if (c === selectedCategory) option.selected = true
+      categoryFilter.appendChild(option)
+    })
+  }
+  
+  // Render category pills (new Apple-style design)
+  if (categoryPills) {
+    categoryPills.innerHTML = ''
+    categories.forEach((c) => {
+      const pill = h('button', { 
+        class: 'category-pill',
+        type: 'button',
+        'aria-label': `Filter by ${c === 'All' ? 'all categories' : c}`,
+        'aria-pressed': c === selectedCategory ? 'true' : 'false'
+      })
+      pill.textContent = c === 'All' ? 'All' : c
+      if (c === selectedCategory) {
+        pill.classList.add('active')
+      }
+      pill.addEventListener('click', () => {
+        selectedCategory = c
+        renderCategoryFilter()
+        renderProducts()
+      })
+      categoryPills.appendChild(pill)
+    })
+  }
 }
 
 // Audio context for generating phone dial tones
@@ -1493,10 +1528,15 @@ function showAddToCartAnimation(element: HTMLElement) {
 
 function updateCartModeUI() {
   if (cartModeLabel) {
-    cartModeLabel.textContent = cartMode === 'sale' ? '(Sale)' : '(Order)'
+    cartModeLabel.textContent = cartMode === 'sale' ? 'Sale' : 'Order'
   }
   if (cartModeToggle) {
-    cartModeToggle.textContent = cartMode === 'sale' ? 'Switch to Order' : 'Switch to Sale'
+    const text = cartMode === 'sale' ? 'Switch to Order' : 'Switch to Sale'
+    if (cartModeToggleText) {
+      cartModeToggleText.textContent = text
+    } else {
+      cartModeToggle.textContent = text
+    }
     cartModeToggle.setAttribute('aria-pressed', cartMode === 'order' ? 'true' : 'false')
     cartModeToggle.setAttribute('title', cartMode === 'sale' ? 'Switch cart to order mode' : 'Switch cart to sale mode')
     cartModeToggle.classList.toggle('sale', cartMode === 'sale')
@@ -1508,11 +1548,65 @@ function updateCartModeUI() {
 }
 
 function renderProducts() {
-  const term = cashierSearch.value.toLowerCase()
+  const term = cashierSearch?.value.toLowerCase() || ''
   const filtered = inventory.filter(
     (i) => (selectedCategory === 'All' || i.category === selectedCategory) && (i.name.toLowerCase().includes(term) || i.category.toLowerCase().includes(term))
   )
+  
+  if (!productGrid) return
+  
   productGrid.innerHTML = ''
+  
+  // Show/hide empty state
+  if (productGridEmpty) {
+    productGridEmpty.style.display = filtered.length === 0 ? 'flex' : 'none'
+  }
+  
+  filtered.forEach((item) => {
+    // New Apple-style product card
+    const card = h('div', { 
+      class: 'pos-product-card',
+      'aria-label': `Add ${item.name} to cart`,
+      role: 'button',
+      tabIndex: 0
+    })
+    
+    const img = h('img', { 
+      class: 'pos-product-image', 
+      alt: item.name, 
+      src: item.image || pic(Number(item.id.slice(-3))),
+      loading: 'lazy'
+    })
+    
+    const body = h('div', { class: 'pos-product-body' })
+    body.append(
+      h('h3', { class: 'pos-product-name' }, item.name),
+      h('p', { class: 'pos-product-stock' }, `${item.stock} in stock`),
+      h('div', { class: 'pos-product-price' }, fmt(item.price))
+    )
+    
+    card.append(img, body)
+    
+    // Click handler
+    const handleClick = () => {
+      playDialTone()
+      vibrate(10)
+      showAddToCartAnimation(card)
+      addToCart(item.id)
+    }
+    
+    card.addEventListener('click', handleClick)
+    card.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        handleClick()
+      }
+    })
+    
+    productGrid.appendChild(card)
+  })
+  
+  // Also render legacy product cards for backward compatibility
   filtered.forEach((item) => {
     const card = h('div', { class: 'product' })
     const img = h('img', { class: 'thumb', alt: item.name, src: item.image || pic(Number(item.id.slice(-3))) })
@@ -1529,38 +1623,79 @@ function renderProducts() {
       showAddToCartAnimation(card)
       addToCart(item.id)
     })
-    productGrid.appendChild(card)
+    // Only append to legacy grid if it exists separately
   })
 }
 
 function renderCart() {
   updateCartModeUI()
   const entries = Object.entries(cart)
+  
+  if (!cartItemsEl) return
+  
   cartItemsEl.classList.toggle('empty', entries.length === 0)
   cartItemsEl.innerHTML = ''
+  
   let subtotal = 0
   entries.forEach(([id, qty]) => {
     const item = inventory.find((i) => i.id === id)!
     const price = item.price * qty
     subtotal += price
+    
+    // New Apple-style cart item
+    const cartItem = h('div', { class: 'pos-cart-item' })
+    
+    const info = h('div', { class: 'pos-cart-item-info' })
+    info.append(
+      h('h4', { class: 'pos-cart-item-name' }, item.name),
+      h('p', { class: 'pos-cart-item-details' }, `${qty} × ${fmt(item.price)} = ${fmt(price)}`)
+    )
+    
+    const actions = h('div', { class: 'pos-cart-item-actions' })
+    const stepper = h('div', { class: 'stepper' })
+    stepper.append(
+      h('button', { 
+        class: 'stepper-button',
+        type: 'button',
+        'aria-label': `Decrease quantity of ${item.name}`,
+        onclick: () => changeQty(id, -1)
+      }, '−'),
+      h('div', { class: 'stepper-value' }, String(qty)),
+      h('button', { 
+        class: 'stepper-button',
+        type: 'button',
+        'aria-label': `Increase quantity of ${item.name}`,
+        onclick: () => changeQty(id, 1)
+      }, '+')
+    )
+    actions.appendChild(stepper)
+    
+    cartItem.append(info, actions)
+    cartItemsEl.appendChild(cartItem)
+    
+    // Legacy cart item for backward compatibility
     const el = h('div', { class: 'cart-item' })
     const left = h('div')
     left.append(h('div', { class: 'title' }, item.name), h('div', { class: 'sub' }, `${qty} × ${fmt(item.price)} = ${fmt(price)}`))
     const right = h('div', { class: 'qty' })
     right.append(btn('-', '', () => changeQty(id, -1)), h('div', null, String(qty)), btn('+', '', () => changeQty(id, 1)))
     el.append(left, right)
-    cartItemsEl.appendChild(el)
+    // Only append if legacy cart items container exists
   })
+  
   const tax = subtotal * TAX_RATE
   const total = subtotal + tax
-  cartTaxEl.textContent = fmt(tax)
-  cartTotalEl.textContent = fmt(total)
-  completeSaleBtn.disabled = entries.length === 0
+  
+  // Update cart totals
+  if (cartSubtotalEl) cartSubtotalEl.textContent = fmt(subtotal)
+  if (cartTaxEl) cartTaxEl.textContent = fmt(tax)
+  if (cartTotalEl) cartTotalEl.textContent = fmt(total)
+  if (completeSaleBtn) completeSaleBtn.disabled = entries.length === 0
   
   // Update cart header summary (mobile)
   const totalItems = entries.reduce((sum, [, qty]) => sum + qty, 0)
-  cartHeaderCount.textContent = `${totalItems} item${totalItems !== 1 ? 's' : ''}`
-  cartHeaderTotal.textContent = fmtNoCents(total)
+  if (cartHeaderCount) cartHeaderCount.textContent = `${totalItems} item${totalItems !== 1 ? 's' : ''}`
+  if (cartHeaderTotal) cartHeaderTotal.textContent = fmtNoCents(total)
 }
 
 function changeQty(id: string, delta: number) {
