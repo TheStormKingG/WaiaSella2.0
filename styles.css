@@ -727,49 +727,66 @@ body {
 
 .app-header h1 { margin: 0; font-size: 22px; }
 
+/* ============================================================================
+   HEADER RIGHT ELEMENTS - Apple Design System
+   ============================================================================ */
 .user-info {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  background: #f0f9ff;
-  border-radius: 8px;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--fill-tertiary);
+  border-radius: var(--radius-md);
+  border: 0.5px solid var(--separator-opaque);
 }
 
 .user-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--ink);
+  font-size: var(--font-size-subhead);
+  font-weight: var(--font-weight-semibold);
+  color: var(--label);
 }
 
 .user-type-badge {
-  font-size: 12px;
-  padding: 2px 8px;
-  background: var(--primary);
-  color: white;
-  border-radius: 12px;
-  font-weight: 500;
+  font-size: var(--font-size-caption1);
+  padding: var(--space-1) var(--space-2);
+  background: var(--system-blue);
+  color: #FFFFFF;
+  border-radius: var(--radius-pill);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
 }
 
 .header-settings-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   padding: 0;
-  background: #f0f9ff;
-  color: var(--ink);
-  border: none;
-  border-radius: 8px;
+  background: var(--fill-tertiary);
+  color: var(--label);
+  border: 0.5px solid var(--separator-opaque);
+  border-radius: var(--radius-md);
   font-size: 18px;
   cursor: pointer;
-  transition: background 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .header-settings-btn:hover {
-  background: #e0f2fe;
+  background: var(--fill-secondary);
+}
+
+.header-settings-btn:active {
+  transform: scale(0.95);
+}
+
+.header-settings-btn:focus-visible {
+  outline: 2px solid var(--system-blue);
+  outline-offset: 2px;
 }
 
 .header-settings-btn .icon {
@@ -779,20 +796,33 @@ body {
 .logout-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  background: #ef4444;
-  color: white;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  min-height: 44px;
+  background: var(--system-red);
+  color: #FFFFFF;
   border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .logout-btn:hover {
-  background: #dc2626;
+  background: #D70015;
+  box-shadow: var(--shadow-md);
+}
+
+.logout-btn:active {
+  transform: scale(0.97);
+}
+
+.logout-btn:focus-visible {
+  outline: 2px solid var(--system-red);
+  outline-offset: 2px;
 }
 
 .logout-btn .icon {
@@ -1738,119 +1768,177 @@ body {
   color: var(--label-secondary);
 }
 
+/* Expense tabs now use segmented control - styles above in base components */
 .expense-tabs {
+  /* Legacy - now using segmented-control class */
   display: flex;
-  gap: 8px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg);
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 0.5px solid var(--separator);
+  background: var(--system-background);
 }
+
 .expense-tab {
+  /* Legacy - now using segmented-control-button class */
   border: none;
   background: transparent;
-  padding: 8px 16px;
-  border-radius: 8px;
-  color: var(--muted);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  color: var(--label-secondary);
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+  min-height: 44px;
 }
+
 .expense-tab:hover {
-  background: #f3f4f6;
+  background: var(--fill-quaternary);
 }
+
 .expense-tab.active {
-  color: var(--primary);
-  background: #eff6ff;
-  font-weight: 600;
+  color: var(--system-blue);
+  background: var(--fill-tertiary);
+  font-weight: var(--font-weight-semibold);
 }
+
 .expense-tab-content {
   display: none;
 }
+
 .expense-tab-content.active {
   display: block;
 }
 
-/* Operational Expenses */
+/* Legacy expense-filter-input - now using input-system class */
 .expense-filter-input {
   width: 100%;
-  padding: 8px 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-size: 14px;
-  background: var(--card);
-  color: var(--ink);
-}
-.expense-filter-input:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  min-height: 44px;
+  padding: var(--space-3) var(--space-4);
+  border: 0.5px solid var(--separator-opaque);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-body);
+  background: var(--system-grouped-background);
+  color: var(--label);
+  font-family: inherit;
+  transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+  -webkit-appearance: none;
+  appearance: none;
 }
 
+.expense-filter-input:focus {
+  outline: none;
+  border-color: var(--system-blue);
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+}
+
+/* ============================================================================
+   DATA TABLE - Apple Design System
+   ============================================================================ */
 .expenses-table {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--font-size-body);
+  background: var(--system-grouped-background);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
+
 .expenses-table thead {
-  background: #f9fafb;
-  border-bottom: 2px solid var(--border);
+  background: var(--fill-tertiary);
+  border-bottom: 0.5px solid var(--separator);
 }
+
 .expenses-table th {
-  padding: 12px;
+  padding: var(--space-3) var(--space-4);
   text-align: left;
-  font-weight: 600;
-  color: var(--ink);
-  font-size: 12px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--label);
+  font-size: var(--font-size-caption1);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap;
 }
+
 .expenses-table td {
-  padding: 12px;
-  border-bottom: 1px solid var(--border);
-  color: var(--ink);
+  padding: var(--space-4);
+  border-bottom: 0.5px solid var(--separator);
+  color: var(--label);
+  font-size: var(--font-size-body);
 }
+
+.expenses-table tbody tr {
+  transition: background 0.15s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
 .expenses-table tbody tr:hover {
-  background: #f9fafb;
+  background: var(--fill-quaternary);
 }
+
 .expenses-table tbody tr:last-child td {
   border-bottom: none;
 }
+
 .expenses-table .expense-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
+  align-items: center;
 }
+
 .expenses-table .expense-actions button {
-  padding: 4px 8px;
-  font-size: 12px;
+  min-height: 32px;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-caption1);
+  font-weight: var(--font-weight-medium);
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s cubic-bezier(0.4, 0.0, 0.2, 1);
+  -webkit-tap-highlight-color: transparent;
 }
+
+.expenses-table .expense-actions button:active {
+  transform: scale(0.95);
+}
+
 .expenses-table .expense-actions .btn-edit {
-  background: #eff6ff;
-  color: var(--primary);
+  background: var(--fill-tertiary);
+  color: var(--system-blue);
 }
+
 .expenses-table .expense-actions .btn-edit:hover {
-  background: #dbeafe;
+  background: var(--fill-secondary);
 }
+
+.expenses-table .expense-actions .btn-edit:focus-visible {
+  outline: 2px solid var(--system-blue);
+  outline-offset: 2px;
+}
+
 .expenses-table .expense-actions .btn-delete {
-  background: #fef2f2;
-  color: #ef4444;
+  background: var(--fill-tertiary);
+  color: var(--system-red);
 }
+
 .expenses-table .expense-actions .btn-delete:hover {
-  background: #fee2e2;
+  background: rgba(255, 59, 48, 0.1);
+}
+
+.expenses-table .expense-actions .btn-delete:focus-visible {
+  outline: 2px solid var(--system-red);
+  outline-offset: 2px;
 }
 
 .expenses-empty {
-  padding: 48px 16px;
+  padding: var(--space-16) var(--space-4);
   text-align: center;
-  color: var(--muted);
+  color: var(--label-secondary);
 }
+
 .expenses-empty p {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--font-size-body);
 }
 
 .dialog-header {

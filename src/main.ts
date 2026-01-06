@@ -1011,6 +1011,21 @@ tabs.forEach((t) =>
 
 // Expense tab switching
 function switchExpenseTab(tabName: 'sellable' | 'operational') {
+  // Update segmented control buttons
+  const sellableBtn = qs<HTMLButtonElement>('#sellableTabBtn')
+  const operationalBtn = qs<HTMLButtonElement>('#operationalTabBtn')
+  
+  if (sellableBtn && operationalBtn) {
+    if (tabName === 'sellable') {
+      sellableBtn.classList.add('active')
+      operationalBtn.classList.remove('active')
+    } else {
+      operationalBtn.classList.add('active')
+      sellableBtn.classList.remove('active')
+    }
+  }
+  
+  // Update legacy tabs
   expenseTabs.forEach(tab => {
     if (tab.dataset.expenseTab === tabName) {
       tab.classList.add('active')

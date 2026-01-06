@@ -177,43 +177,47 @@
 
       <!-- Expense View -->
       <section id="expenseView" class="view">
-        <div class="expense-tabs">
-          <button class="expense-tab active" data-expense-tab="sellable">
-            <span>Sellable</span>
-          </button>
-          <button class="expense-tab" data-expense-tab="operational">
-            <span>Operational</span>
-          </button>
-        </div>
-        
-        <!-- Sellable Tab Content (current inventory) -->
-        <div id="sellableView" class="expense-tab-content active">
-          <!-- Table View -->
-          <div id="sellableTableView" style="padding: 16px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-              <h3 style="margin: 0;">Sellable Items</h3>
-              <button id="addItemBtn" type="button" class="btn primary">+ Add Item</button>
+        <div class="view-container">
+          <!-- Segmented Control for Tabs -->
+          <div class="segmented-control" style="margin-bottom: var(--space-6);">
+            <button class="segmented-control-button active" data-expense-tab="sellable" id="sellableTabBtn">
+              Sellable
+            </button>
+            <button class="segmented-control-button" data-expense-tab="operational" id="operationalTabBtn">
+              Operational
+            </button>
+          </div>
+          
+          <!-- Sellable Tab Content (current inventory) -->
+          <div id="sellableView" class="expense-tab-content active">
+            <!-- Header with Title and Action -->
+            <div class="view-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-6);">
+              <h1 class="view-title">Sellable Items</h1>
+              <button id="addItemBtn" type="button" class="btn-system btn-primary">
+                <span>+</span>
+                <span>Add Item</span>
+              </button>
             </div>
             
             <!-- Filters and Search -->
-            <div class="card" style="margin-bottom: 16px;">
-              <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;">
+            <div class="card-system" style="margin-bottom: var(--space-4);">
+              <div style="display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: flex-end;">
                 <div style="flex: 1; min-width: 200px;">
-                  <label style="display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px;">Search</label>
-                  <input id="sellableSearch" type="text" class="expense-filter-input" placeholder="Search items...">
+                  <label style="display: block; font-size: var(--font-size-caption1); color: var(--label-secondary); margin-bottom: var(--space-1); font-weight: var(--font-weight-medium);">Search</label>
+                  <input id="sellableSearch" type="text" class="input-system" placeholder="Search items...">
                 </div>
                 <div style="min-width: 150px;">
-                  <label style="display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px;">Category</label>
-                  <select id="sellableCategoryFilter" class="expense-filter-input">
+                  <label style="display: block; font-size: var(--font-size-caption1); color: var(--label-secondary); margin-bottom: var(--space-1); font-weight: var(--font-weight-medium);">Category</label>
+                  <select id="sellableCategoryFilter" class="input-system">
                     <option value="">All Categories</option>
                   </select>
                 </div>
-                <button id="clearSellableFilters" type="button" class="btn" style="white-space: nowrap;">Clear</button>
+                <button id="clearSellableFilters" type="button" class="btn-system btn-secondary" style="white-space: nowrap;">Clear</button>
               </div>
             </div>
             
             <!-- Items Table -->
-            <div class="card">
+            <div class="card-system">
               <div style="overflow-x: auto;">
                 <table id="sellableTable" class="expenses-table">
                   <thead>
@@ -233,7 +237,8 @@
                   </tbody>
                 </table>
                 <div id="sellableEmpty" class="expenses-empty">
-                  <p>No items found. Click "Add Item" to create your first item.</p>
+                  <div class="empty-state-title">No items found</div>
+                  <div class="empty-state-description">Click "Add Item" to create your first item.</div>
                 </div>
               </div>
             </div>
