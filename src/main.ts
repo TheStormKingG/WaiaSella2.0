@@ -1547,10 +1547,11 @@ if (headerBackBtn) {
     }
 
     const savedExpenseView = load<string>(STORAGE_KEYS.expenseView) || load<string>('ws.inventoryView')
-    if (savedExpenseView === 'manage' || savedExpenseView === 'items') {
-      showInventoryCategories()
-    }
-})
+  if (savedExpenseView === 'manage' || savedExpenseView === 'items') {
+    showInventoryCategories()
+  }
+  })
+}
 if (addCategoryBtn) {
   addCategoryBtn.addEventListener('click', openAddCategoryDialog)
 }
