@@ -1223,9 +1223,8 @@ expenseTabs.forEach(tab => {
     } else if (tabName === 'sellable') {
       renderSellableTable()
     }
-    })
   })
-}
+})
 
 // Report tab switching
 function switchReportTab(tabName: 'general' | 'income' | 'balance' | 'cashflow') {
