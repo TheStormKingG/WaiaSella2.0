@@ -194,6 +194,7 @@
   --glass-fill-strong: rgba(255, 255, 255, 0.32);
   --glass-fill-subtle: rgba(255, 255, 255, 0.16);
   --glass-border: rgba(255, 255, 255, 0.22);
+  --glass-separator: rgba(255, 255, 255, 0.14);
   --glass-highlight-top: rgba(255, 255, 255, 0.5);
   --glass-highlight-bottom: rgba(255, 255, 255, 0.06);
   --glass-shadow: 0 10px 30px rgba(15, 23, 42, 0.12), 0 1px 0 rgba(255, 255, 255, 0.08);
@@ -208,6 +209,7 @@
     --glass-fill-strong: rgba(18, 20, 26, 0.62);
     --glass-fill-subtle: rgba(18, 20, 26, 0.36);
     --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-separator: rgba(255, 255, 255, 0.08);
     --glass-highlight-top: rgba(255, 255, 255, 0.22);
     --glass-highlight-bottom: rgba(255, 255, 255, 0.03);
     --glass-shadow: 0 16px 36px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.04);
@@ -2168,31 +2170,34 @@ body::before {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border);
+  padding: 16px 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
 }
 .dialog-header h2 {
   margin: 0;
   font-size: 18px;
   font-weight: 700;
+  color: var(--label);
 }
 .dialog-close {
-  background: none;
-  border: none;
-  font-size: 24px;
-  color: var(--muted);
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 20px;
+  color: var(--label);
   cursor: pointer;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 10px;
   transition: all 0.2s ease;
+  backdrop-filter: var(--glass-backdrop-filter);
+  -webkit-backdrop-filter: var(--glass-backdrop-filter);
 }
 .dialog-close:hover {
-  background: #f3f4f6;
-  color: var(--ink);
+  background: rgba(255, 255, 255, 0.28);
 }
 
 .dialog-form {
@@ -2203,12 +2208,13 @@ body::before {
 }
 
 .dialog-body {
-  padding: 20px;
+  padding: 20px 22px 22px;
   display: flex;
   flex-direction: column;
   gap: 16px;
   max-height: calc(90vh - 140px);
   overflow-y: auto;
+  color: var(--label);
 }
 
 .form-group {
@@ -2219,26 +2225,26 @@ body::before {
 .form-group label {
   font-size: 13px;
   font-weight: 500;
-  color: var(--ink);
+  color: var(--label-secondary);
 }
 .form-group input,
 .form-group textarea,
 .form-group select {
   padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
   font-size: 14px;
   font-family: inherit;
-  background: var(--card);
-  color: var(--ink);
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--label);
   transition: all 0.2s ease;
 }
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: var(--system-blue);
+  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2);
 }
 .form-group select {
   cursor: pointer;
@@ -2506,22 +2512,61 @@ body::before {
 }
 
 /* Dialog */
-.dialog { border: none; border-radius: 12px; padding: 0; max-height: 90vh; overflow: auto; }
+.dialog {
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
+  padding: 0;
+  max-height: 90vh;
+  overflow: auto;
+  background: var(--glass-fill-strong);
+  backdrop-filter: var(--glass-backdrop-filter);
+  -webkit-backdrop-filter: var(--glass-backdrop-filter);
+  box-shadow: var(--glass-shadow);
+  color: var(--label);
+}
 .dialog:not([open]) { display: none; }
-.dialog::backdrop { background: rgba(0,0,0,.3); }
-.dialog-body { min-width: 320px; max-width: 500px; display: flex; flex-direction: column; max-height: 90vh; overflow-y: auto; position: relative; }
+.dialog::backdrop {
+  background: radial-gradient(circle at 50% 20%, rgba(15, 23, 42, 0.35), rgba(3, 7, 18, 0.6));
+  animation: dialog-backdrop-fade 0.2s ease;
+}
+
+@keyframes dialog-backdrop-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.dialog[open],
+.order-details-modal[open] {
+  animation: dialog-pop 0.18s ease;
+}
+
+@keyframes dialog-pop {
+  from { transform: translateY(12px) scale(0.98); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+.dialog-body {
+  min-width: 320px;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
 
 /* Order Details Modal - Rebuilt from scratch */
 .order-details-modal {
-  border: none;
-  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
   padding: 0;
   max-width: 90vw;
   width: 600px;
   max-height: 90vh;
   margin: auto;
-  background: white;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  background: var(--glass-fill-strong);
+  backdrop-filter: var(--glass-backdrop-filter);
+  -webkit-backdrop-filter: var(--glass-backdrop-filter);
+  box-shadow: var(--glass-shadow);
 }
 
 .order-details-modal:not([open]) {
@@ -2529,7 +2574,8 @@ body::before {
 }
 
 .order-details-modal::backdrop {
-  background: rgba(0, 0, 0, 0.3);
+  background: radial-gradient(circle at 50% 20%, rgba(15, 23, 42, 0.35), rgba(3, 7, 18, 0.6));
+  animation: dialog-backdrop-fade 0.2s ease;
 }
 
 .order-modal-container {
@@ -2544,21 +2590,21 @@ body::before {
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .order-modal-title {
   margin: 0;
   font-size: 24px;
   font-weight: 700;
-  color: var(--ink);
+  color: var(--label);
   letter-spacing: -0.3px;
 }
 
 .order-modal-close {
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
   width: 32px;
   height: 32px;
   display: flex;
@@ -2566,14 +2612,15 @@ body::before {
   justify-content: center;
   cursor: pointer;
   font-size: 20px;
-  color: var(--muted);
+  color: var(--label);
   padding: 0;
   transition: all 0.2s ease;
+  backdrop-filter: var(--glass-backdrop-filter);
+  -webkit-backdrop-filter: var(--glass-backdrop-filter);
 }
 
 .order-modal-close:hover {
-  background: #f3f4f6;
-  color: var(--ink);
+  background: rgba(255, 255, 255, 0.28);
 }
 
 .order-modal-body {
@@ -2584,46 +2631,51 @@ body::before {
   flex-direction: column;
   gap: 32px;
   min-height: 0;
+  color: var(--label);
 }
 
 .order-modal-footer {
   padding: 16px 24px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   gap: 12px;
   justify-content: flex-end;
 }
 
 .order-btn-cancel {
-  background: #ef4444;
-  color: white;
-  border: none;
-  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.18);
+  color: #ffffff;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 10px;
   padding: 10px 24px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
+  backdrop-filter: var(--glass-backdrop-filter);
+  -webkit-backdrop-filter: var(--glass-backdrop-filter);
 }
 
 .order-btn-cancel:hover {
-  background: #dc2626;
+  background: rgba(239, 68, 68, 0.28);
 }
 
 .order-btn-delivered {
-  background: #22c55e;
-  color: white;
-  border: none;
-  border-radius: 8px;
+  background: rgba(34, 197, 94, 0.18);
+  color: #ffffff;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  border-radius: 10px;
   padding: 10px 24px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
+  backdrop-filter: var(--glass-backdrop-filter);
+  -webkit-backdrop-filter: var(--glass-backdrop-filter);
 }
 
 .order-btn-delivered:hover {
-  background: #16a34a;
+  background: rgba(34, 197, 94, 0.28);
 }
 
 /* Order Details Content Styles */
@@ -2632,7 +2684,7 @@ body::before {
   flex-wrap: wrap;
   gap: 20px 32px;
   padding: 24px 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--glass-separator);
   font-size: 14px;
 }
 
@@ -2687,7 +2739,7 @@ body::before {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  border-bottom: 2px solid var(--border);
+  border-bottom: 1px solid var(--glass-separator);
 }
 
 .order-table-header.order-col-qty,
@@ -2698,7 +2750,7 @@ body::before {
 }
 
 .order-table-row {
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--glass-separator);
 }
 
 .order-table-row:last-child {
@@ -2744,7 +2796,7 @@ body::before {
 }
 
 .order-totals-section {
-  border-top: 2px solid var(--border);
+  border-top: 1px solid var(--glass-separator);
   padding-top: 24px;
   padding-bottom: 8px;
   display: flex;
@@ -2774,7 +2826,7 @@ body::before {
 .order-total-final {
   margin-top: 8px;
   padding-top: 16px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--glass-separator);
   font-size: 20px;
   font-weight: 700;
 }
@@ -2852,6 +2904,81 @@ body::before {
 .form-grid label { display: grid; gap: 6px; font-size: 12px; }
 .form-grid input { height: 36px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--border); }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; padding-top: 12px; margin: 0; }
+
+.dialog-actions .btn {
+  min-height: 40px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.18);
+  color: var(--label);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: var(--glass-backdrop-filter);
+  -webkit-backdrop-filter: var(--glass-backdrop-filter);
+  font-weight: 600;
+}
+
+.dialog-actions .btn:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+
+.dialog-actions .btn.primary {
+  background: rgba(10, 132, 255, 0.85);
+  border-color: rgba(10, 132, 255, 0.85);
+  color: #ffffff;
+  box-shadow: 0 12px 24px rgba(10, 132, 255, 0.25);
+}
+
+.dialog-actions .btn.primary:hover {
+  background: rgba(10, 132, 255, 0.95);
+}
+
+#confirmCancelOrderBtn {
+  background: rgba(239, 68, 68, 0.22) !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  color: #ffffff !important;
+  box-shadow: 0 12px 24px rgba(239, 68, 68, 0.2);
+}
+
+#confirmDeliverOrderBtn {
+  background: rgba(34, 197, 94, 0.22) !important;
+  border-color: rgba(34, 197, 94, 0.4) !important;
+  color: #ffffff !important;
+  box-shadow: 0 12px 24px rgba(34, 197, 94, 0.2);
+}
+
+#confirmDeleteBtn {
+  background: rgba(239, 68, 68, 0.22) !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  color: #ffffff !important;
+}
+
+#whatsappReceiptBtn {
+  background: rgba(37, 211, 102, 0.2) !important;
+  border-color: rgba(37, 211, 102, 0.35) !important;
+  color: #ffffff !important;
+}
+
+#downloadReceiptBtn {
+  background: rgba(148, 163, 184, 0.22) !important;
+  border-color: rgba(148, 163, 184, 0.35) !important;
+  color: #ffffff !important;
+}
+
+#receiptDialog .dialog-body h2 {
+  color: var(--label);
+}
+
+#receiptDialog .dialog-body [style*="color: #6b7280"] {
+  color: var(--label-secondary) !important;
+}
+
+#receiptDialog .dialog-body [style*="border-top"] {
+  border-color: var(--glass-separator) !important;
+}
+
+#receiptDialog .dialog-body [style*="border-bottom"] {
+  border-color: var(--glass-separator) !important;
+}
 
 #productGrid {
   display: grid;
