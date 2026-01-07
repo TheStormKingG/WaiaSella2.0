@@ -81,7 +81,7 @@
       </div>
     </section>
 
-    <header class="app-header" style="display: none;" role="banner">
+    <header class="app-header liquid-glass liquid-glass--strong" style="display: none;" role="banner">
       <div class="header-left">
         <h1 id="headerTitle">Cashier</h1>
         <input id="cashierSearch" class="header-search" placeholder="Search products..." style="display: none;" 
@@ -116,12 +116,15 @@
       <section id="cashierView" class="view" role="main" aria-label="Cashier view">
         <div class="pos-layout">
           <!-- Left: Catalog Browser -->
-          <div class="pos-catalog">
+          <div class="pos-catalog liquid-glass">
             <!-- Category Pills Navigation -->
-            <div class="category-pills-container">
+            <div class="category-pills-container liquid-glass liquid-glass--subtle">
               <div id="categoryPills" class="category-pills">
                 <!-- Category pills will be rendered here -->
               </div>
+            </div>
+            <div class="pos-alpha-index" aria-hidden="true">
+              <span>A</span><span>B</span><span>C</span><span>D</span><span>E</span><span>F</span><span>G</span><span>H</span><span>I</span><span>J</span><span>K</span><span>L</span><span>M</span><span>N</span><span>O</span><span>P</span><span>Q</span><span>R</span><span>S</span><span>T</span><span>U</span><span>V</span><span>W</span><span>X</span><span>Y</span><span>Z</span>
             </div>
             
             <!-- Product Grid -->
@@ -135,8 +138,8 @@
           </div>
           
           <!-- Right: Cart Panel -->
-          <aside class="pos-cart collapsed" id="cartPanel">
-            <div class="pos-cart-header">
+          <aside class="pos-cart liquid-glass liquid-glass--strong collapsed" id="cartPanel">
+            <div class="pos-cart-header liquid-glass liquid-glass--subtle">
               <div class="pos-cart-header-top">
                 <div class="pos-cart-title-group">
                   <h2 class="pos-cart-title">Cart</h2>
@@ -145,6 +148,11 @@
                 <button id="cartModeToggle" class="btn-system btn-secondary" type="button" aria-label="Switch cart mode">
                   <span id="cartModeToggleText">Switch to Order</span>
                 </button>
+              </div>
+              <div class="pos-order-context">
+                <span class="pos-context-chip">Table —</span>
+                <span class="pos-context-chip">Guests —</span>
+                <span class="pos-context-chip">Notes</span>
               </div>
               <div class="pos-cart-header-summary">
                 <span id="cartHeaderCount" class="pos-cart-count">0 items</span>
@@ -160,7 +168,7 @@
               </div>
             </div>
             
-            <div class="pos-cart-footer">
+            <div class="pos-cart-footer liquid-glass liquid-glass--subtle">
               <div class="pos-cart-totals">
                 <div class="pos-cart-total-row">
                   <span class="pos-cart-total-label">Subtotal</span>

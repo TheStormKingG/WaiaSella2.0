@@ -1791,7 +1791,7 @@ function renderProducts() {
   filtered.forEach((item) => {
     // New Apple-style product card
     const card = h('div', { 
-      class: 'pos-product-card',
+      class: 'pos-product-card liquid-glass liquid-glass--card liquid-glass--subtle',
       'aria-label': `Add ${item.name} to cart`,
       role: 'button',
       tabIndex: 0
@@ -1871,7 +1871,7 @@ function renderCart() {
     subtotal += price
     
     // New Apple-style cart item
-    const cartItem = h('div', { class: 'pos-cart-item' })
+    const cartItem = h('div', { class: 'pos-cart-item liquid-glass liquid-glass--card liquid-glass--subtle' })
     
     const info = h('div', { class: 'pos-cart-item-info' })
     info.append(
